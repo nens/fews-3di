@@ -1,0 +1,11 @@
+[run]
+source = fews_3di
+
+[report]
+show_missing = true
+
+[html]
+directory = htmlcov
+
+[xml]
+output = coverage.xml

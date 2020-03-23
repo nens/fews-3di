@@ -1,0 +1,8 @@
+# Install ourselves (".") in editable ("-e") mode. Include the test ([test])
+# dependencies.
+-e .[test]
+
+# Extra development dependencies
+black
+coveralls
+zest.releaser

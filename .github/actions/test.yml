@@ -1,0 +1,29 @@
+name: test
+
+# Run on pull requests and on the master branch itself.
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+
+jobs:
+  build_and_test:
+    runs-on: ubuntu-18.04
+    steps:
+      # Checkout the code.
+      - uses: actions/checkout@v2
+      # Activate python environment
+      - uses: actions/setup-python@v1
+        with:
+          python-version: '3.7'
+      - name: build
+        run: |
+          python3 -m venv .
+          bin/pip install -r requirements.txt
+      - name: test
+        run: bin/pytest
+      - name: coverage report
+        run: bin/coveralls
+
+# Possible TODO for Reinout: set up automatic pypi releases for tags.
