@@ -9,8 +9,8 @@ def get_lateral_timeseries(csv_file_path, sim_start, sim_end):
     # start = datetime.strptime("2019-07-24 06:00:00", '%Y-%m-%d %H:%M:%S')
     # end = datetime.strptime("2019-07-24 12:00:00", '%Y-%m-%d %H:%M:%S')
 
-    with open(csv_file_path, 'r') as csvfile:
-        readCSV = csv.reader(csvfile, delimiter=',')
+    with open(csv_file_path, "r") as csvfile:
+        readCSV = csv.reader(csvfile, delimiter=",")
 
         # Read all data in llist
         data = [x for x in readCSV]
@@ -34,7 +34,7 @@ def get_lateral_timeseries(csv_file_path, sim_start, sim_end):
     # loop through all rows
     for row in data:
         # Convert first column to datetime
-        date = datetime.strptime(row[0], '%Y-%m-%d %H:%M:%S')
+        date = datetime.strptime(row[0], "%Y-%m-%d %H:%M:%S")
         # Check if in range for simulation
         if sim_start <= date <= sim_end:
             # Loop through all timeseries data
@@ -54,8 +54,11 @@ def get_lateral_timeseries(csv_file_path, sim_start, sim_end):
                 if value != NULL_VALUE:
                     # add the value as [offset, value] if it's not a NULL_VALUE
                     timeseries[name].append([offset, value])
-                elif (name in last_data and last_data[name] != NULL_VALUE and
-                      last_data[name] != 0.0):
+                elif (
+                    name in last_data
+                    and last_data[name] != NULL_VALUE
+                    and last_data[name] != 0.0
+                ):
                     # Add 0.0 once for first NULL_VALUE after a valid value
                     # and only when the last value was not 0.0
                     timeseries[name].append([offset, 0.0])
