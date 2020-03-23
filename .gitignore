@@ -16,6 +16,9 @@ node_modules/
 doc/build/
 ansible/*.retry
 .venv
+bin/
+lib/
+pyvenv.cfg
 
 # Unit test / coverage reports
 .coverage
