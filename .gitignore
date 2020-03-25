@@ -29,6 +29,8 @@ htmlcov
 coverage.xml
 .pytest_cache
 
+original/run_info.xml
+
 # Pycharm, visual studio
 .idea
 .vscode
