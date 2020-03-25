@@ -1,12 +1,11 @@
 from datetime import datetime
 
-import os
 import xml.etree.ElementTree as ET
 
 
 def settings(settingsfile):
 
-    ## read settings file
+    # # read settings file
     # global user, password, model_rev, sim_name, state_file, tstart, duration
     tstart, tend = "", ""
     (
@@ -37,6 +36,7 @@ def settings(settingsfile):
         )
         if child.tag[-10:] == "properties":
             for i in range(len(child)):
+                # TODO: remove bare try/except
                 try:
                     user = (
                         child[i].attrib["value"]
