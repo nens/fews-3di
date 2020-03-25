@@ -1,6 +1,24 @@
-# import getpass
-# import json
-# import xml.etree.ElementTree as ET
+"""Comments by Reinout
+
+One big file, most everything on the main level. So it looks like the main script :-)
+
+- Split it up in separate functions.
+
+- Fix settings handling. Turn it into a dict. Or read an ini file with
+  defaults. Or accept more command line parameters.
+
+- Mark constants (3di api url, for instance) as such.
+
+- Fix path handling (raw strings with backslashes and even with double
+  backslashes). Especially those last ones won't work if ``convert_path()`` is
+  used :-)
+
+- Several things happen here. Starting a sim; downloading results; doing some
+  processing; etcetera. Turn everything into separate properly-named
+  functions, that should make the flow clearer. And it would show which
+  variables are needed.
+
+"""
 from datetime import datetime
 from datetime import timedelta
 from lateral_csv_parser import get_lateral_timeseries
@@ -17,9 +35,6 @@ from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 from time import sleep
 
 import logging
-
-# import numpy as np
-# Write FEWS-readable NetCDF file
 import netCDF4
 import numpy as np
 import os
@@ -36,7 +51,8 @@ def convert_path(path):
     return path
 
 
-# create logger
+# TODO: standardize logging setup. And move the actual config into the main
+# script runner.
 logger = logging.getLogger("simple")
 logger.setLevel(logging.INFO)
 ch = logging.FileHandler("../logs/3Di_log.txt")
@@ -45,7 +61,6 @@ formatter = logging.Formatter("%(levelname)s - %(asctime)s - %(message)s")
 ch.setFormatter(formatter)
 logger.addHandler(ch)
 
-# create console handler and set level to debug
 ch_console = logging.StreamHandler()
 ch_console.setLevel(logging.DEBUG)
 ch_console.setFormatter(formatter)
@@ -173,6 +188,7 @@ if set_initial_state:
 
 # Save flow state
 if save_state == "True":
+    # ^^^ TODO: a literal string "True" smells dirty.
     expirytime = datetime.now() + timedelta(days=int(expirydays))
     expirytime = datetime.strftime(expirytime, "%Y-%m-%dT%H:%M:%SZ")
     save_state_data = {
@@ -218,12 +234,13 @@ sim_upload_rain = sim_api.simulations_events_rain_rasters_netcdf_create(
 with open(new_path, "rb") as f:
     requests.put(sim_upload_rain.put_url, data=f)
 
-sleep(2)
 
 # Check whether rain upload has been processed
 processing = True
+sleep(2)
 
 while processing:
+    # TODO: move the sleep up here.
     upload_status = sim_api.simulations_events_rain_rasters_netcdf_list(sim_id)
     if upload_status.results[0].file.state == "processed":
         processing = False
@@ -251,7 +268,7 @@ time_indexes = (
 # Create new file with only time_indexes
 create_file_from_source(full_path, new_path, time_indexes)
 
-# Declare evaporatrion upload and upload to put_url using requests
+# Declare evaporation upload and upload to put_url using requests
 sim_upload_evap = sim_api.simulations_events_sources_sinks_rasters_netcdf_create(
     sim_id, data={"filename": evapfilename.replace(".nc", "_{}.nc".format(sim_id))}
 )
