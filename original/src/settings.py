@@ -1,3 +1,13 @@
+"""Comments by Reinout
+
+- Horrible bare try/excepts that can hide any manner of errors.
+
+- I think an ini file would be a better/clearer/easier choice. Part of the
+  elaborateness of this file is due to using xml, I fear.
+
+- Don't return a list of values, but a much clearer dict or so.
+
+"""
 from datetime import datetime
 
 import xml.etree.ElementTree as ET

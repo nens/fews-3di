@@ -1,3 +1,9 @@
+"""Comments by Reinout
+
+My impression is that it can be done a bit shorter/clearer. Perhaps splitting
+it into two or three functions is enough.
+
+"""
 from datetime import datetime
 
 import csv
@@ -23,7 +29,7 @@ def get_lateral_timeseries(csv_file_path, sim_start, sim_end):
         # Strip headers from data
         data = data[2:]
 
-    # Create dictionairy for timeseries
+    # Create dictionary for timeseries
     timeseries = {}
 
     # Initialize dictionairy with headers

@@ -1,3 +1,11 @@
+"""Comments by Reinout
+
+- Fix the naming. "Data" is too generic. "trg": what does that mean?
+
+- "Create file from source" also sound generic. Is it that way? Perhaps a
+  ``utils.py`` with some generic stuff?
+
+"""
 import netCDF4 as nc
 
 
