@@ -1,27 +1,26 @@
 # import getpass
 # import json
-import os
-import requests
-
-# import numpy as np
-import pandas as pd
-import logging
-
-from openapi_client import (
-    ApiClient,
-    Configuration,
-    AuthApi,
-    SimulationsApi,
-    ThreedimodelsApi,
-)
-from openapi_client.models import Authenticate
-
 # import xml.etree.ElementTree as ET
-from datetime import datetime, timedelta
-from time import sleep
-
+from datetime import datetime
+from datetime import timedelta
+from openapi_client import ApiClient
+from openapi_client import AuthApi
+from openapi_client import Configuration
+from openapi_client import SimulationsApi
+from openapi_client import ThreedimodelsApi
+from openapi_client.models import Authenticate
 from settings import settings
 from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
+from time import sleep
+
+import logging
+# Write FEWS-readable NetCDF file
+import netCDF4
+import os
+# import numpy as np
+import pandas as pd
+import requests
+
 
 is_linux = False
 
@@ -70,8 +69,6 @@ df.columns = pd.MultiIndex.from_arrays([pump_id, pump_id, params])
 df.to_csv(convert_path(r"..\output\discharges.csv"), index=True, header=True, sep=",")
 logger.info("Simulated discharges are exported")
 
-# Write FEWS-readable NetCDF file
-import netCDF4
 
 dset = netCDF4.Dataset(r"..\\output\\ow.nc", "a")
 s1 = results.nodes.subset("2D_OPEN_WATER").timeseries(start_time=0, end_time=endtime).s1

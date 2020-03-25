@@ -1,5 +1,4 @@
 import netCDF4 as nc
-from netCDF4 import num2date
 
 
 def get_datetimes_from_source(src_file):

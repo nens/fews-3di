@@ -1,5 +1,7 @@
-import csv
 from datetime import datetime
+
+import csv
+
 
 NULL_VALUE = -999
 

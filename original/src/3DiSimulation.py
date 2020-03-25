@@ -1,32 +1,30 @@
 # import getpass
 # import json
-import os
-import requests
+# import xml.etree.ElementTree as ET
+from datetime import datetime
+from datetime import timedelta
+from lateral_csv_parser import get_lateral_timeseries
+from netcdf_utils import create_file_from_source
+from netcdf_utils import get_datetimes_from_source
+from openapi_client import ApiClient
+from openapi_client import AuthApi
+from openapi_client import Configuration
+from openapi_client import SimulationsApi
+from openapi_client import ThreedimodelsApi
+from openapi_client.models import Authenticate
+from settings import settings
+from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
+from time import sleep
 
+import logging
 # import numpy as np
 # Write FEWS-readable NetCDF file
 import netCDF4
-import pandas as pd
-import logging
 import numpy as np
+import os
+import pandas as pd
+import requests
 
-from openapi_client import (
-    ApiClient,
-    Configuration,
-    AuthApi,
-    SimulationsApi,
-    ThreedimodelsApi,
-)
-from openapi_client.models import Authenticate
-
-# import xml.etree.ElementTree as ET
-from datetime import datetime, timedelta
-from time import sleep
-
-from netcdf_utils import create_file_from_source, get_datetimes_from_source
-from settings import settings
-from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
-from lateral_csv_parser import get_lateral_timeseries
 
 is_linux = False
 

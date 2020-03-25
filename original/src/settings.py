@@ -1,6 +1,7 @@
+from datetime import datetime
+
 import os
 import xml.etree.ElementTree as ET
-from datetime import datetime
 
 
 def settings(settingsfile):
