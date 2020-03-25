@@ -9,10 +9,6 @@ One big file, most everything on the main level. So it looks like the main scrip
 
 - Mark constants (3di api url, for instance) as such.
 
-- Fix path handling (raw strings with backslashes and even with double
-  backslashes). Especially those last ones won't work if ``convert_path()`` is
-  used :-)
-
 - Several things happen here. Starting a sim; downloading results; doing some
   processing; etcetera. Turn everything into separate properly-named
   functions, that should make the flow clearer. And it would show which
@@ -42,15 +38,6 @@ import pandas as pd
 import requests
 
 
-is_linux = False
-
-
-def convert_path(path):
-    if is_linux:
-        return path.replace("\\", "/")
-    return path
-
-
 # TODO: standardize logging setup. And move the actual config into the main
 # script runner.
 logger = logging.getLogger("simple")
@@ -67,7 +54,7 @@ ch_console.setFormatter(formatter)
 logger.addHandler(ch_console)
 
 # read settings file
-setting = settings(convert_path(r"..\run_info.xml"))
+setting = settings("../run_info.xml")
 
 # set variables
 user = setting[0]
@@ -83,7 +70,7 @@ duration = setting[9]
 tend = tstart + timedelta(seconds=duration)
 
 # selected state_id
-with open(convert_path(state_file), "r") as statefile:
+with open(state_file, "r") as statefile:
     state_id = statefile.read()
 logger.info("Simulation will use initial state: %s", state_id)
 
@@ -126,7 +113,7 @@ sim_id = sim.id
 logger.info("Simulation has been created with id: %s", str(sim_id))
 logger.info("Start processing laterals")
 
-laterals = get_lateral_timeseries(convert_path(r"..\input\lateral.csv"), tstart, tend)
+laterals = get_lateral_timeseries("../input/lateral.csv", tstart, tend)
 
 lateral_ids_not_processed = []
 
@@ -207,10 +194,10 @@ else:
 
 # Post rain events
 rainfilename = "precipitation.nc"
-filepath = r"..\input"
+filepath = "../input"
 
 
-full_path = convert_path(os.path.join(filepath, rainfilename))
+full_path = os.path.join(filepath, rainfilename)
 new_path = full_path.replace(".nc", "_{}.nc".format(sim_id))
 
 # Get all precipitation datetimes in the file
@@ -249,9 +236,9 @@ while processing:
 
 # Post evaporation events
 evapfilename = "evaporation.nc"
-filepath = r"..\input"
+filepath = "../input"
 
-full_path = convert_path(os.path.join(filepath, evapfilename))
+full_path = os.path.join(filepath, evapfilename)
 new_path = full_path.replace(".nc", "_{}.nc".format(sim_id))
 
 # Get all evaporation datetimes in the file
@@ -328,22 +315,22 @@ def download_file(results, file_name, path):
 logger.info("Downloading results files")
 
 download_file(
-    sim_results.results, "simulation.log", convert_path(r"..\output\simulation.log")
+    sim_results.results, "simulation.log", "../output/simulation.log"
 )
 
 # New zipfile with all logs (combined)
 download_file(
     sim_results.results,
     f"log_files_sim_{sim_id}.zip",
-    convert_path(r"..\output\simulation.zip"),
+    "../output/simulation.zip",
 )
 
 download_file(
-    sim_results.results, "flow_summary.log", convert_path(r"..\output\flow_summary.log")
+    sim_results.results, "flow_summary.log", "../output/flow_summary.log"
 )
 
 download_file(
-    sim_results.results, "results_3di.nc", convert_path(r"..\output\results_3di.nc")
+    sim_results.results, "results_3di.nc", "../output/results_3di.nc"
 )
 
 
@@ -351,15 +338,15 @@ logger.info("Download of resultfile is succeeded")
 
 # Store saved_state.id
 if sim_save_state:
-    with open(convert_path(r"..\states\states_3Di.out"), "w") as f:
+    with open("../states/states_3Di.out", "w") as f:
         f.write("%d" % sim_save_state.id)
         logger.info("Saved state exported: {}".format(sim_save_state.url))
 
 
 # Read results
 results = GridH5ResultAdmin(
-    convert_path(r"..\\model\\gridadmin.h5"),
-    convert_path(r"..\\output\\results_3di.nc"),
+    "../model/gridadmin.h5",
+    "../output/results_3di.nc",
 )
 
 times = results.pumps.timestamps[()] + tstart.timestamp()
@@ -372,15 +359,15 @@ df = pd.DataFrame(discharges, index=times, columns=pump_id)
 params = ["Q.sim" for x in range(len(df.columns))]
 
 df.columns = pd.MultiIndex.from_arrays([pump_id, pump_id, params])
-df.to_csv(convert_path(r"..\output\discharges.csv"), index=True, header=True, sep=",")
+df.to_csv("../output/discharges.csv", index=True, header=True, sep=",")
 logger.info("Simulated discharges are exported")
 
 
 # Write FEWS-readable NetCDF file
-ow_path = r"..\\input\\ow.nc"
+ow_path = "../input/ow.nc"
 
 # Get all own datetimes in the file
-ow_datetimes = get_datetimes_from_source(convert_path(ow_path))
+ow_datetimes = get_datetimes_from_source(ow_path)
 
 # Figure out which are valid for the given simulation period
 # precipation_datetimes
@@ -390,10 +377,10 @@ time_indexes = (
 
 # Create new file with only time_indexes
 create_file_from_source(
-    convert_path(ow_path), convert_path(r"..\\output\\ow.nc"), time_indexes
+    ow_path, "../output/ow.nc", time_indexes
 )
 
-dset = netCDF4.Dataset(convert_path(r"..\\output\\ow.nc"), "a")
+dset = netCDF4.Dataset("../output/ow.nc", "a")
 s1 = results.nodes.subset("2D_OPEN_WATER").timeseries(start_time=0, end_time=endtime).s1
 dset["Mesh2D_s1"][:, :] = s1
 dset.close()
