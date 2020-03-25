@@ -1,6 +1,15 @@
-# import getpass
-# import json
-# import xml.etree.ElementTree as ET
+"""
+Comments by Reinout
+
+- Find a better name for this module.
+
+- Fix backslash path handling.
+
+- It looks like a main script, so fix the setup in the regular way (logging, settings).
+
+
+"""
+
 from datetime import datetime
 from settings import settings
 from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
