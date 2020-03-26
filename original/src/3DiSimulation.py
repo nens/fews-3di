@@ -57,7 +57,7 @@ def _old_setup_logging():
     logger.addHandler(ch_console)
 
 
-def download_file(results, file_name, path):
+def download_file(results, sim_api, sim_id, file_name, path):
     results = [x for x in results if x.filename.lower() == file_name.lower()]
     if results:
         # Request 'Download' resource
@@ -105,9 +105,6 @@ def main():
     configuration.api_key["Authorization"] = tokens.access
     configuration.api_key_prefix["Authorization"] = "Bearer"
 
-    # new client instance with auth headers
-    client = ApiClient(configuration)
-
     # Find ThreeDiModel
     models = ThreedimodelsApi(api_client)
     model = models.threedimodels_list(slug__contains=model_rev)
@@ -123,7 +120,6 @@ def main():
     data["duration"] = duration
     logger.info("Simulation will start at: %s", tstart)
     logger.info("Simulation will run for: %s", duration)
-
 
     sim_api = SimulationsApi(api_client)
     sim = sim_api.simulations_create(data)
@@ -191,7 +187,6 @@ def main():
     if set_initial_state:
         sim_api.simulations_initial_saved_state_create(sim_id, data=initial_state_data)
 
-
     # Save flow state
     if save_state == "True":
         # ^^^ TODO: a literal string "True" smells dirty.
@@ -210,11 +205,9 @@ def main():
     else:
         sim_save_state = None
 
-
     # Post rain events
     rainfilename = "precipitation.nc"
     filepath = "../input"
-
 
     full_path = os.path.join(filepath, rainfilename)
     new_path = full_path.replace(".nc", "_{}.nc".format(sim_id))
@@ -225,7 +218,9 @@ def main():
     # Figure out which are valid for the given simulation period
     # precipation_datetimes
     time_indexes = (
-        np.argwhere((precipitation_datetimes >= tstart) & (precipitation_datetimes <= tend))
+        np.argwhere(
+            (precipitation_datetimes >= tstart) & (precipitation_datetimes <= tend)
+        )
         .flatten()
         .tolist()
     )
@@ -239,7 +234,6 @@ def main():
     )
     with open(new_path, "rb") as f:
         requests.put(sim_upload_rain.put_url, data=f)
-
 
     # Check whether rain upload has been processed
     processing = True
@@ -288,12 +282,13 @@ def main():
     processing = True
 
     while processing:
-        upload_status = sim_api.simulations_events_sources_sinks_rasters_netcdf_list(sim_id)
+        upload_status = sim_api.simulations_events_sources_sinks_rasters_netcdf_list(
+            sim_id
+        )
         if upload_status.results[0].file.state == "processed":
             processing = False
         else:
             sleep(2)
-
 
     # Start simulation
     start_data = {"name": "start"}
@@ -316,22 +311,36 @@ def main():
     # Download results
     sim_results = sim_api.simulations_results_files_list(sim_id)
 
-
-
-
     logger.info("Downloading results files")
 
-    download_file(sim_results.results, "simulation.log", "../output/simulation.log")
+    download_file(
+        sim_results.results,
+        sim_api,
+        sim_id,
+        "simulation.log",
+        "../output/simulation.log",
+    )
 
     # New zipfile with all logs (combined)
     download_file(
         sim_results.results, f"log_files_sim_{sim_id}.zip", "../output/simulation.zip",
     )
 
-    download_file(sim_results.results, "flow_summary.log", "../output/flow_summary.log")
+    download_file(
+        sim_results.results,
+        sim_api,
+        sim_id,
+        "flow_summary.log",
+        "../output/flow_summary.log",
+    )
 
-    download_file(sim_results.results, "results_3di.nc", "../output/results_3di.nc")
-
+    download_file(
+        sim_results.results,
+        sim_api,
+        sim_id,
+        "results_3di.nc",
+        "../output/results_3di.nc",
+    )
 
     logger.info("Download of resultfile is succeeded")
 
@@ -340,7 +349,6 @@ def main():
         with open("../states/states_3Di.out", "w") as f:
             f.write("%d" % sim_save_state.id)
             logger.info("Saved state exported: {}".format(sim_save_state.url))
-
 
     # Read results
     results = GridH5ResultAdmin("../model/gridadmin.h5", "../output/results_3di.nc",)
@@ -358,7 +366,6 @@ def main():
     df.to_csv("../output/discharges.csv", index=True, header=True, sep=",")
     logger.info("Simulated discharges are exported")
 
-
     # Write FEWS-readable NetCDF file
     ow_path = "../input/ow.nc"
 
@@ -368,14 +375,20 @@ def main():
     # Figure out which are valid for the given simulation period
     # precipation_datetimes
     time_indexes = (
-        np.argwhere((ow_datetimes >= tstart) & (ow_datetimes <= tend)).flatten().tolist()
+        np.argwhere((ow_datetimes >= tstart) & (ow_datetimes <= tend))
+        .flatten()
+        .tolist()
     )
 
     # Create new file with only time_indexes
     create_file_from_source(ow_path, "../output/ow.nc", time_indexes)
 
     dset = netCDF4.Dataset("../output/ow.nc", "a")
-    s1 = results.nodes.subset("2D_OPEN_WATER").timeseries(start_time=0, end_time=endtime).s1
+    s1 = (
+        results.nodes.subset("2D_OPEN_WATER")
+        .timeseries(start_time=0, end_time=endtime)
+        .s1
+    )
     dset["Mesh2D_s1"][:, :] = s1
     dset.close()
 
