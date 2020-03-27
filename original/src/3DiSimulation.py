@@ -74,16 +74,13 @@ def download_file(results, sim_api, sim_id, file_name, path):
 def main():
     # read settings file
     setting = settings("../run_info.xml")
-
-    # set variables
+    # Some settings have been moved to seperate functions.
     user = setting[0]
     password = setting[1]
     organisation = setting[2]
     model_rev = setting[3]
     sim_name = setting[4]
     state_file = setting[5]
-    save_state = setting[6]
-    expirydays = setting[7]
     tstart = setting[8]
     duration = setting[9]
     tend = tstart + timedelta(seconds=duration)
@@ -95,7 +92,7 @@ def main():
 
     # authentication handling
     configuration = Configuration()
-
+    # TODO constant.
     configuration.host = "https://api.3di.live/v3.0"
 
     api_client = ApiClient(configuration)
@@ -110,6 +107,8 @@ def main():
     model = models.threedimodels_list(slug__contains=model_rev)
     model_id = model.results[0].id
     logger.info("Simulation uses model revision: %s", model_rev)
+
+
 
     # Create simulation
     data = {}
@@ -128,6 +127,10 @@ def main():
     logger.info("Simulation has been created with id: %s", str(sim_id))
     logger.info("Start processing laterals")
 
+
+
+    # TODO add laterals. The first of some "add" actions. And all of them has
+    # a "while processing:" loop.
     laterals = get_lateral_timeseries("../input/lateral.csv", tstart, tend)
 
     lateral_ids_not_processed = []
@@ -178,6 +181,10 @@ def main():
             processing = False
 
         sleep(2)
+
+
+
+
     # Set initial state
     initial_state_data = {"saved_state": "{}".format(state_id)}
 
@@ -187,25 +194,10 @@ def main():
     if set_initial_state:
         sim_api.simulations_initial_saved_state_create(sim_id, data=initial_state_data)
 
-    # Save flow state
-    if save_state == "True":
-        # ^^^ TODO: a literal string "True" smells dirty.
-        expirytime = datetime.now() + timedelta(days=int(expirydays))
-        expirytime = datetime.strftime(expirytime, "%Y-%m-%dT%H:%M:%SZ")
-        save_state_data = {
-            "name": "Texel operational",
-            "time": duration,
-            "expiry": expirytime,
-        }
 
-        sim_save_state = sim_api.simulations_create_saved_states_timed_create(
-            sim_id, data=save_state_data
-        )
-        logger.info("Saved state created: {}".format(sim_save_state.url))
-    else:
-        sim_save_state = None
 
-    # Post rain events
+
+    # Add rain events
     rainfilename = "precipitation.nc"
     filepath = "../input"
 
@@ -247,7 +239,10 @@ def main():
         else:
             sleep(2)
 
-    # Post evaporation events
+
+
+
+    # Add evaporation events
     evapfilename = "evaporation.nc"
     filepath = "../input"
 
@@ -290,7 +285,10 @@ def main():
         else:
             sleep(2)
 
-    # Start simulation
+
+
+
+    # TODO start simulation. Also a "while processing"-like loop.
     start_data = {"name": "start"}
     sim_start = sim_api.simulations_actions_create(sim_id, data=start_data)
 
@@ -307,6 +305,23 @@ def main():
             pending = False
         sleep(5)
     logger.info("Simulation has finished")
+
+
+
+
+    download_results(sim_api, sim_id, setting)
+
+    # Finish
+    logger.info("Done")
+
+
+def download_results(sim_api, sim_id, setting):
+    save_state = setting[6]
+    expirydays = setting[7]
+    tstart = setting[8]
+    duration = setting[9]
+    tend = tstart + timedelta(seconds=duration)
+    # ^^^ there are some duplicates from main().
 
     # Download results
     sim_results = sim_api.simulations_results_files_list(sim_id)
@@ -343,6 +358,25 @@ def main():
     )
 
     logger.info("Download of resultfile is succeeded")
+
+    # Save flow state
+    if save_state == "True":
+        # ^^^ TODO: a literal string "True" smells dirty.
+        expirytime = datetime.now() + timedelta(days=int(expirydays))
+        expirytime = datetime.strftime(expirytime, "%Y-%m-%dT%H:%M:%SZ")
+        save_state_data = {
+            # Note: name should be a constant? Or a setting?
+            "name": "Texel operational",
+            "time": duration,
+            "expiry": expirytime,
+        }
+
+        sim_save_state = sim_api.simulations_create_saved_states_timed_create(
+            sim_id, data=save_state_data
+        )
+        logger.info("Saved state created: {}".format(sim_save_state.url))
+    else:
+        sim_save_state = None
 
     # Store saved_state.id
     if sim_save_state:
@@ -391,9 +425,6 @@ def main():
     )
     dset["Mesh2D_s1"][:, :] = s1
     dset.close()
-
-    # Finish
-    logger.info("Done")
 
 
 if __name__ == "__main__":
