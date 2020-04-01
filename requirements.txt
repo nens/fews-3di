@@ -3,6 +3,7 @@
 -e .[test]
 
 # Extra development dependencies
+PyYAML
 black
 coveralls
 zest.releaser
