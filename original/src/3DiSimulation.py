@@ -20,12 +20,6 @@ from datetime import timedelta
 from lateral_csv_parser import get_lateral_timeseries
 from netcdf_utils import create_file_from_source
 from netcdf_utils import get_datetimes_from_source
-from openapi_client import ApiClient
-from openapi_client import AuthApi
-from openapi_client import Configuration
-from openapi_client import SimulationsApi
-from openapi_client import ThreedimodelsApi
-from openapi_client.models import Authenticate
 from settings import settings
 from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 from time import sleep
@@ -33,6 +27,7 @@ from time import sleep
 import logging
 import netCDF4
 import numpy as np
+import openapi_client
 import os
 import pandas as pd
 import requests
@@ -91,24 +86,22 @@ def main():
     logger.info("Simulation will use initial state: %s", state_id)
 
     # authentication handling
-    configuration = Configuration()
+    configuration = openapi_client.Configuration()
     # TODO constant.
     configuration.host = "https://api.3di.live/v3.0"
 
-    api_client = ApiClient(configuration)
-    auth = AuthApi(api_client)
-    tokens = auth.auth_token_create(Authenticate(user, password))
+    api_client = openapi_client.ApiClient(configuration)
+    auth = openapi_client.AuthApi(api_client)
+    tokens = auth.auth_token_create(openapi_client.Authenticate(user, password))
 
     configuration.api_key["Authorization"] = tokens.access
     configuration.api_key_prefix["Authorization"] = "Bearer"
 
     # Find ThreeDiModel
-    models = ThreedimodelsApi(api_client)
+    models = openapi_client.ThreedimodelsApi(api_client)
     model = models.threedimodels_list(slug__contains=model_rev)
     model_id = model.results[0].id
     logger.info("Simulation uses model revision: %s", model_rev)
-
-
 
     # Create simulation
     data = {}
@@ -120,14 +113,12 @@ def main():
     logger.info("Simulation will start at: %s", tstart)
     logger.info("Simulation will run for: %s", duration)
 
-    sim_api = SimulationsApi(api_client)
+    sim_api = openapi_client.SimulationsApi(api_client)
     sim = sim_api.simulations_create(data)
     sim_id = sim.id
 
     logger.info("Simulation has been created with id: %s", str(sim_id))
     logger.info("Start processing laterals")
-
-
 
     # TODO add laterals. The first of some "add" actions. And all of them has
     # a "while processing:" loop.
@@ -182,9 +173,6 @@ def main():
 
         sleep(2)
 
-
-
-
     # Set initial state
     initial_state_data = {"saved_state": "{}".format(state_id)}
 
@@ -193,9 +181,6 @@ def main():
 
     if set_initial_state:
         sim_api.simulations_initial_saved_state_create(sim_id, data=initial_state_data)
-
-
-
 
     # Add rain events
     rainfilename = "precipitation.nc"
@@ -238,9 +223,6 @@ def main():
             processing = False
         else:
             sleep(2)
-
-
-
 
     # Add evaporation events
     evapfilename = "evaporation.nc"
@@ -285,9 +267,6 @@ def main():
         else:
             sleep(2)
 
-
-
-
     # TODO start simulation. Also a "while processing"-like loop.
     start_data = {"name": "start"}
     sim_start = sim_api.simulations_actions_create(sim_id, data=start_data)
@@ -305,9 +284,6 @@ def main():
             pending = False
         sleep(5)
     logger.info("Simulation has finished")
-
-
-
 
     download_results(sim_api, sim_id, setting)
 
