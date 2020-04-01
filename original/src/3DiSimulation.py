@@ -66,24 +66,14 @@ def download_file(results, sim_api, sim_id, file_name, path):
         logger.info("Could not download file %s", file_name)
 
 
-def main():
-    # read settings file
-    setting = settings("../run_info.xml")
-    # Some settings have been moved to seperate functions.
+def create_simulation(setting):
     user = setting[0]
     password = setting[1]
     organisation = setting[2]
     model_rev = setting[3]
     sim_name = setting[4]
-    state_file = setting[5]
     tstart = setting[8]
     duration = setting[9]
-    tend = tstart + timedelta(seconds=duration)
-
-    # selected state_id
-    with open(state_file, "r") as statefile:
-        state_id = statefile.read()
-    logger.info("Simulation will use initial state: %s", state_id)
 
     # authentication handling
     configuration = openapi_client.Configuration()
@@ -99,7 +89,9 @@ def main():
 
     # Find ThreeDiModel
     models = openapi_client.ThreedimodelsApi(api_client)
+    # ^^^ why do you need to pass in the api_client?
     model = models.threedimodels_list(slug__contains=model_rev)
+    # ^^^  Hoe netjes is het om model_rev te gebruiken op deze manier?
     model_id = model.results[0].id
     logger.info("Simulation uses model revision: %s", model_rev)
 
@@ -116,9 +108,28 @@ def main():
     sim_api = openapi_client.SimulationsApi(api_client)
     sim = sim_api.simulations_create(data)
     sim_id = sim.id
-
     logger.info("Simulation has been created with id: %s", str(sim_id))
     logger.info("Start processing laterals")
+    # Note: is passing the sim_id needed? I'd expect a proper "simulation"
+    # object or so for both sim_api and sim_id?
+    return sim_api, sim_id
+
+
+def main():
+    # read settings file
+    setting = settings("../run_info.xml")
+    # Some settings have been moved to seperate functions.
+    state_file = setting[5]
+    tstart = setting[8]
+    duration = setting[9]
+    tend = tstart + timedelta(seconds=duration)
+
+    # selected state_id
+    with open(state_file, "r") as statefile:
+        state_id = statefile.read()
+    logger.info("Simulation will use initial state: %s", state_id)
+
+    sim_api, sim_id = create_simulation(setting)
 
     # TODO add laterals. The first of some "add" actions. And all of them has
     # a "while processing:" loop.
