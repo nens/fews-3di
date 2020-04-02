@@ -25,7 +25,7 @@ jobs:
         run: |
           bin/pytest
           bin/black --check original/src/*.py
-          bin/flake8 --check original/src/*.py
+          bin/flake8 original/src/*.py
       - name: coverage report
         run: bin/coveralls
         env:
