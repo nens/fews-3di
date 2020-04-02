@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 """Tests for script.py"""
 from fews_3di import scripts
 
