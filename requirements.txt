@@ -6,4 +6,6 @@
 black
 coveralls
 flake8
+isort
+mypy
 zest.releaser
