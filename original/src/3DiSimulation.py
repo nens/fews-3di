@@ -188,7 +188,6 @@ def set_initial_state(sim_api, sim_id, setting):
     sim_api.simulations_initial_saved_state_create(sim_id, data=initial_state_data)
 
 
-
 def add_rain_events(setting, sim_api, sim_id):
     tstart = setting[8]
     duration = setting[9]
@@ -283,6 +282,7 @@ def add_evaporation_events(setting, sim_api, sim_id):
             processing = False
         else:
             sleep(2)
+
 
 def start_simulation(sim_api, sim_id):
     # ################# "ADD": start simulation ##############
