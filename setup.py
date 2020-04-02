@@ -5,7 +5,7 @@ version = "0.1.dev0"
 
 long_description = "\n\n".join([open("README.rst").read(), open("CHANGES.rst").read()])
 
-install_requires = []
+install_requires = ["netCDF4", "threedi-api-client", "threedigrid", "pandas"]
 
 tests_require = ["pytest", "mock", "pytest-cov", "pytest-flakes", "pytest-black"]
 
