@@ -22,7 +22,10 @@ jobs:
           python3 -m venv .
           bin/pip install -r requirements.txt
       - name: test
-        run: bin/pytest
+        run: |
+          bin/pytest
+          bin/black --check original/src/*.py
+          bin/flake8 --check original/src/*.py
       - name: coverage report
         run: bin/coveralls
         env:

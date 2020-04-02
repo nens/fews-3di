@@ -5,4 +5,5 @@
 # Extra development dependencies
 black
 coveralls
+flake8
 zest.releaser
