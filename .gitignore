@@ -28,6 +28,7 @@ htmlcov
 .codeintel
 coverage.xml
 .pytest_cache
+.mypy_cache
 
 original/run_info.xml
 
