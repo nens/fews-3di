@@ -43,6 +43,6 @@ def main():  # pragma: no cover
     try:
         print("Call some function from another file here")
         # ^^^ TODO: pass in options.xyz where needed.
-    except:
+    except Exception:
         logger.exception("An exception has occurred.")
         return 1
