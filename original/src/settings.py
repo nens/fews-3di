@@ -28,6 +28,8 @@ def settings(settingsfile):
         save_state,
         save_state_expirytime,
     ) = ("", "", "", "", "", "", False, "")
+    # ^^^ defaults
+
     # tree = ET.parse(r"..\run_info.xml")
     tree = ET.parse(settingsfile)
     root = tree.getroot()
@@ -73,7 +75,7 @@ def settings(settingsfile):
                     else sim_name
                 )
                 state_file = (
-                    child[i].attrib["value"]
+                    child[i].attrib["value"].replace("\\", "/")
                     if child[i].attrib["key"] == "use_state"
                     else state_file
                 )
