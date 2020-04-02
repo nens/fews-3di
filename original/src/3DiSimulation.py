@@ -389,9 +389,6 @@ def main():
     setting = settings("../run_info.xml")
     # Some settings have been moved to seperate functions.
     state_file = setting[5]
-    tstart = setting[8]
-    duration = setting[9]
-    tend = tstart + timedelta(seconds=duration)
 
     sim_api, sim_id = create_simulation(setting)
 
