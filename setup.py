@@ -7,7 +7,14 @@ long_description = "\n\n".join([open("README.rst").read(), open("CHANGES.rst").r
 
 install_requires = ["netCDF4", "threedi-api-client", "threedigrid", "pandas"]
 
-tests_require = ["pytest", "mock", "pytest-cov", "pytest-flakes", "pytest-black"]
+tests_require = [
+    "mock",
+    "pytest",
+    "pytest-black",
+    "pytest-cov",
+    "pytest-flakes",
+    "pytest-mypy",
+]
 
 setup(
     name="fews-3di",
