@@ -176,6 +176,19 @@ def add_laterals(setting, sim_api, sim_id):
         sleep(2)
 
 
+def set_initial_state(sim_api, sim_id, setting):
+    state_file = setting[5]
+    # ######### Some other sim management thingy ################
+    # selected state_id
+    with open(state_file, "r") as statefile:
+        state_id = statefile.read()
+    logger.info("Simulation will use initial state: %s", state_id)
+    # Set initial state
+    initial_state_data = {"saved_state": "{}".format(state_id)}
+    sim_api.simulations_initial_saved_state_create(sim_id, data=initial_state_data)
+
+
+
 def add_rain_events(setting, sim_api, sim_id):
     tstart = setting[8]
     duration = setting[9]
@@ -270,6 +283,26 @@ def add_evaporation_events(setting, sim_api, sim_id):
             processing = False
         else:
             sleep(2)
+
+def start_simulation(sim_api, sim_id):
+    # ################# "ADD": start simulation ##############
+    # TODO start simulation. Also a "while processing"-like loop.
+    start_data = {"name": "start"}  # TODO: what is this?
+    sim_start = sim_api.simulations_actions_create(sim_id, data=start_data)
+
+    logger.info("Simulation has been started %s", sim_start)
+
+    # Wait for simulation to finish
+    pending = True
+
+    while pending:
+        latest_sim_status = sim_api.simulations_status_list(sim_id)
+        if latest_sim_status.name in [
+            "finished",
+        ]:
+            pending = False
+        sleep(5)
+    logger.info("Simulation has finished")
 
 
 def download_results(sim_api, sim_id, setting):
@@ -387,53 +420,14 @@ def download_results(sim_api, sim_id, setting):
 def main():
     # read settings file
     setting = settings("../run_info.xml")
-    # Some settings have been moved to seperate functions.
-    state_file = setting[5]
 
     sim_api, sim_id = create_simulation(setting)
 
-    # ADD 1
     add_laterals(setting, sim_api, sim_id)
-
-    # ######### Some other sim management thingy ################
-    # selected state_id
-    with open(state_file, "r") as statefile:
-        state_id = statefile.read()
-    logger.info("Simulation will use initial state: %s", state_id)
-    # Set initial state
-    initial_state_data = {"saved_state": "{}".format(state_id)}
-
-    # Set this to True if you want to use the initial state
-    set_initial_state = True
-
-    if set_initial_state:
-        sim_api.simulations_initial_saved_state_create(sim_id, data=initial_state_data)
-
-    # ADD 2
+    set_initial_state(sim_api, sim_id, setting)
     add_rain_events(setting, sim_api, sim_id)
-
-    # ADD 3
     add_evaporation_events(setting, sim_api, sim_id)
-
-    # ################# "ADD": start simulation ##############
-    # TODO start simulation. Also a "while processing"-like loop.
-    start_data = {"name": "start"}
-    sim_start = sim_api.simulations_actions_create(sim_id, data=start_data)
-
-    logger.info("Simulation has been started %s", sim_start)
-
-    # Wait for simulation to finish
-    pending = True
-
-    while pending:
-        latest_sim_status = sim_api.simulations_status_list(sim_id)
-        if latest_sim_status.name in [
-            "finished",
-        ]:
-            pending = False
-        sleep(5)
-    logger.info("Simulation has finished")
-
+    start_simulation(sim_api, sim_id)
     download_results(sim_api, sim_id, setting)
     logger.info("Done")
 
