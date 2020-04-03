@@ -22,7 +22,7 @@ def read_settings(settings_file: Path) -> dict:
     logger.debug("Reading settings from %s", settings_file)
     result = {}
     root = ET.fromstring(settings_file.read_text())
-    print(root)
+
     required_properties = [
         "username",
         "password",
@@ -33,11 +33,12 @@ def read_settings(settings_file: Path) -> dict:
     for required_property in required_properties:
         xpath = f"pi:properties/pi:string[@key='{required_property}']"
         elements = root.findall(xpath, NAMESPACES)
-        if len(elements) != 1:
+        if not elements:
             raise MissingSettingException(
                 f"Required property '{required_property}' is missing"
             )
         value = elements[0].attrib["value"]
         logger.debug("Found property %s=%s", required_property, value)
         result[required_property] = value
+
     return result
