@@ -22,3 +22,10 @@ def test_read_settings_extracts_properties():
 def test_read_settings_missing_username():
     with pytest.raises(utils.MissingSettingException):
         utils.read_settings(WRONG_SETTINGS_FILE)
+
+
+def test_read_settings_extracts_times():
+    settings = utils.read_settings(EXAMPLE_SETTINGS_FILE)
+    assert "start" in settings
+    assert "end" in settings
+    assert settings["start"].day == 26
