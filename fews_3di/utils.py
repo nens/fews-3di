@@ -6,6 +6,10 @@ import xml.etree.ElementTree as ET
 NAMESPACES = {"pi": "http://www.wldelft.nl/fews/PI"}
 
 
+class MissingSettingException(Exception):
+    pass
+
+
 def read_settings(settings_file: Path) -> dict:
     """Return settings from the xml settings file.
 
@@ -25,6 +29,10 @@ def read_settings(settings_file: Path) -> dict:
     for required_property in required_properties:
         xpath = f"pi:properties/pi:string[@key='{required_property}']"
         elements = root.findall(xpath, NAMESPACES)
+        if len(elements) != 1:
+            raise MissingSettingException(
+                f"Required property '{required_property}' is missing"
+            )
         value = elements[0].attrib["value"]
         result[required_property] = value
     return result
