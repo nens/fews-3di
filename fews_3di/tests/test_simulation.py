@@ -16,6 +16,11 @@ def example_settings():
 
 
 def test_smoke(example_settings):
+    simulation.ThreediSimulation(example_settings)
+
+
+def test_auth_fails(example_settings):
+    threedi_simulation = simulation.ThreediSimulation(example_settings)
     # The example settings of course give an authentication error.
     with pytest.raises(simulation.AuthenticationError):
-        simulation.ThreediSimulation(example_settings)
+        threedi_simulation.login()

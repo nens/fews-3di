@@ -56,9 +56,9 @@ class ThreediSimulation:
         self.configuration = openapi_client.Configuration(host=API_HOST)
         self.api_client = openapi_client.ApiClient(self.configuration)
         self.api_client.user_agent = USER_AGENT  # Let's be neat.
-        self._login()
+        # You need to call login() here, but we won't: it makes testing easier.
 
-    def _login(self):
+    def login(self):
         """Log in and set the necessary tokens.
 
         Called from the init. It is a separate method to make testing easier.

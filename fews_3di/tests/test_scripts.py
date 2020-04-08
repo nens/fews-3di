@@ -35,7 +35,21 @@ def test_main_error():
         assert scripts.main() == 1  # Exit error code.
 
 
-def test_main():
+def test_main_login_error():
     with mock.patch("sys.argv", ["program", "--settings", str(EXAMPLE_SETTINGS_FILE)]):
 
         assert scripts.main() == 1  # exit code 1: expected login error.
+
+
+def test_main_login_error_verbose():
+    with mock.patch(
+        "sys.argv", ["program", "--verbose", "--settings", str(EXAMPLE_SETTINGS_FILE)]
+    ):
+
+        assert scripts.main() == 1  # exit code 1: expected login error.
+
+
+def test_main_dummy_run():
+    with mock.patch("sys.argv", ["program", "--settings", str(EXAMPLE_SETTINGS_FILE)]):
+        with mock.patch("fews_3di.scripts.simulation.ThreediSimulation"):
+            assert scripts.main() == 0  # Success

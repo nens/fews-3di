@@ -59,8 +59,9 @@ def main():
     try:
         settings = utils.Settings(Path(options.settings_file))
         threedi_simulation = simulation.ThreediSimulation(settings)
+        threedi_simulation.login()
         threedi_simulation.run()
-        return 0
+        return 0  # Success!
     except OWN_EXCEPTIONS as e:
         if options.verbose:
             logger.exception(e)
