@@ -69,7 +69,3 @@ def main():
         else:
             logger.error("↓↓↓↓↓   Pass --verbose to get more information   ↓↓↓↓↓")
             logger.error(e)
-    except Exception:
-        logger.exception("An exception has occurred.")
-
-    return 1
