@@ -48,7 +48,7 @@ class Settings:
         if not elements:
             raise MissingSettingException(
                 f"Required setting '{property_name}' is missing "
-                "under <properties> in {settings_file}."
+                f"under <properties> in {self._settings_file}."
             )
         value = elements[0].attrib["value"]
         logger.debug("Found property %s=%s", property_name, value)
