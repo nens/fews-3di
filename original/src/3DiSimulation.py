@@ -2,7 +2,7 @@
 
 One big file, most everything on the main level. So it looks like the main script :-)
 
-- Split it up in separate functions.
+- DONE Split it up in separate functions.
 
 - Fix settings handling. Turn it into a dict. Or read an ini file with
   defaults. Or accept more command line parameters.
@@ -421,14 +421,15 @@ def main():
     # read settings file
     setting = settings("../run_info.xml")
 
-    sim_api, sim_id = create_simulation(setting)
+    sim_api, sim_id = create_simulation(setting)  # SIM CLASS
 
     add_laterals(setting, sim_api, sim_id)
     set_initial_state(sim_api, sim_id, setting)
     add_rain_events(setting, sim_api, sim_id)
     add_evaporation_events(setting, sim_api, sim_id)
-    start_simulation(sim_api, sim_id)
-    download_results(sim_api, sim_id, setting)
+
+    start_simulation(sim_api, sim_id)  # SIM CLASS
+    download_results(sim_api, sim_id, setting)  # SIM CLASS
     logger.info("Done")
 
 
