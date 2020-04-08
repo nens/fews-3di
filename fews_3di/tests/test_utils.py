@@ -29,3 +29,9 @@ def test_read_settings_extracts_times():
     assert settings.start
     assert settings.end
     assert settings.start.day == 26
+
+
+def test_read_settings_missing_date_item():
+    settings = utils.Settings(EXAMPLE_SETTINGS_FILE)
+    with pytest.raises(utils.MissingSettingException):
+        settings._read_datetime("middle")

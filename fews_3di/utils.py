@@ -62,7 +62,7 @@ class Settings:
         if not elements:
             raise MissingSettingException(
                 f"Required setting '{element_name}' is missing in "
-                "{self._settings_file}."
+                f"{self._settings_file}."
             )
         date = elements[0].attrib["date"]
         time = elements[0].attrib["time"]
