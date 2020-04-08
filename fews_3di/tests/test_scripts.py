@@ -37,8 +37,5 @@ def test_main_error():
 
 def test_main():
     with mock.patch("sys.argv", ["program", "--settings", str(EXAMPLE_SETTINGS_FILE)]):
-        with mock.patch("fews_3di.scripts.run_simulation") as mock_simulation:
 
-            # We patch the run_simulation as we don't actually want to run anything.
-            scripts.main()
-            assert mock_simulation.called
+        assert scripts.main() == 1  # exit code 1: expected login error.

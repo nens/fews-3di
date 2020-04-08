@@ -1,12 +1,19 @@
 """Script to start 3Di simulations from FEWS.
 """
 # ^^^ This docstring is automatically used in the command line help text.
+from fews_3di import simulation
 from fews_3di import utils
-from fews_3di.simulation import run_simulation
 from pathlib import Path
 
 import argparse
 import logging
+
+
+# Exceptions we raise ourselves that are suitable for printing as error messages.
+OWN_EXCEPTIONS = (
+    simulation.AuthenticationError,
+    utils.MissingSettingException,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -47,10 +54,20 @@ def main():
     else:
         log_level = logging.INFO
     logging.basicConfig(level=log_level, format="%(levelname)s: %(message)s")
+    # ^^^ TODO: add debug logging to file.
 
     try:
         settings = utils.Settings(Path(options.settings_file))
-        run_simulation(settings)
-    except Exception:  # TODO: just print the error for known exceptions.
+        threedi_simulation = simulation.ThreediSimulation(settings)
+        threedi_simulation.run()
+        return 0
+    except OWN_EXCEPTIONS as e:
+        if options.verbose:
+            logger.exception(e)
+        else:
+            logger.error(" ↓↓↓ Pass --verbose to get more information ↓↓↓")
+            logger.error(e)
+    except Exception:
         logger.exception("An exception has occurred.")
-        return 1
+
+    return 1
