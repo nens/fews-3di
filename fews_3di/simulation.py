@@ -35,10 +35,6 @@ USER_AGENT = "fews-3di (https://github.com/nens/fews-3di/)"
 logger = logging.getLogger(__name__)
 
 
-def run_simulation(settings):
-    print(settings)
-
-
 class AuthenticationError(Exception):
     pass
 
