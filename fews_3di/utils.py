@@ -14,6 +14,10 @@ class MissingSettingException(Exception):
     pass
 
 
+class MissingSettingsFileException(Exception):
+    pass
+
+
 class Settings:
     # Instance variables with their types
     username: str
@@ -28,7 +32,11 @@ class Settings:
         """Read settings from the xml settings file."""
         self._settings_file = settings_file
         logger.info("Reading settings from %s...", self._settings_file)
-        self._root = ET.fromstring(self._settings_file.read_text())
+        try:
+            self._root = ET.fromstring(self._settings_file.read_text())
+        except FileNotFoundError as e:
+            msg = f"Settings file '{settings_file}' not found"
+            raise MissingSettingsFileException(msg) from e
         required_properties = [
             "username",
             "password",
