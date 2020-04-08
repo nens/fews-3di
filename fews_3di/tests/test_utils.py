@@ -11,21 +11,21 @@ WRONG_SETTINGS_FILE = TEST_DIR / "settings_without_username.xml"
 
 
 def test_read_settings_smoke():
-    assert isinstance(utils.read_settings(EXAMPLE_SETTINGS_FILE), dict)
+    utils.Settings(EXAMPLE_SETTINGS_FILE)
 
 
 def test_read_settings_extracts_properties():
-    settings = utils.read_settings(EXAMPLE_SETTINGS_FILE)
-    assert settings["username"] == "pietje"
+    settings = utils.Settings(EXAMPLE_SETTINGS_FILE)
+    assert settings.username == "pietje"
 
 
 def test_read_settings_missing_username():
     with pytest.raises(utils.MissingSettingException):
-        utils.read_settings(WRONG_SETTINGS_FILE)
+        utils.Settings(WRONG_SETTINGS_FILE)
 
 
 def test_read_settings_extracts_times():
-    settings = utils.read_settings(EXAMPLE_SETTINGS_FILE)
-    assert "start" in settings
-    assert "end" in settings
-    assert settings["start"].day == 26
+    settings = utils.Settings(EXAMPLE_SETTINGS_FILE)
+    assert settings.start
+    assert settings.end
+    assert settings.start.day == 26
