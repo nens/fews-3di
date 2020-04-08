@@ -1,4 +1,9 @@
-"""TODO Docstring, used in the command line help text."""
+"""Script to start 3Di simulations from FEWS.
+"""
+# ^^^ This docstring is automatically used in the command line help text.
+from fews_3di import utils
+from pathlib import Path
+
 import argparse
 import logging
 
@@ -17,15 +22,17 @@ def get_parser():
         default=False,
         help="Verbose output",
     )
-    # add arguments here
-    # parser.add_argument(
-    #     'path',
-    #     metavar='FILE',
-    # )
+    parser.add_argument(
+        "-s",
+        "--settings",
+        dest="settings_file",
+        default="run_info.xml",
+        help="xml settings file",
+    )
     return parser
 
 
-def main():  # pragma: no cover
+def main():
     """Call main command with args from parser.
 
     This method is called when you run 'bin/run-fews-3di',
@@ -41,8 +48,10 @@ def main():  # pragma: no cover
     logging.basicConfig(level=log_level, format="%(levelname)s: %(message)s")
 
     try:
+        settings = utils.Settings(Path(options.settings_file))
+        print(settings)
         print("Call some function from another file here")
         # ^^^ TODO: pass in options.xyz where needed.
-    except Exception:
+    except Exception:  # TODO: just print the error for known exceptions.
         logger.exception("An exception has occurred.")
         return 1
