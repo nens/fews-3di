@@ -27,7 +27,7 @@ class Settings:
     def __init__(self, settings_file: Path):
         """Read settings from the xml settings file."""
         self._settings_file = settings_file
-        logger.info("Reading settings from %s", self._settings_file)
+        logger.info("Reading settings from %s...", self._settings_file)
         self._root = ET.fromstring(self._settings_file.read_text())
         required_properties = [
             "username",

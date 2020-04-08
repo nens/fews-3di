@@ -66,7 +66,7 @@ def main():
         if options.verbose:
             logger.exception(e)
         else:
-            logger.error(" ↓↓↓ Pass --verbose to get more information ↓↓↓")
+            logger.error("↓↓↓↓↓   Pass --verbose to get more information   ↓↓↓↓↓")
             logger.error(e)
     except Exception:
         logger.exception("An exception has occurred.")
