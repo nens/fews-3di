@@ -59,7 +59,7 @@ class ThreediSimulation:
 
         Called from the init. It is a separate method to make testing easier.
         """
-        logger.info("Logging in to %s as user %s...", API_HOST, self.settings.username)
+        logger.info("Logging in on %s as user %s...", API_HOST, self.settings.username)
         auth_api = openapi_client.AuthApi(self.api_client)
         user_plus_password = openapi_client.Authenticate(
             username=self.settings.username, password=self.settings.password
