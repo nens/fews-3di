@@ -37,4 +37,7 @@ def test_main_error():
 
 def test_main():
     with mock.patch("sys.argv", ["program", "--settings", str(EXAMPLE_SETTINGS_FILE)]):
-        scripts.main()
+        with mock.patch("fews_3di.scripts.run_simulation") as mock_simulation:
+
+            scripts.main()
+            assert mock_simulation.called

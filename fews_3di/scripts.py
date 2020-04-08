@@ -2,6 +2,7 @@
 """
 # ^^^ This docstring is automatically used in the command line help text.
 from fews_3di import utils
+from fews_3di.simulation import run_simulation
 from pathlib import Path
 
 import argparse
@@ -49,9 +50,7 @@ def main():
 
     try:
         settings = utils.Settings(Path(options.settings_file))
-        print(settings)
-        print("Call some function from another file here")
-        # ^^^ TODO: pass in options.xyz where needed.
+        run_simulation(settings)
     except Exception:  # TODO: just print the error for known exceptions.
         logger.exception("An exception has occurred.")
         return 1
