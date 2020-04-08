@@ -51,8 +51,10 @@ class Settings:
                 f"under <properties> in {self._settings_file}."
             )
         value = elements[0].attrib["value"]
-        logger.debug("Found property %s=%s", property_name, value)
         setattr(self, property_name, value)
+        if property_name == "password":
+            value = "*" * len(value)
+        logger.debug("Found property %s=%s", property_name, value)
 
     def _read_datetime(self, datetime_variable):
         element_name = f"{datetime_variable}DateTime"
