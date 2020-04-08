@@ -69,3 +69,4 @@ def main():
         else:
             logger.error("↓↓↓↓↓   Pass --verbose to get more information   ↓↓↓↓↓")
             logger.error(e)
+        return 1  # Exit code signalling an error.
