@@ -35,3 +35,8 @@ def test_read_settings_missing_date_item():
     settings = utils.Settings(EXAMPLE_SETTINGS_FILE)
     with pytest.raises(utils.MissingSettingException):
         settings._read_datetime("middle")
+
+
+def test_read_settings_duration():
+    settings = utils.Settings(EXAMPLE_SETTINGS_FILE)
+    assert settings.duration == 352800

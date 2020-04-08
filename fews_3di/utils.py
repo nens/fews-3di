@@ -71,3 +71,8 @@ class Settings:
         timestamp = datetime.datetime.strptime(datetime_string, "%Y-%m-%dT%H:%M:%SZ")
         logger.debug("Found timestamp %s=%s", datetime_variable, timestamp)
         setattr(self, datetime_variable, timestamp)
+
+    @property
+    def duration(self) -> int:
+        """Return duration in seconds."""
+        return int((self.end - self.start).total_seconds())
