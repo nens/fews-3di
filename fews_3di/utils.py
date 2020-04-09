@@ -92,6 +92,10 @@ class Settings:
         """Return duration in seconds."""
         return int((self.end - self.start).total_seconds())
 
+    @property
+    def base_dir(self) -> Path:
+        return self._settings_file.parent
+
 
 def lateral_timeseries(laterals_csv: Path, settings: Settings) -> dict:
     if not laterals_csv.exists():

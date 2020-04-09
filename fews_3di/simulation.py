@@ -91,6 +91,11 @@ class ThreediSimulation:
         self.simulations_api = openapi_client.SimulationsApi(self.api_client)
         self.simulation_id = self._create_simulation(model_id)
 
+        laterals_csv = self.settings.base_dir / "input" / "lateral.csv"
+        laterals = utils.lateral_timeseries(laterals_csv, self.settings)
+        print(len(laterals))
+        print("TODO")
+
     def _find_model(self) -> int:
         """Return model ID based on the model revision in the settings."""
         logger.debug(
