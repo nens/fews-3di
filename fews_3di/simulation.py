@@ -44,7 +44,21 @@ class NotFoundError(Exception):
 
 
 class ThreediSimulation:
-    """Wrapper for a set of 3di API calls."""
+    """Wrapper for a set of 3di API calls.
+
+    To make testing easier, we don't call everything from the
+    ``__init__()``. It is mandatory to call ``login()`` and ``run()`` after
+    ``__init__()``.
+
+    login(), as expected, logs you in to the 3Di api.
+
+    run() runs all the required simulation steps.
+
+    All the other methods are private methods (prefixed with an underscore) so
+    that it is clear that they're "just" helper methods. By reading run(), it
+    ought to be clear to see what's happening.
+
+    """
 
     api_client: openapi_client.ApiClient
     configuration: openapi_client.Configuration
@@ -58,7 +72,7 @@ class ThreediSimulation:
         self.configuration = openapi_client.Configuration(host=API_HOST)
         self.api_client = openapi_client.ApiClient(self.configuration)
         self.api_client.user_agent = USER_AGENT  # Let's be neat.
-        # You need to call login() here, but we won't: it makes testing easier.
+        # You need to call login(), but we won't: it makes testing easier.
 
     def login(self):
         """Log in and set the necessary tokens.
