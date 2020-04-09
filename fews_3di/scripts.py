@@ -13,7 +13,7 @@ import logging
 OWN_EXCEPTIONS = (
     simulation.AuthenticationError,
     utils.MissingSettingException,
-    utils.MissingSettingsFileException,
+    utils.MissingFileException,
 )
 
 

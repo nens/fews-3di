@@ -96,8 +96,6 @@ def create_simulation(setting):
 
     sim_api = openapi_client.SimulationsApi(api_client)
 
-    # TOT HIER KLAAR
-
     # Create simulation
     data = {}
     data["name"] = sim_name
@@ -116,6 +114,8 @@ def create_simulation(setting):
     # object or so for both sim_api and sim_id?
     return sim_api, sim_id
 
+
+    # TOT HIER KLAAR
 
 def add_laterals(setting, sim_api, sim_id):
     tstart = setting[8]
