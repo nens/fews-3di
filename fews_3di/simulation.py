@@ -94,7 +94,8 @@ class ThreediSimulation:
                     f"{API_HOST} with the given password"
                 )
                 raise AuthenticationError(msg) from e
-            raise  # Simply re-raise.
+            logger.debug("Error isn't a 401, so we re-raise it.")
+            raise
         # Set tokens on the configuration (which is used by self.api_client).
         self.configuration.api_key["Authorization"] = tokens.access
         self.configuration.api_key_prefix["Authorization"] = "Bearer"
