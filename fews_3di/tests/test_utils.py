@@ -49,3 +49,8 @@ def test_read_settings_base_dir(example_settings):
 
 def test_lateral_timeseries_smoke(example_settings):
     utils.lateral_timeseries(EXAMPLE_LATERAL_CSV, example_settings)
+
+
+def test_lateral_timeseries_file_missing(example_settings):
+    with pytest.raises(utils.MissingFileException):
+        utils.lateral_timeseries(Path("boodschappenlijst.csv"), example_settings)
