@@ -43,5 +43,9 @@ def test_read_settings_duration(example_settings):
     assert example_settings.duration == 352800
 
 
+def test_read_settings_base_dir(example_settings):
+    assert example_settings.base_dir == TEST_DIR
+
+
 def test_lateral_timeseries_smoke(example_settings):
     utils.lateral_timeseries(EXAMPLE_LATERAL_CSV, example_settings)
