@@ -1,7 +1,20 @@
-# -*- coding: utf-8 -*-
-"""TODO Docstring, used in the command line help text."""
+"""Script to start 3Di simulations from FEWS.
+"""
+# ^^^ This docstring is automatically used in the command line help text.
+from fews_3di import simulation
+from fews_3di import utils
+from pathlib import Path
+
 import argparse
 import logging
+
+
+# Exceptions we raise ourselves that are suitable for printing as error messages.
+OWN_EXCEPTIONS = (
+    simulation.AuthenticationError,
+    utils.MissingSettingException,
+    utils.MissingFileException,
+)
 
 
 logger = logging.getLogger(__name__)
@@ -18,15 +31,17 @@ def get_parser():
         default=False,
         help="Verbose output",
     )
-    # add arguments here
-    # parser.add_argument(
-    #     'path',
-    #     metavar='FILE',
-    # )
+    parser.add_argument(
+        "-s",
+        "--settings",
+        dest="settings_file",
+        default="run_info.xml",
+        help="xml settings file",
+    )
     return parser
 
 
-def main():  # pragma: no cover
+def main():
     """Call main command with args from parser.
 
     This method is called when you run 'bin/run-fews-3di',
@@ -40,10 +55,18 @@ def main():  # pragma: no cover
     else:
         log_level = logging.INFO
     logging.basicConfig(level=log_level, format="%(levelname)s: %(message)s")
+    # ^^^ TODO: add debug logging to file.
 
     try:
-        print("Call some function from another file here")
-        # ^^^ TODO: pass in options.xyz where needed.
-    except:
-        logger.exception("An exception has occurred.")
-        return 1
+        settings = utils.Settings(Path(options.settings_file))
+        threedi_simulation = simulation.ThreediSimulation(settings)
+        threedi_simulation.login()
+        threedi_simulation.run()
+        return 0  # Success!
+    except OWN_EXCEPTIONS as e:
+        if options.verbose:
+            logger.exception(e)
+        else:
+            logger.error("↓↓↓↓↓   Pass --verbose to get more information   ↓↓↓↓↓")
+            logger.error(e)
+        return 1  # Exit code signalling an error.

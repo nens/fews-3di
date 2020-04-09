@@ -2,7 +2,7 @@
 
 One big file, most everything on the main level. So it looks like the main script :-)
 
-- Split it up in separate functions.
+- DONE Split it up in separate functions.
 
 - Fix settings handling. Turn it into a dict. Or read an ini file with
   defaults. Or accept more command line parameters.
@@ -89,11 +89,12 @@ def create_simulation(setting):
 
     # Find ThreeDiModel
     models = openapi_client.ThreedimodelsApi(api_client)
-    # ^^^ why do you need to pass in the api_client?
     model = models.threedimodels_list(slug__contains=model_rev)
     # ^^^  Hoe netjes is het om model_rev te gebruiken op deze manier?
     model_id = model.results[0].id
     logger.info("Simulation uses model revision: %s", model_rev)
+
+    sim_api = openapi_client.SimulationsApi(api_client)
 
     # Create simulation
     data = {}
@@ -105,7 +106,6 @@ def create_simulation(setting):
     logger.info("Simulation will start at: %s", tstart)
     logger.info("Simulation will run for: %s", duration)
 
-    sim_api = openapi_client.SimulationsApi(api_client)
     sim = sim_api.simulations_create(data)
     sim_id = sim.id
     logger.info("Simulation has been created with id: %s", str(sim_id))
@@ -114,6 +114,8 @@ def create_simulation(setting):
     # object or so for both sim_api and sim_id?
     return sim_api, sim_id
 
+
+    # TOT HIER KLAAR
 
 def add_laterals(setting, sim_api, sim_id):
     tstart = setting[8]
@@ -421,14 +423,15 @@ def main():
     # read settings file
     setting = settings("../run_info.xml")
 
-    sim_api, sim_id = create_simulation(setting)
+    sim_api, sim_id = create_simulation(setting)  # SIM CLASS
 
     add_laterals(setting, sim_api, sim_id)
     set_initial_state(sim_api, sim_id, setting)
     add_rain_events(setting, sim_api, sim_id)
     add_evaporation_events(setting, sim_api, sim_id)
-    start_simulation(sim_api, sim_id)
-    download_results(sim_api, sim_id, setting)
+
+    start_simulation(sim_api, sim_id)  # SIM CLASS
+    download_results(sim_api, sim_id, setting)  # SIM CLASS
     logger.info("Done")
 
 
