@@ -89,11 +89,12 @@ def create_simulation(setting):
 
     # Find ThreeDiModel
     models = openapi_client.ThreedimodelsApi(api_client)
-    # ^^^ why do you need to pass in the api_client?
     model = models.threedimodels_list(slug__contains=model_rev)
     # ^^^  Hoe netjes is het om model_rev te gebruiken op deze manier?
     model_id = model.results[0].id
     logger.info("Simulation uses model revision: %s", model_rev)
+
+    # TOT HIER KLAAR
 
     # Create simulation
     data = {}

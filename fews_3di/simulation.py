@@ -1,4 +1,4 @@
-""""
+"""
 Notes
 =====
 
@@ -39,12 +39,17 @@ class AuthenticationError(Exception):
     pass
 
 
+class NotFoundError(Exception):
+    pass
+
+
 class ThreediSimulation:
     """Wrapper for a set of 3di API calls."""
 
     api_client: openapi_client.ApiClient
     configuration: openapi_client.Configuration
     settings: utils.Settings
+    # simulations_api: openapi_client.SimulationsApi
 
     def __init__(self, settings):
         """Set up a 3di API connection."""
@@ -80,4 +85,23 @@ class ThreediSimulation:
         self.configuration.api_key_prefix["Authorization"] = "Bearer"
 
     def run(self):
-        pass
+        model_id = self._find_model()
+        # self.simulations_api = self._create_simulation
+
+    def _find_model(self) -> int:
+        """Return model ID based on the model revision in the settings."""
+        logger.debug(
+            "Searching model based on revision=%s...", self.settings.modelrevision
+        )
+        threedimodels_api = openapi_client.ThreedimodelsApi(self.api_client)
+        threedimodels_result = threedimodels_api.threedimodels_list(
+            slug__contains=self.settings.modelrevision
+        )
+        if not threedimodels_result.results:
+            raise NotFoundError(
+                "Model with revision={self.settings.modelrevision} not found"
+            )
+        id = threedimodels_result.results[0].id
+        url = threedimodels_result.results[0].url
+        logger.info("Simulation uses model %s", url)
+        return id
