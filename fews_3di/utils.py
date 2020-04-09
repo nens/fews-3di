@@ -129,6 +129,7 @@ def lateral_timeseries(
         offset = (timestamp - settings.start).total_seconds()
         # Check if in range for simulation
         if (timestamp < settings.start) or (timestamp > settings.end):
+            logger.debug("Omitting timestamp %s", timestamp)
             continue
 
         for index, value_str in enumerate(row[1:]):

@@ -6,6 +6,7 @@ Note: the 'example_settings' pytest fixture is defined in conftest.py.
 from fews_3di import utils
 from pathlib import Path
 
+import datetime
 import pytest
 
 
@@ -54,3 +55,11 @@ def test_lateral_timeseries_smoke(example_settings):
 def test_lateral_timeseries_file_missing(example_settings):
     with pytest.raises(utils.MissingFileException):
         utils.lateral_timeseries(Path("boodschappenlijst.csv"), example_settings)
+
+
+def test_lateral_timeseries_omit_early_timestamps(example_settings):
+    # The example laterals csv has some 2020-01-21 timestamps. Check that
+    # they're omitted when we adjust the start date.
+    example_settings.start = datetime.datetime(year=2020, month=1, day=22)
+    utils.lateral_timeseries(EXAMPLE_LATERAL_CSV, example_settings)
+    # Just a smoke test atm for code coverage.
