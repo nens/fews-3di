@@ -43,5 +43,5 @@ def test_read_settings_duration(example_settings):
     assert example_settings.duration == 352800
 
 
-def test_lateral_timeseries(example_settings):
-    EXAMPLE_LATERAL_CSV
+def test_lateral_timeseries_smoke(example_settings):
+    utils.lateral_timeseries(EXAMPLE_LATERAL_CSV, example_settings)
