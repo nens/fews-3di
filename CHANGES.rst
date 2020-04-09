@@ -2,7 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-0.1 (unreleased)
+0.1 (2020-04-09)
 ----------------
 
 - Started copying code from the old project.
