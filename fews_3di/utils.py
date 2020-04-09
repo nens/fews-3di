@@ -24,7 +24,7 @@ class Settings:
     password: str
     organisation: str
     modelrevision: str
-    simulation_name: str
+    simulationname: str
     start: datetime.datetime
     end: datetime.datetime
 

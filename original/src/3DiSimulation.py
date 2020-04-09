@@ -94,6 +94,8 @@ def create_simulation(setting):
     model_id = model.results[0].id
     logger.info("Simulation uses model revision: %s", model_rev)
 
+    sim_api = openapi_client.SimulationsApi(api_client)
+
     # TOT HIER KLAAR
 
     # Create simulation
@@ -106,7 +108,6 @@ def create_simulation(setting):
     logger.info("Simulation will start at: %s", tstart)
     logger.info("Simulation will run for: %s", duration)
 
-    sim_api = openapi_client.SimulationsApi(api_client)
     sim = sim_api.simulations_create(data)
     sim_id = sim.id
     logger.info("Simulation has been created with id: %s", str(sim_id))

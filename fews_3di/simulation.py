@@ -49,7 +49,8 @@ class ThreediSimulation:
     api_client: openapi_client.ApiClient
     configuration: openapi_client.Configuration
     settings: utils.Settings
-    # simulations_api: openapi_client.SimulationsApi
+    simulations_api: openapi_client.SimulationsApi
+    simulation_id: int
 
     def __init__(self, settings):
         """Set up a 3di API connection."""
@@ -85,8 +86,10 @@ class ThreediSimulation:
         self.configuration.api_key_prefix["Authorization"] = "Bearer"
 
     def run(self):
+        """Main method, should be called after login()."""
         model_id = self._find_model()
-        # self.simulations_api = self._create_simulation
+        self.simulations_api = openapi_client.SimulationsApi(self.api_client)
+        self.simulation_id = self._create_simulation(model_id)
 
     def _find_model(self) -> int:
         """Return model ID based on the model revision in the settings."""
@@ -105,3 +108,17 @@ class ThreediSimulation:
         url = threedimodels_result.results[0].url
         logger.info("Simulation uses model %s", url)
         return id
+
+    def _create_simulation(self, model_id: int) -> int:
+        data = {}
+        data["name"] = self.settings.simulationname
+        data["threedimodel"] = str(model_id)
+        data["organisation"] = self.settings.organisation
+        data["start_datetime"] = self.settings.start.isoformat()
+        # TODO: end_datetime is also possible!
+        data["duration"] = str(self.settings.duration)
+        logger.debug("Creating simulation with these settings: %s", data)
+
+        simulation = self.simulations_api.simulations_create(data)
+        logger.info("Simulation %s has been created", simulation.url)
+        return simulation.id
