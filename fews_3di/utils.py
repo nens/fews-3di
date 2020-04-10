@@ -150,4 +150,32 @@ def lateral_timeseries(
             # Set previous_values
             previous_values[key] = value
 
+    # Extra checks/cleanup.
+    to_remove: List[str] = []
+    for name, timeserie in timeseries.items():
+        if len(timeserie) < 2:
+            to_remove.append(name)
+            continue
+        first_offset = timeserie[0].offset
+        if first_offset != 0:
+            # Timeseries always should start at 0.
+            shift_back_by = first_offset
+            logger.warning(
+                "lateral timeserie '%s' does not start at 0; shifting "
+                "all times back by %s seconds.",
+                name,
+                shift_back_by,
+            )
+            shifted_timeserie = [
+                OffsetAndValue(offset - shift_back_by, value)
+                for offset, value in timeserie
+            ]
+            timeseries[name] = shifted_timeserie
+    for name in to_remove:
+        logger.warn(
+            "Removing lateral timeserie '%s' because there are fewer than two values",
+            name,
+        )
+        del timeseries[name]
+
     return timeseries
