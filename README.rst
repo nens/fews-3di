@@ -1,23 +1,29 @@
 fews-3di
 ==========================================
 
-Introduction
-
-Usage, etc.
+Program to start `3Di <https://3diwatermanagement.com/>`_ simulations from FEWS.
 
 
-Installation
-------------
+Installation and usage
+----------------------
 
-We can be installed with::
+We can be installed using python 3.6+ with::
 
   $ pip install fews-3di
 
-(TODO: after the first release has been made)
+The script is called ``run-fews-3di``, you can pass ``--help`` to get usage
+instructions and ``--verbose`` to get more verbose output in case of
+problems.
+
+``run-fews-3di`` looks for a ``run_info.xml`` in the current directory by
+default, but you can pass a different file in a different location with
+``--settings``.
+
+TODO: data requirements.
 
 
-Development installation of this project itself
------------------------------------------------
+Development instructions (only for the programmers, not for regular use)
+------------------------------------------------------------------------
 
 We use python's build-in "virtualenv" to get a nice isolated directory. You
 only need to run this once::
@@ -64,7 +70,7 @@ a pull request right away:
 
 There's also
 `coverage reporting <https://coveralls.io/github/nens/fews-3di>`_
-on coveralls.io (once it has been set up).
+on coveralls.io.
 
 If you need a new dependency (like ``requests``), add it in ``setup.py`` in
 ``install_requires``. Local development tools, like "black", can be added to the
