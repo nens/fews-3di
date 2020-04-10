@@ -21,8 +21,9 @@ happening where...
 
 """
 
-
 from fews_3di import utils
+from time import sleep
+from typing import List
 
 import logging
 import openapi_client
@@ -40,6 +41,10 @@ class AuthenticationError(Exception):
 
 
 class NotFoundError(Exception):
+    pass
+
+
+class InvalidDataError(Exception):
     pass
 
 
@@ -108,7 +113,7 @@ class ThreediSimulation:
 
         laterals_csv = self.settings.base_dir / "input" / "lateral.csv"
         laterals = utils.lateral_timeseries(laterals_csv, self.settings)
-        print(len(laterals))
+        self._add_laterals(laterals)
         print("TODO")
 
     def _find_model(self) -> int:
@@ -142,3 +147,44 @@ class ThreediSimulation:
         simulation = self.simulations_api.simulations_create(data)
         logger.info("Simulation %s has been created", simulation.url)
         return simulation.id
+
+    def _add_laterals(self, laterals):
+        """Upload lateral timeseries and wait for them to be processed."""
+        still_to_process: List[int] = []
+        logger.info("Uploading %s lateral timeseries...", len(laterals))
+
+        for name, timeserie in laterals.items():
+            first_offset = timeserie[0].offset  # TODO: by definition, this is 0???
+            lateral = self.simulations_api.simulations_events_lateral_timeseries_create(
+                simulation_pk=self.simulation_id,
+                data={
+                    "offset": first_offset,
+                    "interpolate": False,
+                    "values": timeserie,
+                    "units": "m3/s",
+                    "connection_node": name,
+                },
+            )
+            logger.debug("Added lateral timeserie '%s': %s", name, lateral.url)
+            still_to_process.append(lateral.id)
+
+        logger.debug("Waiting for laterals to be processed...")
+        while True:
+            for id in still_to_process:
+                lateral = self.simulations_api.simulations_events_lateral_timeseries_read(
+                    simulation_pk=self.simulation_id, id=id
+                )
+                if lateral.state.lower() == "processing":
+                    logger.debug("Lateral %s is still being processed.", lateral.url)
+                    continue
+                elif lateral.state.lower() == "invalid":
+                    msg = f"Lateral {lateral.url} is invalid according to the server."
+                    raise InvalidDataError(msg)
+                elif lateral.state.lower() == "valid":
+                    logger.debug("Lateral %s is valid.", lateral.url)
+                    still_to_process.remove(id)
+
+            if not still_to_process:
+                return
+
+            sleep(2)

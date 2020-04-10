@@ -12,8 +12,9 @@ import logging
 # Exceptions we raise ourselves that are suitable for printing as error messages.
 OWN_EXCEPTIONS = (
     simulation.AuthenticationError,
-    utils.MissingSettingException,
+    simulation.InvalidDataError,
     utils.MissingFileException,
+    utils.MissingSettingException,
 )
 
 
