@@ -162,7 +162,7 @@ def lateral_timeseries(
             shift_back_by = first_offset
             logger.warning(
                 "lateral timeserie '%s' does not start at 0; shifting "
-                "all times back by %s seconds.",
+                "*all* times back by %s seconds.",
                 name,
                 shift_back_by,
             )
