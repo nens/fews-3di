@@ -8,6 +8,7 @@ long_description = "\n\n".join([open("README.rst").read(), open("CHANGES.rst").r
 install_requires = ["netCDF4", "threedi-api-client", "threedigrid", "pandas"]
 
 tests_require = [
+    "data-science-types",
     "mock",
     "pytest",
     "pytest-black",
