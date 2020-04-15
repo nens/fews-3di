@@ -1,3 +1,4 @@
+from collections import namedtuple
 from pathlib import Path
 from typing import Dict
 from typing import List
@@ -12,6 +13,9 @@ NAMESPACES = {"pi": "http://www.wldelft.nl/fews/PI"}
 NULL_VALUE = -999
 
 logger = logging.getLogger(__name__)
+
+
+OffsetAndValue = namedtuple("OffsetAndValue", ["offset", "value"])
 
 
 class MissingSettingException(Exception):
@@ -97,7 +101,9 @@ class Settings:
         return self._settings_file.parent
 
 
-def lateral_timeseries(laterals_csv: Path, settings: Settings) -> dict:
+def lateral_timeseries(
+    laterals_csv: Path, settings: Settings
+) -> Dict[str, List[OffsetAndValue]]:
     if not laterals_csv.exists():
         raise MissingFileException("Lateral csv file %s not found", laterals_csv)
 
@@ -110,7 +116,7 @@ def lateral_timeseries(laterals_csv: Path, settings: Settings) -> dict:
     # Strip header rows from rows.
     rows = rows[2:]
 
-    timeseries: Dict[str, List] = {}
+    timeseries: Dict[str, List[OffsetAndValue]] = {}
     previous_values: Dict[
         str, float
     ] = {}  # Values can be omitted if they stay the same.
@@ -123,6 +129,7 @@ def lateral_timeseries(laterals_csv: Path, settings: Settings) -> dict:
         offset = (timestamp - settings.start).total_seconds()
         # Check if in range for simulation
         if (timestamp < settings.start) or (timestamp > settings.end):
+            logger.debug("Omitting timestamp %s", timestamp)
             continue
 
         for index, value_str in enumerate(row[1:]):
@@ -135,12 +142,40 @@ def lateral_timeseries(laterals_csv: Path, settings: Settings) -> dict:
                 continue
             if value != NULL_VALUE:
                 # add the value as [offset, value] if it's not a NULL_VALUE
-                timeseries[key].append([offset, value])
+                timeseries[key].append(OffsetAndValue(offset, value))
             elif previous_value != NULL_VALUE and previous_value != 0.0:
                 # Add 0.0 once for first NULL_VALUE after a valid value
                 # and only when the last value was not 0.0
-                timeseries[key].append([offset, 0.0])
+                timeseries[key].append(OffsetAndValue(offset, 0.0))
             # Set previous_values
             previous_values[key] = value
+
+    # Extra checks/cleanup.
+    to_remove: List[str] = []
+    for name, timeserie in timeseries.items():
+        if len(timeserie) < 2:
+            to_remove.append(name)
+            continue
+        first_offset = timeserie[0].offset
+        if first_offset != 0:
+            # Timeseries always should start at 0.
+            shift_back_by = first_offset
+            logger.warning(
+                "lateral timeserie '%s' does not start at 0; shifting "
+                "*all* times back by %s seconds.",
+                name,
+                shift_back_by,
+            )
+            shifted_timeserie = [
+                OffsetAndValue(offset - shift_back_by, value)
+                for offset, value in timeserie
+            ]
+            timeseries[name] = shifted_timeserie
+    for name in to_remove:
+        logger.warn(
+            "Removing lateral timeserie '%s' because there are fewer than two values",
+            name,
+        )
+        del timeseries[name]
 
     return timeseries

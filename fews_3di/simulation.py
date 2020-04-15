@@ -21,8 +21,9 @@ happening where...
 
 """
 
-
 from fews_3di import utils
+from time import sleep
+from typing import List
 
 import logging
 import openapi_client
@@ -43,8 +44,26 @@ class NotFoundError(Exception):
     pass
 
 
+class InvalidDataError(Exception):
+    pass
+
+
 class ThreediSimulation:
-    """Wrapper for a set of 3di API calls."""
+    """Wrapper for a set of 3di API calls.
+
+    To make testing easier, we don't call everything from the
+    ``__init__()``. It is mandatory to call ``login()`` and ``run()`` after
+    ``__init__()``.
+
+    login(), as expected, logs you in to the 3Di api.
+
+    run() runs all the required simulation steps.
+
+    All the other methods are private methods (prefixed with an underscore) so
+    that it is clear that they're "just" helper methods. By reading run(), it
+    ought to be clear to see what's happening.
+
+    """
 
     api_client: openapi_client.ApiClient
     configuration: openapi_client.Configuration
@@ -58,7 +77,7 @@ class ThreediSimulation:
         self.configuration = openapi_client.Configuration(host=API_HOST)
         self.api_client = openapi_client.ApiClient(self.configuration)
         self.api_client.user_agent = USER_AGENT  # Let's be neat.
-        # You need to call login() here, but we won't: it makes testing easier.
+        # You need to call login(), but we won't: it makes testing easier.
 
     def login(self):
         """Log in and set the necessary tokens.
@@ -80,7 +99,8 @@ class ThreediSimulation:
                     f"{API_HOST} with the given password"
                 )
                 raise AuthenticationError(msg) from e
-            raise  # Simply re-raise.
+            logger.debug("Error isn't a 401, so we re-raise it.")
+            raise
         # Set tokens on the configuration (which is used by self.api_client).
         self.configuration.api_key["Authorization"] = tokens.access
         self.configuration.api_key_prefix["Authorization"] = "Bearer"
@@ -93,7 +113,7 @@ class ThreediSimulation:
 
         laterals_csv = self.settings.base_dir / "input" / "lateral.csv"
         laterals = utils.lateral_timeseries(laterals_csv, self.settings)
-        print(len(laterals))
+        self._add_laterals(laterals)
         print("TODO")
 
     def _find_model(self) -> int:
@@ -127,3 +147,44 @@ class ThreediSimulation:
         simulation = self.simulations_api.simulations_create(data)
         logger.info("Simulation %s has been created", simulation.url)
         return simulation.id
+
+    def _add_laterals(self, laterals):
+        """Upload lateral timeseries and wait for them to be processed."""
+        still_to_process: List[int] = []
+        logger.info("Uploading %s lateral timeseries...", len(laterals))
+
+        for name, timeserie in laterals.items():
+            first_offset = timeserie[0].offset  # TODO: by definition, this is 0???
+            lateral = self.simulations_api.simulations_events_lateral_timeseries_create(
+                simulation_pk=self.simulation_id,
+                data={
+                    "offset": first_offset,
+                    "interpolate": False,
+                    "values": timeserie,
+                    "units": "m3/s",
+                    "connection_node": name,
+                },
+            )
+            logger.debug("Added lateral timeserie '%s': %s", name, lateral.url)
+            still_to_process.append(lateral.id)
+
+        logger.debug("Waiting for laterals to be processed...")
+        while True:
+            for id in still_to_process:
+                lateral = self.simulations_api.simulations_events_lateral_timeseries_read(
+                    simulation_pk=self.simulation_id, id=id
+                )
+                if lateral.state.lower() == "processing":
+                    logger.debug("Lateral %s is still being processed.", lateral.url)
+                    continue
+                elif lateral.state.lower() == "invalid":
+                    msg = f"Lateral {lateral.url} is invalid according to the server."
+                    raise InvalidDataError(msg)
+                elif lateral.state.lower() == "valid":
+                    logger.debug("Lateral %s is valid.", lateral.url)
+                    still_to_process.remove(id)
+
+            if not still_to_process:
+                return
+
+            sleep(2)

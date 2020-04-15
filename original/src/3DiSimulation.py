@@ -115,8 +115,6 @@ def create_simulation(setting):
     return sim_api, sim_id
 
 
-    # TOT HIER KLAAR
-
 def add_laterals(setting, sim_api, sim_id):
     tstart = setting[8]
     duration = setting[9]
@@ -177,6 +175,8 @@ def add_laterals(setting, sim_api, sim_id):
 
         sleep(2)
 
+
+# TOT HIER KLAAR
 
 def set_initial_state(sim_api, sim_id, setting):
     state_file = setting[5]
