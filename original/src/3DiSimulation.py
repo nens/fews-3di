@@ -177,6 +177,8 @@ def add_laterals(setting, sim_api, sim_id):
 
 
 # TOT HIER KLAAR
+# TODO: initial state nog doen!
+
 
 def set_initial_state(sim_api, sim_id, setting):
     state_file = setting[5]
