@@ -5,9 +5,11 @@ Changelog of fews-3di
 0.2 (unreleased)
 ----------------
 
-- Added lateral processing + upload.
+- Added lateral upload.
 
-- Added rain processing + upload.
+- Added rain upload.
+
+- Added evaporation upload.
 
 
 0.1 (2020-04-09)
