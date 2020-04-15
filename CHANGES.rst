@@ -7,6 +7,8 @@ Changelog of fews-3di
 
 - Added lateral processing + upload.
 
+- Added rain processing + upload.
+
 
 0.1 (2020-04-09)
 ----------------
