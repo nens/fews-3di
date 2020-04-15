@@ -176,7 +176,6 @@ def add_laterals(setting, sim_api, sim_id):
         sleep(2)
 
 
-# TOT HIER KLAAR
 # TODO: initial state nog doen!
 
 
@@ -286,6 +285,9 @@ def add_evaporation_events(setting, sim_api, sim_id):
             processing = False
         else:
             sleep(2)
+
+
+# TOT HIER KLAAR
 
 
 def start_simulation(sim_api, sim_id):
