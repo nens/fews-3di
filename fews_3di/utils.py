@@ -246,4 +246,36 @@ def convert_rain_events(
     temp_dir = Path(tempfile.mkdtemp(prefix="fews-3di"))
     target_file = temp_dir / rain_file.name.replace(".nc", f"_{simulation_id}.nc")
     write_new_netcdf(rain_file, target_file, time_indexes)
+    logger.debug("Wrote new rain netcdf to %s", target_file)
+    return target_file
+
+
+# TODO: virtually the same as convert_rain_events.
+def convert_evaporation(
+    evaporation_file: Path, settings: Settings, simulation_id: int
+) -> Path:
+    """Return netcdf file with only time indexes."""
+    if not evaporation_file.exists():
+        raise MissingFileException("Evaporation file %s not found", evaporation_file)
+
+    logger.info("Extracting evaporation from %s", evaporation_file)
+    precipitation_timestamps = timestamps_from_netcdf(evaporation_file)
+
+    # Figure out which are valid for the given simulation period.
+    time_indexes: List = (
+        np.argwhere(  # type: ignore
+            (precipitation_timestamps >= settings.start)  # type: ignore
+            & (precipitation_timestamps <= settings.end)  # type: ignore
+        )
+        .flatten()
+        .tolist()
+    )
+
+    # Create new file with only time_indexes
+    temp_dir = Path(tempfile.mkdtemp(prefix="fews-3di"))
+    target_file = temp_dir / evaporation_file.name.replace(
+        ".nc", f"_{simulation_id}.nc"
+    )
+    write_new_netcdf(evaporation_file, target_file, time_indexes)
+    logger.debug("Wrote new evaporation netcdf to %s", target_file)
     return target_file

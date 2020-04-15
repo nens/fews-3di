@@ -123,6 +123,12 @@ class ThreediSimulation:
         )
         self._add_rain(rain_raster_netcdf)
 
+        evaporation_file = self.settings.base_dir / "input" / "evaporation.nc"
+        evaporation_raster_netcdf = utils.convert_evaporation(
+            evaporation_file, self.settings, self.simulation_id
+        )
+        self._add_evaporation(evaporation_raster_netcdf)
+
         print("TODO")
 
     def _find_model(self) -> int:
@@ -223,6 +229,38 @@ class ThreediSimulation:
                 raise InvalidDataError(msg)
             elif state.lower() == "processed":
                 logger.debug("Rain raster %s has been processed.", log_url)
+                return
+            else:
+                logger.debug("Unknown state: %s", state)
+
+    def _add_evaporation(self, evaporation_raster_netcdf: Path):
+        """Upload evaporation raster netcdf file and wait for it to be processed."""
+        logger.info("Uploading evaporation rasters...")
+        evaporation_api_call = self.simulations_api.simulations_events_sources_sinks_rasters_netcdf_create(
+            self.simulation_id, data={"filename": evaporation_raster_netcdf.name}
+        )
+        log_url = evaporation_api_call.put_url.split("?")[
+            0
+        ]  # Strip off aws credentials.
+        with evaporation_raster_netcdf.open("rb") as f:
+            requests.put(evaporation_api_call.put_url, data=f)
+        logger.debug("Added evaporation raster to %s", log_url)
+
+        logger.debug("Waiting for evaporation raster to be processed...")
+        while True:
+            sleep(2)
+            upload_status = self.simulations_api.simulations_events_sources_sinks_rasters_netcdf_list(
+                self.simulation_id
+            )
+            state = upload_status.results[0].file.state
+            if state.lower() == "processing":
+                logger.debug("Evaporation raster is still being processed.")
+                continue
+            elif state.lower() == "invalid":
+                msg = f"Evaporation raster upload (to {log_url}) is invalid according to the server."
+                raise InvalidDataError(msg)
+            elif state.lower() == "processed":
+                logger.debug("Evaporation raster %s has been processed.", log_url)
                 return
             else:
                 logger.debug("Unknown state: %s", state)

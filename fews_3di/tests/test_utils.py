@@ -14,7 +14,8 @@ TEST_DIR = Path(__file__).parent
 EXAMPLE_SETTINGS_FILE = TEST_DIR / "example_settings.xml"
 WRONG_SETTINGS_FILE = TEST_DIR / "settings_without_username.xml"
 EXAMPLE_LATERAL_CSV = TEST_DIR / "example_lateral.csv"
-EXAMPLE_RAIN_FILE = TEST_DIR / "precipitation.nc"
+EXAMPLE_PRECIPITATION_FILE = TEST_DIR / "precipitation.nc"
+EXAMPLE_EVAPORATION_FILE = TEST_DIR / "evaporation.nc"
 
 
 def test_read_settings_smoke():
@@ -67,7 +68,7 @@ def test_lateral_timeseries_omit_early_timestamps(example_settings):
 
 
 def test_timestamps_from_netcdf():
-    timestamps = utils.timestamps_from_netcdf(EXAMPLE_RAIN_FILE)
+    timestamps = utils.timestamps_from_netcdf(EXAMPLE_PRECIPITATION_FILE)
     assert len(timestamps)
     assert timestamps[0].day == 21
     assert timestamps[0].hour == 12
@@ -76,7 +77,7 @@ def test_timestamps_from_netcdf():
 
 
 def test_convert_rain_events(example_settings):
-    result = utils.convert_rain_events(EXAMPLE_RAIN_FILE, example_settings, 12)
+    result = utils.convert_rain_events(EXAMPLE_PRECIPITATION_FILE, example_settings, 12)
     assert result.exists()
     assert result.name == "precipitation_12.nc"
 
@@ -84,3 +85,14 @@ def test_convert_rain_events(example_settings):
 def test_convert_rain_events_missing_file(example_settings):
     with pytest.raises(utils.MissingFileException):
         utils.convert_rain_events(Path("pietje.nc"), example_settings, 42)
+
+
+def test_convert_evaporation(example_settings):
+    result = utils.convert_evaporation(EXAMPLE_EVAPORATION_FILE, example_settings, 12)
+    assert result.exists()
+    assert result.name == "evaporation_12.nc"
+
+
+def test_convert_evaporation_events_missing_file(example_settings):
+    with pytest.raises(utils.MissingFileException):
+        utils.convert_evaporation(Path("pietje.nc"), example_settings, 42)
