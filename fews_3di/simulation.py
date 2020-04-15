@@ -203,10 +203,10 @@ class ThreediSimulation:
         rain_api_call = self.simulations_api.simulations_events_rain_rasters_netcdf_create(
             self.simulation_id, data={"filename": rain_raster_netcdf.name}
         )
-        url = rain_api_call.put_url
+        log_url = rain_api_call.put_url.split("?")[0]  # Strip off aws credentials.
         with rain_raster_netcdf.open("rb") as f:
-            requests.put(url, data=f)
-        logger.debug("Added rain raster to %s", url)
+            requests.put(rain_api_call.put_url, data=f)
+        logger.debug("Added rain raster to %s", log_url)
 
         logger.debug("Waiting for rain raster to be processed...")
         while True:
@@ -219,12 +219,10 @@ class ThreediSimulation:
                 logger.debug("Rain raster is still being processed.")
                 continue
             elif state.lower() == "invalid":
-                msg = (
-                    f"Rain raster upload (to {url}) is invalid according to the server."
-                )
+                msg = f"Rain raster upload (to {log_url}) is invalid according to the server."
                 raise InvalidDataError(msg)
             elif state.lower() == "processed":
-                logger.debug("Rain raster %s has been processed.", url)
+                logger.debug("Rain raster %s has been processed.", log_url)
                 return
             else:
                 logger.debug("Unknown state: %s", state)
