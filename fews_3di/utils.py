@@ -222,7 +222,9 @@ def write_new_netcdf(source_file: Path, target_file: Path, time_indexes: List):
     source.close()
 
 
-def convert_rain_events(rain_file: Path, settings: Settings) -> Path:
+def convert_rain_events(
+    rain_file: Path, settings: Settings, simulation_id: int
+) -> Path:
     """Return netcdf file with only time indexes."""
     if not rain_file.exists():
         raise MissingFileException("Rain file %s not found", rain_file)
@@ -242,6 +244,6 @@ def convert_rain_events(rain_file: Path, settings: Settings) -> Path:
 
     # Create new file with only time_indexes
     temp_dir = Path(tempfile.mkdtemp(prefix="fews-3di"))
-    target_file = temp_dir / "rain.nc"
+    target_file = temp_dir / rain_file.name.replace(".nc", f"_{simulation_id}.nc")
     write_new_netcdf(rain_file, target_file, time_indexes)
     return target_file

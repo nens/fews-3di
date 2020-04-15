@@ -76,10 +76,11 @@ def test_timestamps_from_netcdf():
 
 
 def test_convert_rain_events(example_settings):
-    result = utils.convert_rain_events(EXAMPLE_RAIN_FILE, example_settings)
+    result = utils.convert_rain_events(EXAMPLE_RAIN_FILE, example_settings, 12)
     assert result.exists()
+    assert result.name == "precipitation_12.nc"
 
 
 def test_convert_rain_events_missing_file(example_settings):
     with pytest.raises(utils.MissingFileException):
-        utils.convert_rain_events(Path("pietje.nc"), example_settings)
+        utils.convert_rain_events(Path("pietje.nc"), example_settings, 42)
