@@ -211,7 +211,8 @@ class ThreediSimulation:
         )
         log_url = rain_api_call.put_url.split("?")[0]  # Strip off aws credentials.
         with rain_raster_netcdf.open("rb") as f:
-            requests.put(rain_api_call.put_url, data=f)
+            response = requests.put(rain_api_call.put_url, data=f)
+            response.raise_for_status()
         logger.debug("Added rain raster to %s", log_url)
 
         logger.debug("Waiting for rain raster to be processed...")
@@ -233,6 +234,10 @@ class ThreediSimulation:
             else:
                 logger.debug("Unknown state: %s", state)
 
+    # TODO: virtually the same as _add_rain()
+    # Perhaps a list with dicts as config? precipitation, evaporation.
+    # Can it be done through
+    # https://api.3di.live/v3.0/simulations/1673/events/rain/rasters/netcdf/ ?
     def _add_evaporation(self, evaporation_raster_netcdf: Path):
         """Upload evaporation raster netcdf file and wait for it to be processed."""
         logger.info("Uploading evaporation rasters...")
@@ -243,7 +248,8 @@ class ThreediSimulation:
             0
         ]  # Strip off aws credentials.
         with evaporation_raster_netcdf.open("rb") as f:
-            requests.put(evaporation_api_call.put_url, data=f)
+            response = requests.put(evaporation_api_call.put_url, data=f)
+            response.raise_for_status()
         logger.debug("Added evaporation raster to %s", log_url)
 
         logger.debug("Waiting for evaporation raster to be processed...")
