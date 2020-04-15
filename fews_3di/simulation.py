@@ -22,11 +22,13 @@ happening where...
 """
 
 from fews_3di import utils
+from pathlib import Path
 from time import sleep
 from typing import List
 
 import logging
 import openapi_client
+import requests
 
 
 API_HOST = "https://api.3di.live/v3.0"
@@ -114,6 +116,13 @@ class ThreediSimulation:
         laterals_csv = self.settings.base_dir / "input" / "lateral.csv"
         laterals = utils.lateral_timeseries(laterals_csv, self.settings)
         self._add_laterals(laterals)
+
+        rain_file = self.settings.base_dir / "input" / "precipitation.nc"
+        rain_raster_netcdf = utils.convert_rain_events(
+            rain_file, self.settings, self.simulation_id
+        )
+        self._add_rain(rain_raster_netcdf)
+
         print("TODO")
 
     def _find_model(self) -> int:
@@ -170,6 +179,7 @@ class ThreediSimulation:
 
         logger.debug("Waiting for laterals to be processed...")
         while True:
+            sleep(2)
             for id in still_to_process:
                 lateral = self.simulations_api.simulations_events_lateral_timeseries_read(
                     simulation_pk=self.simulation_id, id=id
@@ -187,4 +197,32 @@ class ThreediSimulation:
             if not still_to_process:
                 return
 
+    def _add_rain(self, rain_raster_netcdf: Path):
+        """Upload rain raster netcdf file and wait for it to be processed."""
+        logger.info("Uploading rain rasters...")
+        rain_api_call = self.simulations_api.simulations_events_rain_rasters_netcdf_create(
+            self.simulation_id, data={"filename": rain_raster_netcdf.name}
+        )
+        log_url = rain_api_call.put_url.split("?")[0]  # Strip off aws credentials.
+        with rain_raster_netcdf.open("rb") as f:
+            requests.put(rain_api_call.put_url, data=f)
+        logger.debug("Added rain raster to %s", log_url)
+
+        logger.debug("Waiting for rain raster to be processed...")
+        while True:
             sleep(2)
+            upload_status = self.simulations_api.simulations_events_rain_rasters_netcdf_list(
+                self.simulation_id
+            )
+            state = upload_status.results[0].file.state
+            if state.lower() == "processing":
+                logger.debug("Rain raster is still being processed.")
+                continue
+            elif state.lower() == "invalid":
+                msg = f"Rain raster upload (to {log_url}) is invalid according to the server."
+                raise InvalidDataError(msg)
+            elif state.lower() == "processed":
+                logger.debug("Rain raster %s has been processed.", log_url)
+                return
+            else:
+                logger.debug("Unknown state: %s", state)

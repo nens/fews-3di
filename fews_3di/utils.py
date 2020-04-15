@@ -3,9 +3,13 @@ from pathlib import Path
 from typing import Dict
 from typing import List
 
+import cftime
 import csv
 import datetime
 import logging
+import netCDF4 as nc
+import numpy as np
+import tempfile
 import xml.etree.ElementTree as ET
 
 
@@ -179,3 +183,67 @@ def lateral_timeseries(
         del timeseries[name]
 
     return timeseries
+
+
+def timestamps_from_netcdf(source_file: Path) -> List[cftime.DatetimeGregorian]:
+    source = nc.Dataset(source_file)
+    timestamps = nc.num2date(source["time"][:], source["time"].units)
+    source.close()
+    return timestamps
+
+
+def write_new_netcdf(source_file: Path, target_file: Path, time_indexes: List):
+    source = nc.Dataset(source_file)
+    target = nc.Dataset(target_file, mode="w")
+
+    # Create the dimensions of the file.
+    for name, dim in source.dimensions.items():
+        dim_length = len(dim)
+        if name == "time":
+            dim_length = len(time_indexes)
+        target.createDimension(name, dim_length if not dim.isunlimited() else None)
+
+    # Copy the global attributes.
+    target.setncatts({a: source.getncattr(a) for a in source.ncattrs()})
+
+    # Create the variables in the file.
+    for name, var in source.variables.items():
+        target.createVariable(name, var.dtype, var.dimensions)
+        # Copy the variable attributes.
+        target.variables[name].setncatts({a: var.getncattr(a) for a in var.ncattrs()})
+        # Copy the variables values (as 'f4' eventually).
+        data = source.variables[name][:]
+        if name in ("time", "values", "Mesh2D_s1"):
+            data = data[time_indexes]
+        target.variables[name][:] = data
+
+    # Save the file.
+    target.close()
+    source.close()
+
+
+def convert_rain_events(
+    rain_file: Path, settings: Settings, simulation_id: int
+) -> Path:
+    """Return netcdf file with only time indexes."""
+    if not rain_file.exists():
+        raise MissingFileException("Rain file %s not found", rain_file)
+
+    logger.info("Extracting rain from %s", rain_file)
+    precipitation_timestamps = timestamps_from_netcdf(rain_file)
+
+    # Figure out which are valid for the given simulation period.
+    time_indexes: List = (
+        np.argwhere(  # type: ignore
+            (precipitation_timestamps >= settings.start)  # type: ignore
+            & (precipitation_timestamps <= settings.end)  # type: ignore
+        )
+        .flatten()
+        .tolist()
+    )
+
+    # Create new file with only time_indexes
+    temp_dir = Path(tempfile.mkdtemp(prefix="fews-3di"))
+    target_file = temp_dir / rain_file.name.replace(".nc", f"_{simulation_id}.nc")
+    write_new_netcdf(rain_file, target_file, time_indexes)
+    return target_file
