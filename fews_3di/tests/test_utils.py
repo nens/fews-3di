@@ -14,6 +14,7 @@ TEST_DIR = Path(__file__).parent
 EXAMPLE_SETTINGS_FILE = TEST_DIR / "example_settings.xml"
 WRONG_SETTINGS_FILE = TEST_DIR / "settings_without_username.xml"
 EXAMPLE_LATERAL_CSV = TEST_DIR / "example_lateral.csv"
+EXAMPLE_RAIN_FILE = TEST_DIR / "precipitation.nc"
 
 
 def test_read_settings_smoke():
@@ -63,3 +64,22 @@ def test_lateral_timeseries_omit_early_timestamps(example_settings):
     example_settings.start = datetime.datetime(year=2020, month=1, day=22)
     utils.lateral_timeseries(EXAMPLE_LATERAL_CSV, example_settings)
     # Just a smoke test atm for code coverage.
+
+
+def test_timestamps_from_netcdf():
+    timestamps = utils.timestamps_from_netcdf(EXAMPLE_RAIN_FILE)
+    assert len(timestamps)
+    assert timestamps[0].day == 21
+    assert timestamps[0].hour == 12
+    assert timestamps[-1].day == 30
+    assert timestamps[-1].hour == 12
+
+
+def test_convert_rain_events(example_settings):
+    result = utils.convert_rain_events(EXAMPLE_RAIN_FILE, example_settings)
+    assert result.exists()
+
+
+def test_convert_rain_events_missing_file(example_settings):
+    with pytest.raises(utils.MissingFileException):
+        utils.convert_rain_events(Path("pietje.nc"), example_settings)
