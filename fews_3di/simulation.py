@@ -25,6 +25,7 @@ from fews_3di import utils
 from pathlib import Path
 from time import sleep
 from typing import List
+from typing import Tuple
 
 import logging
 import openapi_client
@@ -33,7 +34,7 @@ import requests
 
 API_HOST = "https://api.3di.live/v3.0"
 USER_AGENT = "fews-3di (https://github.com/nens/fews-3di/)"
-
+SIMULATION_STATUS_CHECK_INTERVAL = 30
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +73,7 @@ class ThreediSimulation:
     settings: utils.Settings
     simulations_api: openapi_client.SimulationsApi
     simulation_id: int
+    simulation_url: str
 
     def __init__(self, settings):
         """Set up a 3di API connection."""
@@ -111,7 +113,7 @@ class ThreediSimulation:
         """Main method, should be called after login()."""
         model_id = self._find_model()
         self.simulations_api = openapi_client.SimulationsApi(self.api_client)
-        self.simulation_id = self._create_simulation(model_id)
+        self.simulation_id, self.simulation_url = self._create_simulation(model_id)
 
         laterals_csv = self.settings.base_dir / "input" / "lateral.csv"
         laterals = utils.lateral_timeseries(laterals_csv, self.settings)
@@ -150,7 +152,8 @@ class ThreediSimulation:
         logger.info("Simulation uses model %s", url)
         return id
 
-    def _create_simulation(self, model_id: int) -> int:
+    def _create_simulation(self, model_id: int) -> Tuple[int, str]:
+        """Return id and url of created simulation."""
         data = {}
         data["name"] = self.settings.simulationname
         data["threedimodel"] = str(model_id)
@@ -162,7 +165,7 @@ class ThreediSimulation:
 
         simulation = self.simulations_api.simulations_create(data)
         logger.info("Simulation %s has been created", simulation.url)
-        return simulation.id
+        return simulation.id, simulation.url
 
     def _add_laterals(self, laterals):
         """Upload lateral timeseries and wait for them to be processed."""
@@ -275,20 +278,20 @@ class ThreediSimulation:
     def _run_simulation(self):
         """Start simulation and wait for it to finish."""
         start_data = {"name": "start"}
-        simulation_start = self.simulations_api.simulations_actions_create(
+        self.simulations_api.simulations_actions_create(
             self.simulation_id, data=start_data
         )
-        logger.info("Simulation has been started %s", simulation_start)
+        logger.info("Simulation %s has been started.", self.simulation_url)
 
         while True:
-            sleep(5)
+            sleep(SIMULATION_STATUS_CHECK_INTERVAL)
             simulation_status = self.simulations_api.simulations_status_list(
                 self.simulation_id
             )
             if simulation_status.name == "finished":
                 logger.info("Simulation has finished")
                 return
-            logger.debug(
+            logger.info(
                 "Simulation is still running (status=%s)", simulation_status.name
             )
             # Note: status 'initialized' actually means 'running'.
