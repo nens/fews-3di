@@ -129,6 +129,7 @@ class ThreediSimulation:
         )
         self._add_evaporation(evaporation_raster_netcdf)
 
+        self._run_simulation()
         print("TODO")
 
     def _find_model(self) -> int:
@@ -270,3 +271,24 @@ class ThreediSimulation:
                 return
             else:
                 logger.debug("Unknown state: %s", state)
+
+    def _run_simulation(self):
+        """Start simulation and wait for it to finish."""
+        start_data = {"name": "start"}
+        simulation_start = self.simulations_api.simulations_actions_create(
+            self.simulation_id, data=start_data
+        )
+        logger.info("Simulation has been started %s", simulation_start)
+
+        while True:
+            sleep(5)
+            simulation_status = self.simulations_api.simulations_status_list(
+                self.simulation_id
+            )
+            if simulation_status.name == "finished":
+                logger.info("Simulation has finished")
+                return
+            logger.debug(
+                "Simulation is still running (status=%s)", simulation_status.name
+            )
+            # Note: status 'initialized' actually means 'running'.
