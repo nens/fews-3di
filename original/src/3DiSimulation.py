@@ -355,6 +355,8 @@ def download_results(sim_api, sim_id, setting):
 
     logger.info("Download of resultfile is succeeded")
 
+    # TODO: flow state
+
     # Save flow state
     if save_state == "True":
         # ^^^ TODO: a literal string "True" smells dirty.

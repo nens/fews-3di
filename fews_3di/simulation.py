@@ -23,13 +23,13 @@ happening where...
 
 from fews_3di import utils
 from pathlib import Path
-from time import sleep
 from typing import List
 from typing import Tuple
 
 import logging
 import openapi_client
 import requests
+import time
 
 
 API_HOST = "https://api.3di.live/v3.0"
@@ -132,6 +132,7 @@ class ThreediSimulation:
         self._add_evaporation(evaporation_raster_netcdf)
 
         self._run_simulation()
+        self._download_results()
         print("TODO")
 
     def _find_model(self) -> int:
@@ -189,7 +190,7 @@ class ThreediSimulation:
 
         logger.debug("Waiting for laterals to be processed...")
         while True:
-            sleep(2)
+            time.sleep(2)
             for id in still_to_process:
                 lateral = self.simulations_api.simulations_events_lateral_timeseries_read(
                     simulation_pk=self.simulation_id, id=id
@@ -221,7 +222,7 @@ class ThreediSimulation:
 
         logger.debug("Waiting for rain raster to be processed...")
         while True:
-            sleep(2)
+            time.sleep(2)
             upload_status = self.simulations_api.simulations_events_rain_rasters_netcdf_list(
                 self.simulation_id
             )
@@ -258,7 +259,7 @@ class ThreediSimulation:
 
         logger.debug("Waiting for evaporation raster to be processed...")
         while True:
-            sleep(2)
+            time.sleep(2)
             upload_status = self.simulations_api.simulations_events_sources_sinks_rasters_netcdf_list(
                 self.simulation_id
             )
@@ -283,15 +284,53 @@ class ThreediSimulation:
         )
         logger.info("Simulation %s has been started.", self.simulation_url)
 
+        start_time = time.time()
         while True:
-            sleep(SIMULATION_STATUS_CHECK_INTERVAL)
+            time.sleep(SIMULATION_STATUS_CHECK_INTERVAL)
             simulation_status = self.simulations_api.simulations_status_list(
                 self.simulation_id
             )
             if simulation_status.name == "finished":
                 logger.info("Simulation has finished")
                 return
+            running_time = round(time.time() - start_time)
             logger.info(
-                "Simulation is still running (status=%s)", simulation_status.name
+                "%ss: simulation is still running (status=%s)",
+                running_time,
+                simulation_status.name,
             )
             # Note: status 'initialized' actually means 'running'.
+
+    def _download_results(self):
+        output_dir = self.settings.base_dir / "output"
+        output_dir.mkdir(exist_ok=True)
+        logger.info("Downloading results into %s...", output_dir)
+        simulation_results = self.simulations_api.simulations_results_files_list(
+            self.simulation_id
+        ).results
+        logger.debug("All simulation results: %s", simulation_results)
+        desired_results = [
+            "simulation.log",
+            "flow_summary.log",
+            f"log_files_sim_{self.simulation_id}.zip",
+            "results_3di.nc",
+        ]
+        available_results = {
+            simulation_result.filename.lower(): simulation_result
+            for simulation_result in simulation_results
+        }
+        for desired_result in desired_results:
+            if desired_result not in available_results:
+                logger.warning(
+                    "Desired result file %s isn't available.", desired_result
+                )
+                continue
+            resource = self.simulations_api.simulations_results_files_download(
+                available_results[desired_result].id, self.simulation_id
+            )
+            target = output_dir / desired_result
+            with open(target, "wb") as f:
+                response = requests.get(resource.get_url)
+                response.raise_for_status()
+                f.write(response.content)
+            logger.info("Downloaded %s", target)
