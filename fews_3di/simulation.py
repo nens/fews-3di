@@ -357,7 +357,7 @@ class ThreediSimulation:
                 "Open water input file %s not found", open_water_input_file
             )
 
-        results = GridH5ResultAdmin(gridadmin_file, results_file)
+        results = GridH5ResultAdmin(str(gridadmin_file), str(results_file))
         times = results.pumps.timestamps[()] + self.settings.start.timestamp()
         times = times.astype("datetime64[s]")
         times = pd.Series(times).dt.round("10 min")
@@ -382,8 +382,8 @@ class ThreediSimulation:
 
         # TODO make similar to convert_rain_events and move to utils.py
 
-        open_water_input_file = "../input/ow.nc"
-        open_water_output_file = "../output/ow.nc"
+        open_water_input_file = self.settings.base_dir / "input" / "ow.nc"
+        open_water_output_file = self.settings.base_dir / "output" / "ow.nc"
         open_water_timestamps = utils.timestamps_from_netcdf(open_water_input_file)
 
         # Figure out which are valid for the given simulation period
