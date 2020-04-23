@@ -13,6 +13,10 @@ Changelog of fews-3di
 
 - Simulation is actually being run now.
 
+- Added processing of the results.
+
+- Added usage instructions.
+
 
 0.1 (2020-04-09)
 ----------------
