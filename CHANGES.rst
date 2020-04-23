@@ -5,7 +5,7 @@ Changelog of fews-3di
 0.4 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Another release mechanism fix.
 
 
 0.3 (2020-04-23)
