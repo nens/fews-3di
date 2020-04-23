@@ -23,11 +23,15 @@ happening where...
 
 from fews_3di import utils
 from pathlib import Path
+from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 from typing import List
 from typing import Tuple
 
 import logging
+import netCDF4
+import numpy as np
 import openapi_client
+import pandas as pd
 import requests
 import time
 
@@ -74,6 +78,7 @@ class ThreediSimulation:
     simulations_api: openapi_client.SimulationsApi
     simulation_id: int
     simulation_url: str
+    output_dir: Path
 
     def __init__(self, settings):
         """Set up a 3di API connection."""
@@ -81,6 +86,8 @@ class ThreediSimulation:
         self.configuration = openapi_client.Configuration(host=API_HOST)
         self.api_client = openapi_client.ApiClient(self.configuration)
         self.api_client.user_agent = USER_AGENT  # Let's be neat.
+        self.output_dir = self.settings.base_dir / "output"
+        self.output_dir.mkdir(exist_ok=True)
         # You need to call login(), but we won't: it makes testing easier.
 
     def login(self):
@@ -133,7 +140,8 @@ class ThreediSimulation:
 
         self._run_simulation()
         self._download_results()
-        print("TODO")
+        self._process_results()
+        logger.info("Done.")
 
     def _find_model(self) -> int:
         """Return model ID based on the model revision in the settings."""
@@ -302,9 +310,7 @@ class ThreediSimulation:
             # Note: status 'initialized' actually means 'running'.
 
     def _download_results(self):
-        output_dir = self.settings.base_dir / "output"
-        output_dir.mkdir(exist_ok=True)
-        logger.info("Downloading results into %s...", output_dir)
+        logger.info("Downloading results into %s...", self.output_dir)
         simulation_results = self.simulations_api.simulations_results_files_list(
             self.simulation_id
         ).results
@@ -328,9 +334,80 @@ class ThreediSimulation:
             resource = self.simulations_api.simulations_results_files_download(
                 available_results[desired_result].id, self.simulation_id
             )
-            target = output_dir / desired_result
+            target = self.output_dir / desired_result
             with open(target, "wb") as f:
                 response = requests.get(resource.get_url)
                 response.raise_for_status()
                 f.write(response.content)
             logger.info("Downloaded %s", target)
+
+    def _process_results(self):
+        # Input files
+        gridadmin_file = self.settings.base_dir / "model" / "gridadmin.h5"
+        if not gridadmin_file.exists():
+            raise utils.MissingFileException(
+                "Gridadmin file %s not found", gridadmin_file
+            )
+        results_file = self.output_dir / "results_3di.nc"
+        if not results_file.exists():
+            raise utils.MissingFileException("Results file %s not found", results_file)
+        open_water_input_file = self.settings.base_dir / "input" / "ow.nc"
+        if not open_water_input_file.exists():
+            raise utils.MissingFileException(
+                "Open water input file %s not found", open_water_input_file
+            )
+
+        results = GridH5ResultAdmin(gridadmin_file, results_file)
+        times = results.pumps.timestamps[()] + self.settings.start.timestamp()
+        times = times.astype("datetime64[s]")
+        times = pd.Series(times).dt.round("10 min")
+        endtime = results.pumps.timestamps[-1]
+        pump_id = results.pumps.display_name.astype("U13")
+        discharges = results.pumps.timeseries(start_time=0, end_time=endtime).data[
+            "q_pump"
+        ]
+        discharges_dataframe = pd.DataFrame(discharges, index=times, columns=pump_id)
+        params = ["Q.sim" for x in range(len(discharges_dataframe.columns))]
+
+        discharges_dataframe.columns = pd.MultiIndex.from_arrays(
+            [pump_id, pump_id, params]
+        )
+        discharges_csv_output = self.output_dir / "discharges.csv"
+        discharges_dataframe.to_csv(
+            discharges_csv_output, index=True, header=True, sep=","
+        )
+        logger.info(
+            "Simulated discharges have been exported to %s", discharges_csv_output
+        )
+
+        # TODO make similar to convert_rain_events and move to utils.py
+
+        open_water_input_file = "../input/ow.nc"
+        open_water_output_file = "../output/ow.nc"
+        open_water_timestamps = utils.timestamps_from_netcdf(open_water_input_file)
+
+        # Figure out which are valid for the given simulation period
+        # precipation_datetimes
+        time_indexes = (
+            np.argwhere(
+                (open_water_timestamps >= self.settings.start)
+                & (open_water_timestamps <= self.settings.end)
+            )
+            .flatten()
+            .tolist()
+        )
+
+        # Create new file with only time_indexes
+        utils.write_new_netcdf(
+            open_water_input_file, open_water_output_file, time_indexes
+        )
+        logger.debug("Started open water output file %s", open_water_output_file)
+        dset = netCDF4.Dataset(open_water_output_file, "a")
+        s1 = (
+            results.nodes.subset("2D_OPEN_WATER")
+            .timeseries(start_time=0, end_time=endtime)
+            .s1
+        )
+        dset["Mesh2D_s1"][:, :] = s1
+        dset.close()
+        logger.info("Wrote open water output file %s", open_water_output_file)
