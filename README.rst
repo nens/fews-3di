@@ -19,7 +19,9 @@ problems.
 default, but you can pass a different file in a different location with
 ``--settings``.
 
-TODO: data requirements.
+Several input files are needed, they should be in the ``input`` directory
+**relative** to the ``run_info.xml``, like ``input/evaporation.nc``.
+Output is stored in the ``output`` directory relative to the ``run_info.xml``.
 
 
 Development instructions (only for the programmers, not for regular use)

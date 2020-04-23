@@ -23,9 +23,15 @@ jobs:
           bin/pip install -r requirements.txt
       - name: test
         run: make test
+      - name: create packages
+        run: bin/python setup.py sdist bdist_wheel
       - name: coverage report
         run: bin/coveralls
         env:
           COVERALLS_REPO_TOKEN: ${{ secrets.COVERALLS_REPO_TOKEN }}
-
-# Possible TODO for Reinout: set up automatic pypi releases for tags.
+      - name: Publish package
+        if: github.event_name == 'push' && startsWith(github.event.ref, 'refs/tags')
+        uses: pypa/gh-action-pypi-publish@master
+        with:
+          user: __token__
+          password: ${{ secrets.pypi_password }}

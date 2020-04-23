@@ -23,17 +23,22 @@ happening where...
 
 from fews_3di import utils
 from pathlib import Path
-from time import sleep
+from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 from typing import List
+from typing import Tuple
 
 import logging
+import netCDF4
+import numpy as np
 import openapi_client
+import pandas as pd
 import requests
+import time
 
 
 API_HOST = "https://api.3di.live/v3.0"
 USER_AGENT = "fews-3di (https://github.com/nens/fews-3di/)"
-
+SIMULATION_STATUS_CHECK_INTERVAL = 30
 
 logger = logging.getLogger(__name__)
 
@@ -72,6 +77,8 @@ class ThreediSimulation:
     settings: utils.Settings
     simulations_api: openapi_client.SimulationsApi
     simulation_id: int
+    simulation_url: str
+    output_dir: Path
 
     def __init__(self, settings):
         """Set up a 3di API connection."""
@@ -79,6 +86,8 @@ class ThreediSimulation:
         self.configuration = openapi_client.Configuration(host=API_HOST)
         self.api_client = openapi_client.ApiClient(self.configuration)
         self.api_client.user_agent = USER_AGENT  # Let's be neat.
+        self.output_dir = self.settings.base_dir / "output"
+        self.output_dir.mkdir(exist_ok=True)
         # You need to call login(), but we won't: it makes testing easier.
 
     def login(self):
@@ -111,7 +120,7 @@ class ThreediSimulation:
         """Main method, should be called after login()."""
         model_id = self._find_model()
         self.simulations_api = openapi_client.SimulationsApi(self.api_client)
-        self.simulation_id = self._create_simulation(model_id)
+        self.simulation_id, self.simulation_url = self._create_simulation(model_id)
 
         laterals_csv = self.settings.base_dir / "input" / "lateral.csv"
         laterals = utils.lateral_timeseries(laterals_csv, self.settings)
@@ -129,7 +138,10 @@ class ThreediSimulation:
         )
         self._add_evaporation(evaporation_raster_netcdf)
 
-        print("TODO")
+        self._run_simulation()
+        self._download_results()
+        self._process_results()
+        logger.info("Done.")
 
     def _find_model(self) -> int:
         """Return model ID based on the model revision in the settings."""
@@ -149,7 +161,8 @@ class ThreediSimulation:
         logger.info("Simulation uses model %s", url)
         return id
 
-    def _create_simulation(self, model_id: int) -> int:
+    def _create_simulation(self, model_id: int) -> Tuple[int, str]:
+        """Return id and url of created simulation."""
         data = {}
         data["name"] = self.settings.simulationname
         data["threedimodel"] = str(model_id)
@@ -161,7 +174,7 @@ class ThreediSimulation:
 
         simulation = self.simulations_api.simulations_create(data)
         logger.info("Simulation %s has been created", simulation.url)
-        return simulation.id
+        return simulation.id, simulation.url
 
     def _add_laterals(self, laterals):
         """Upload lateral timeseries and wait for them to be processed."""
@@ -185,7 +198,7 @@ class ThreediSimulation:
 
         logger.debug("Waiting for laterals to be processed...")
         while True:
-            sleep(2)
+            time.sleep(2)
             for id in still_to_process:
                 lateral = self.simulations_api.simulations_events_lateral_timeseries_read(
                     simulation_pk=self.simulation_id, id=id
@@ -217,7 +230,7 @@ class ThreediSimulation:
 
         logger.debug("Waiting for rain raster to be processed...")
         while True:
-            sleep(2)
+            time.sleep(2)
             upload_status = self.simulations_api.simulations_events_rain_rasters_netcdf_list(
                 self.simulation_id
             )
@@ -254,7 +267,7 @@ class ThreediSimulation:
 
         logger.debug("Waiting for evaporation raster to be processed...")
         while True:
-            sleep(2)
+            time.sleep(2)
             upload_status = self.simulations_api.simulations_events_sources_sinks_rasters_netcdf_list(
                 self.simulation_id
             )
@@ -270,3 +283,131 @@ class ThreediSimulation:
                 return
             else:
                 logger.debug("Unknown state: %s", state)
+
+    def _run_simulation(self):
+        """Start simulation and wait for it to finish."""
+        start_data = {"name": "start"}
+        self.simulations_api.simulations_actions_create(
+            self.simulation_id, data=start_data
+        )
+        logger.info("Simulation %s has been started.", self.simulation_url)
+
+        start_time = time.time()
+        while True:
+            time.sleep(SIMULATION_STATUS_CHECK_INTERVAL)
+            simulation_status = self.simulations_api.simulations_status_list(
+                self.simulation_id
+            )
+            if simulation_status.name == "finished":
+                logger.info("Simulation has finished")
+                return
+            running_time = round(time.time() - start_time)
+            logger.info(
+                "%ss: simulation is still running (status=%s)",
+                running_time,
+                simulation_status.name,
+            )
+            # Note: status 'initialized' actually means 'running'.
+
+    def _download_results(self):
+        logger.info("Downloading results into %s...", self.output_dir)
+        simulation_results = self.simulations_api.simulations_results_files_list(
+            self.simulation_id
+        ).results
+        logger.debug("All simulation results: %s", simulation_results)
+        desired_results = [
+            "simulation.log",
+            "flow_summary.log",
+            f"log_files_sim_{self.simulation_id}.zip",
+            "results_3di.nc",
+        ]
+        available_results = {
+            simulation_result.filename.lower(): simulation_result
+            for simulation_result in simulation_results
+        }
+        for desired_result in desired_results:
+            if desired_result not in available_results:
+                logger.warning(
+                    "Desired result file %s isn't available.", desired_result
+                )
+                continue
+            resource = self.simulations_api.simulations_results_files_download(
+                available_results[desired_result].id, self.simulation_id
+            )
+            target = self.output_dir / desired_result
+            with open(target, "wb") as f:
+                response = requests.get(resource.get_url)
+                response.raise_for_status()
+                f.write(response.content)
+            logger.info("Downloaded %s", target)
+
+    def _process_results(self):
+        # Input files
+        gridadmin_file = self.settings.base_dir / "model" / "gridadmin.h5"
+        if not gridadmin_file.exists():
+            raise utils.MissingFileException(
+                "Gridadmin file %s not found", gridadmin_file
+            )
+        results_file = self.output_dir / "results_3di.nc"
+        if not results_file.exists():
+            raise utils.MissingFileException("Results file %s not found", results_file)
+        open_water_input_file = self.settings.base_dir / "input" / "ow.nc"
+        if not open_water_input_file.exists():
+            raise utils.MissingFileException(
+                "Open water input file %s not found", open_water_input_file
+            )
+
+        results = GridH5ResultAdmin(str(gridadmin_file), str(results_file))
+        times = results.pumps.timestamps[()] + self.settings.start.timestamp()
+        times = times.astype("datetime64[s]")
+        times = pd.Series(times).dt.round("10 min")
+        endtime = results.pumps.timestamps[-1]
+        pump_id = results.pumps.display_name.astype("U13")
+        discharges = results.pumps.timeseries(start_time=0, end_time=endtime).data[
+            "q_pump"
+        ]
+        discharges_dataframe = pd.DataFrame(discharges, index=times, columns=pump_id)
+        params = ["Q.sim" for x in range(len(discharges_dataframe.columns))]
+
+        discharges_dataframe.columns = pd.MultiIndex.from_arrays(
+            [pump_id, pump_id, params]
+        )
+        discharges_csv_output = self.output_dir / "discharges.csv"
+        discharges_dataframe.to_csv(
+            discharges_csv_output, index=True, header=True, sep=","
+        )
+        logger.info(
+            "Simulated discharges have been exported to %s", discharges_csv_output
+        )
+
+        # TODO make similar to convert_rain_events and move to utils.py
+
+        open_water_input_file = self.settings.base_dir / "input" / "ow.nc"
+        open_water_output_file = self.settings.base_dir / "output" / "ow.nc"
+        open_water_timestamps = utils.timestamps_from_netcdf(open_water_input_file)
+
+        # Figure out which are valid for the given simulation period
+        # precipation_datetimes
+        time_indexes = (
+            np.argwhere(
+                (open_water_timestamps >= self.settings.start)
+                & (open_water_timestamps <= self.settings.end)
+            )
+            .flatten()
+            .tolist()
+        )
+
+        # Create new file with only time_indexes
+        utils.write_new_netcdf(
+            open_water_input_file, open_water_output_file, time_indexes
+        )
+        logger.debug("Started open water output file %s", open_water_output_file)
+        dset = netCDF4.Dataset(open_water_output_file, "a")
+        s1 = (
+            results.nodes.subset("2D_OPEN_WATER")
+            .timeseries(start_time=0, end_time=endtime)
+            .s1
+        )
+        dset["Mesh2D_s1"][:, :] = s1
+        dset.close()
+        logger.info("Wrote open water output file %s", open_water_output_file)

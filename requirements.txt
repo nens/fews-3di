@@ -8,4 +8,5 @@ coveralls
 flake8
 isort
 mypy
+wheel
 zest.releaser
