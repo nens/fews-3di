@@ -23,6 +23,8 @@ jobs:
           bin/pip install -r requirements.txt
       - name: test
         run: make test
+      - name: create packages
+        run: bin/python setup.py sdist bdist_wheel
       - name: coverage report
         run: bin/coveralls
         env:
