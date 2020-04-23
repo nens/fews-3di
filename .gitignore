@@ -31,6 +31,8 @@ coverage.xml
 .mypy_cache
 
 original/run_info.xml
+original/output/
+dist/
 
 # Pycharm, visual studio
 .idea
