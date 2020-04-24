@@ -2,8 +2,8 @@ Changelog of fews-3di
 ===================================================
 
 
-0.3.4 (unreleased)
-------------------
+0.4 (unreleased)
+----------------
 
 - Nothing changed yet.
 
