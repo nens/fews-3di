@@ -5,8 +5,8 @@ on:
   push:
     branches:
       - master
-  release:
-    types: [created]
+    tags:
+      - "*"
   pull_request:
 
 
