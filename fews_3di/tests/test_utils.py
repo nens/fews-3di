@@ -50,6 +50,10 @@ def test_read_settings_base_dir(example_settings):
     assert example_settings.base_dir == TEST_DIR
 
 
+def test_read_settings_save_state(example_settings):
+    assert example_settings.save_state is True
+
+
 def test_lateral_timeseries_smoke(example_settings):
     utils.lateral_timeseries(EXAMPLE_LATERAL_CSV, example_settings)
 
