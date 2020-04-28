@@ -20,8 +20,7 @@
         <string key="organisation" value="12345678abcd"/>
         <string key="modelrevision" value="abcd123456787"/>
         <string key="simulationname" value="Simulation name"/>
-        <string key="use_state" value="./state.txt"/>
         <string key="save_state" value="True"/>
-        <string key="save_state_expiry_days" value="5"/>
+        <string key="saved_state_expiry_days" value="5"/>
     </properties>
 </Run>

@@ -37,8 +37,9 @@ import time
 
 
 API_HOST = "https://api.3di.live/v3.0"
-USER_AGENT = "fews-3di (https://github.com/nens/fews-3di/)"
+SAVED_STATE_ID_FILENAME = "3di-saved-state-id.txt"
 SIMULATION_STATUS_CHECK_INTERVAL = 30
+USER_AGENT = "fews-3di (https://github.com/nens/fews-3di/)"
 
 logger = logging.getLogger(__name__)
 
