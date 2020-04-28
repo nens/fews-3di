@@ -378,6 +378,7 @@ def download_results(sim_api, sim_id, setting):
 
     # Store saved_state.id
     if sim_save_state:
+        # TODO: is this the same file as the "state_file" setting?
         with open("../states/states_3Di.out", "w") as f:
             f.write("%d" % sim_save_state.id)
             logger.info("Saved state exported: {}".format(sim_save_state.url))
