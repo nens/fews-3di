@@ -287,9 +287,6 @@ def add_evaporation_events(setting, sim_api, sim_id):
             sleep(2)
 
 
-# TOT HIER KLAAR
-
-
 def start_simulation(sim_api, sim_id):
     # ################# "ADD": start simulation ##############
     # TODO start simulation. Also a "while processing"-like loop.

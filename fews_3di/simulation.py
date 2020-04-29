@@ -56,6 +56,10 @@ class InvalidDataError(Exception):
     pass
 
 
+class MissingSavedStateError(Exception):
+    pass
+
+
 class ThreediSimulation:
     """Wrapper for a set of 3di API calls.
 
@@ -73,17 +77,21 @@ class ThreediSimulation:
 
     """
 
+    allow_missing_saved_state: bool
     api_client: openapi_client.ApiClient
     configuration: openapi_client.Configuration
+    output_dir: Path
     settings: utils.Settings
-    simulations_api: openapi_client.SimulationsApi
     simulation_id: int
     simulation_url: str
-    output_dir: Path
+    simulations_api: openapi_client.SimulationsApi
 
-    def __init__(self, settings):
+    def __init__(
+        self, settings: utils.Settings, allow_missing_saved_state: bool = False
+    ):
         """Set up a 3di API connection."""
         self.settings = settings
+        self.allow_missing_saved_state = allow_missing_saved_state
         self.configuration = openapi_client.Configuration(host=API_HOST)
         self.api_client = openapi_client.ApiClient(self.configuration)
         self.api_client.user_agent = USER_AGENT  # Let's be neat.
@@ -126,6 +134,11 @@ class ThreediSimulation:
         laterals_csv = self.settings.base_dir / "input" / "lateral.csv"
         laterals = utils.lateral_timeseries(laterals_csv, self.settings)
         self._add_laterals(laterals)
+
+        if self.settings.save_state:
+            # Save the state, so also use the previously saved one.
+            saved_state_id_file = self.settings.base_dir / SAVED_STATE_ID_FILENAME
+            self._set_initial_state(saved_state_id_file)
 
         rain_file = self.settings.base_dir / "input" / "precipitation.nc"
         rain_raster_netcdf = utils.convert_rain_events(
@@ -216,6 +229,34 @@ class ThreediSimulation:
 
             if not still_to_process:
                 return
+
+    def _set_initial_state(self, saved_state_id_file: Path):
+        if not saved_state_id_file.exists():
+            msg = f"Saved state id file {saved_state_id_file} not found"
+            if self.allow_missing_saved_state:
+                logger.warn(msg)
+                return
+            else:
+                raise utils.MissingFileException(msg)
+        saved_state_id: str = saved_state_id_file.read_text().strip()
+        logger.info("Simulation will use initial state %s", saved_state_id)
+        try:
+            self.simulations_api.simulations_initial_saved_state_create(
+                self.simulation_id, data={"saved_state": saved_state_id}
+            )
+        except openapi_client.exceptions.ApiException as e:
+            if e.status == 400:
+                logger.debug("Saved state setting error: %s", str(e))
+                msg = (
+                    f"Setting initial state to saved state id={saved_state_id} failed. "
+                    f"The error response was {e.body}"
+                )
+                if self.allow_missing_saved_state:
+                    logger.warn(msg)
+                else:
+                    raise MissingSavedStateError(msg) from e
+            logger.debug("Error isn't a 400, so we re-raise it.")
+            raise
 
     def _add_rain(self, rain_raster_netcdf: Path):
         """Upload rain raster netcdf file and wait for it to be processed."""
