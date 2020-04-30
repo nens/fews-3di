@@ -30,7 +30,6 @@ from typing import Tuple
 import datetime
 import logging
 import netCDF4
-import numpy as np
 import openapi_client
 import pandas as pd
 import requests
@@ -460,23 +459,11 @@ class ThreediSimulation:
 
         open_water_input_file = self.settings.base_dir / "input" / "ow.nc"
         open_water_output_file = self.settings.base_dir / "output" / "ow.nc"
-        open_water_timestamps = utils.timestamps_from_netcdf(open_water_input_file)
-
-        # Figure out which are valid for the given simulation period
-        # precipation_datetimes
-        time_indexes = (
-            np.argwhere(
-                (open_water_timestamps >= self.settings.start)
-                & (open_water_timestamps <= self.settings.end)
-            )
-            .flatten()
-            .tolist()
+        converted_netcdf = utils.write_netcdf_with_time_indexes(
+            open_water_input_file, self.settings
         )
-
-        # Create new file with only time_indexes
-        utils.write_new_netcdf(
-            open_water_input_file, open_water_output_file, time_indexes
-        )
+        # converted_netcdf is a temp file, so move it to the correct spot.
+        converted_netcdf.replace(open_water_output_file)
         logger.debug("Started open water output file %s", open_water_output_file)
         dset = netCDF4.Dataset(open_water_output_file, "a")
         s1 = (
