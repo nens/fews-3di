@@ -27,6 +27,7 @@ from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 from typing import List
 from typing import Tuple
 
+import datetime
 import logging
 import netCDF4
 import numpy as np
@@ -135,9 +136,10 @@ class ThreediSimulation:
         laterals = utils.lateral_timeseries(laterals_csv, self.settings)
         self._add_laterals(laterals)
 
+        saved_state_id_file = self.settings.base_dir / SAVED_STATE_ID_FILENAME
         if self.settings.save_state:
-            # Save the state, so also use the previously saved one.
-            saved_state_id_file = self.settings.base_dir / SAVED_STATE_ID_FILENAME
+            # We want to save the state, so we also want to use the previously
+            # saved one.
             self._set_initial_state(saved_state_id_file)
 
         rain_file = self.settings.base_dir / "input" / "precipitation.nc"
@@ -154,6 +156,8 @@ class ThreediSimulation:
 
         self._run_simulation()
         self._download_results()
+        if self.settings.save_state:
+            self._store_saved_state(saved_state_id_file)
         self._process_results()
         logger.info("Done.")
 
@@ -254,6 +258,7 @@ class ThreediSimulation:
                 )
                 if self.allow_missing_saved_state:
                     logger.warn(msg)
+                    return
                 else:
                     raise MissingSavedStateError(msg) from e
             logger.debug("Error isn't a 400, so we re-raise it.")
@@ -383,6 +388,24 @@ class ThreediSimulation:
                 response.raise_for_status()
                 f.write(response.content)
             logger.info("Downloaded %s", target)
+
+    def _store_saved_state(self, saved_state_id_file):
+        expiry_timestamp = datetime.datetime.now() + datetime.timedelta(
+            days=self.settings.saved_state_expiry_days
+        )
+        saved_state = self.simulations_api.simulations_create_saved_states_timed_create(
+            self.simulation_id,
+            data={
+                "name": self.settings.simulationname,
+                "time": self.settings.duration,
+                "expiry": expiry_timestamp.isoformat(),
+            },
+        )
+        logger.info("Saved state stored: %s", saved_state.url)
+        saved_state_id_file.write_text(str(saved_state.id))
+        logger.info(
+            "Wrote saved state id (%s) to %s", saved_state.id, saved_state_id_file
+        )
 
     def _process_results(self):
         # Input files
