@@ -233,9 +233,7 @@ def write_new_netcdf(source_file: Path, target_file: Path, time_indexes: List):
     source.close()
 
 
-def convert_rain_events(
-    rain_file: Path, settings: Settings, simulation_id: int
-) -> Path:
+def convert_rain_events(rain_file: Path, settings: Settings) -> Path:
     """Return netcdf file with only time indexes."""
     if not rain_file.exists():
         raise MissingFileException("Rain file %s not found", rain_file)
@@ -255,16 +253,14 @@ def convert_rain_events(
 
     # Create new file with only time_indexes
     temp_dir = Path(tempfile.mkdtemp(prefix="fews-3di"))
-    target_file = temp_dir / rain_file.name.replace(".nc", f"_{simulation_id}.nc")
+    target_file = temp_dir / rain_file.name
     write_new_netcdf(rain_file, target_file, time_indexes)
     logger.debug("Wrote new rain netcdf to %s", target_file)
     return target_file
 
 
 # TODO: virtually the same as convert_rain_events.
-def convert_evaporation(
-    evaporation_file: Path, settings: Settings, simulation_id: int
-) -> Path:
+def convert_evaporation(evaporation_file: Path, settings: Settings) -> Path:
     """Return netcdf file with only time indexes."""
     if not evaporation_file.exists():
         raise MissingFileException("Evaporation file %s not found", evaporation_file)
@@ -284,9 +280,8 @@ def convert_evaporation(
 
     # Create new file with only time_indexes
     temp_dir = Path(tempfile.mkdtemp(prefix="fews-3di"))
-    target_file = temp_dir / evaporation_file.name.replace(
-        ".nc", f"_{simulation_id}.nc"
-    )
+    target_file = temp_dir / evaporation_file.name
+
     write_new_netcdf(evaporation_file, target_file, time_indexes)
     logger.debug("Wrote new evaporation netcdf to %s", target_file)
     return target_file

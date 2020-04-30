@@ -81,22 +81,22 @@ def test_timestamps_from_netcdf():
 
 
 def test_convert_rain_events(example_settings):
-    result = utils.convert_rain_events(EXAMPLE_PRECIPITATION_FILE, example_settings, 12)
+    result = utils.convert_rain_events(EXAMPLE_PRECIPITATION_FILE, example_settings)
     assert result.exists()
-    assert result.name == "precipitation_12.nc"
+    assert result.name == "precipitation.nc"
 
 
 def test_convert_rain_events_missing_file(example_settings):
     with pytest.raises(utils.MissingFileException):
-        utils.convert_rain_events(Path("pietje.nc"), example_settings, 42)
+        utils.convert_rain_events(Path("pietje.nc"), example_settings)
 
 
 def test_convert_evaporation(example_settings):
-    result = utils.convert_evaporation(EXAMPLE_EVAPORATION_FILE, example_settings, 12)
+    result = utils.convert_evaporation(EXAMPLE_EVAPORATION_FILE, example_settings)
     assert result.exists()
-    assert result.name == "evaporation_12.nc"
+    assert result.name == "evaporation.nc"
 
 
 def test_convert_evaporation_events_missing_file(example_settings):
     with pytest.raises(utils.MissingFileException):
-        utils.convert_evaporation(Path("pietje.nc"), example_settings, 42)
+        utils.convert_evaporation(Path("pietje.nc"), example_settings)

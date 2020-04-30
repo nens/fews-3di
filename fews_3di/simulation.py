@@ -143,14 +143,12 @@ class ThreediSimulation:
             self.saved_state_id = self._prepare_initial_state()
 
         rain_file = self.settings.base_dir / "input" / "precipitation.nc"
-        rain_raster_netcdf = utils.convert_rain_events(
-            rain_file, self.settings, self.simulation_id
-        )
+        rain_raster_netcdf = utils.convert_rain_events(rain_file, self.settings)
         self._add_rain(rain_raster_netcdf)
 
         evaporation_file = self.settings.base_dir / "input" / "evaporation.nc"
         evaporation_raster_netcdf = utils.convert_evaporation(
-            evaporation_file, self.settings, self.simulation_id
+            evaporation_file, self.settings
         )
         self._add_evaporation(evaporation_raster_netcdf)
 
