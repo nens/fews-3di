@@ -80,23 +80,14 @@ def test_timestamps_from_netcdf():
     assert timestamps[-1].hour == 12
 
 
-def test_convert_rain_events(example_settings):
-    result = utils.convert_rain_events(EXAMPLE_PRECIPITATION_FILE, example_settings)
+def test_write_netcdf_with_time_indexes(example_settings):
+    result = utils.write_netcdf_with_time_indexes(
+        EXAMPLE_PRECIPITATION_FILE, example_settings
+    )
     assert result.exists()
     assert result.name == "precipitation.nc"
 
 
-def test_convert_rain_events_missing_file(example_settings):
+def test_write_netcdf_with_time_indexes_missing_file(example_settings):
     with pytest.raises(utils.MissingFileException):
-        utils.convert_rain_events(Path("pietje.nc"), example_settings)
-
-
-def test_convert_evaporation(example_settings):
-    result = utils.convert_evaporation(EXAMPLE_EVAPORATION_FILE, example_settings)
-    assert result.exists()
-    assert result.name == "evaporation.nc"
-
-
-def test_convert_evaporation_events_missing_file(example_settings):
-    with pytest.raises(utils.MissingFileException):
-        utils.convert_evaporation(Path("pietje.nc"), example_settings)
+        utils.write_netcdf_with_time_indexes(Path("pietje.nc"), example_settings)

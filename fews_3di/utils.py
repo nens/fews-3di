@@ -233,55 +233,26 @@ def write_new_netcdf(source_file: Path, target_file: Path, time_indexes: List):
     source.close()
 
 
-def convert_rain_events(rain_file: Path, settings: Settings) -> Path:
-    """Return netcdf file with only time indexes."""
-    if not rain_file.exists():
-        raise MissingFileException("Rain file %s not found", rain_file)
+def write_netcdf_with_time_indexes(source_file: Path, settings: Settings):
+    """Return netcdf file with only time indexes"""
+    if not source_file.exists():
+        raise MissingFileException("Source netcdf file %s not found", source_file)
 
-    logger.info("Extracting rain from %s", rain_file)
-    precipitation_timestamps = timestamps_from_netcdf(rain_file)
-
-    # Figure out which are valid for the given simulation period.
+    logger.info("Converting %s to a file with only time indexes", source_file)
+    relevant_timestamps = timestamps_from_netcdf(source_file)
+    # Figure out which timestamps are valid for the given simulation period.
     time_indexes: List = (
         np.argwhere(  # type: ignore
-            (precipitation_timestamps >= settings.start)  # type: ignore
-            & (precipitation_timestamps <= settings.end)  # type: ignore
+            (relevant_timestamps >= settings.start)  # type: ignore
+            & (relevant_timestamps <= settings.end)  # type: ignore
         )
         .flatten()
         .tolist()
     )
 
-    # Create new file with only time_indexes
+    # Create new file with only time indexes
     temp_dir = Path(tempfile.mkdtemp(prefix="fews-3di"))
-    target_file = temp_dir / rain_file.name
-    write_new_netcdf(rain_file, target_file, time_indexes)
-    logger.debug("Wrote new rain netcdf to %s", target_file)
-    return target_file
-
-
-# TODO: virtually the same as convert_rain_events.
-def convert_evaporation(evaporation_file: Path, settings: Settings) -> Path:
-    """Return netcdf file with only time indexes."""
-    if not evaporation_file.exists():
-        raise MissingFileException("Evaporation file %s not found", evaporation_file)
-
-    logger.info("Extracting evaporation from %s", evaporation_file)
-    precipitation_timestamps = timestamps_from_netcdf(evaporation_file)
-
-    # Figure out which are valid for the given simulation period.
-    time_indexes: List = (
-        np.argwhere(  # type: ignore
-            (precipitation_timestamps >= settings.start)  # type: ignore
-            & (precipitation_timestamps <= settings.end)  # type: ignore
-        )
-        .flatten()
-        .tolist()
-    )
-
-    # Create new file with only time_indexes
-    temp_dir = Path(tempfile.mkdtemp(prefix="fews-3di"))
-    target_file = temp_dir / evaporation_file.name
-
-    write_new_netcdf(evaporation_file, target_file, time_indexes)
-    logger.debug("Wrote new evaporation netcdf to %s", target_file)
+    target_file = temp_dir / source_file.name
+    write_new_netcdf(source_file, target_file, time_indexes)
+    logger.debug("Wrote new time-index-only netcdf to %s", target_file)
     return target_file
