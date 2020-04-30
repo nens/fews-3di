@@ -188,7 +188,7 @@ def lateral_timeseries(
             timeseries[name] = shifted_timeserie
     for name in to_remove:
         logger.warn(
-            "Removing lateral timeserie '%s' because there are fewer than two values",
+            "Removing lateral timeserie '%s' because there are less than two values",
             name,
         )
         del timeseries[name]
