@@ -82,6 +82,7 @@ class ThreediSimulation:
     api_client: openapi_client.ApiClient
     configuration: openapi_client.Configuration
     output_dir: Path
+    saved_state_id: int
     settings: utils.Settings
     simulation_id: int
     simulation_url: str
@@ -98,7 +99,7 @@ class ThreediSimulation:
         self.api_client.user_agent = USER_AGENT  # Let's be neat.
         self.output_dir = self.settings.base_dir / "output"
         self.output_dir.mkdir(exist_ok=True)
-        # You need to call login(), but we won't: it makes testing easier.
+        # You need to call login() and run(), but we won't: it makes testing easier.
 
     def login(self):
         """Log in and set the necessary tokens.
@@ -138,9 +139,8 @@ class ThreediSimulation:
 
         saved_state_id_file = self.settings.base_dir / SAVED_STATE_ID_FILENAME
         if self.settings.save_state:
-            # We want to save the state, so we also want to use the previously
-            # saved one.
-            self._set_initial_state(saved_state_id_file)
+            self._add_initial_state(saved_state_id_file)
+            self.save_state_id = self._prepare_initial_state()
 
         rain_file = self.settings.base_dir / "input" / "precipitation.nc"
         rain_raster_netcdf = utils.convert_rain_events(
@@ -157,7 +157,7 @@ class ThreediSimulation:
         self._run_simulation()
         self._download_results()
         if self.settings.save_state:
-            self._store_saved_state(saved_state_id_file)
+            self._write_saved_state_id(saved_state_id_file)
         self._process_results()
         logger.info("Done.")
 
@@ -234,7 +234,7 @@ class ThreediSimulation:
             if not still_to_process:
                 return
 
-    def _set_initial_state(self, saved_state_id_file: Path):
+    def _add_initial_state(self, saved_state_id_file: Path):
         # TODO explain rationale. (likewise for the other methods).
         if not saved_state_id_file.exists():
             msg = f"Saved state id file {saved_state_id_file} not found"
@@ -263,6 +263,22 @@ class ThreediSimulation:
                     raise MissingSavedStateError(msg) from e
             logger.debug("Error isn't a 400, so we re-raise it.")
             raise
+
+    def _prepare_initial_state(self) -> int:
+        """Instruct 3di to save the state afterwards and return its ID."""
+        expiry_timestamp = datetime.datetime.now() + datetime.timedelta(
+            days=self.settings.saved_state_expiry_days
+        )
+        saved_state = self.simulations_api.simulations_create_saved_states_timed_create(
+            self.simulation_id,
+            data={
+                "name": self.settings.simulationname,
+                "time": self.settings.duration,
+                "expiry": expiry_timestamp.isoformat(),
+            },
+        )
+        logger.info("Saved state will be stored: %s", saved_state.url)
+        return saved_state.id
 
     def _add_rain(self, rain_raster_netcdf: Path):
         """Upload rain raster netcdf file and wait for it to be processed."""
@@ -389,22 +405,16 @@ class ThreediSimulation:
                 f.write(response.content)
             logger.info("Downloaded %s", target)
 
-    def _store_saved_state(self, saved_state_id_file):
-        expiry_timestamp = datetime.datetime.now() + datetime.timedelta(
-            days=self.settings.saved_state_expiry_days
-        )
-        saved_state = self.simulations_api.simulations_create_saved_states_timed_create(
-            self.simulation_id,
-            data={
-                "name": self.settings.simulationname,
-                "time": self.settings.duration,
-                "expiry": expiry_timestamp.isoformat(),
-            },
-        )
-        logger.info("Saved state stored: %s", saved_state.url)
-        saved_state_id_file.write_text(str(saved_state.id))
+    def _write_saved_state_id(self, saved_state_id_file):
+        """Write ID of the saved style to the file for later usage.
+
+        3Di was instructed to save the state previously, now we write its
+        previously-determined ID to a file.
+
+        """
+        saved_state_id_file.write_text(str(self.saved_state_id))
         logger.info(
-            "Wrote saved state id (%s) to %s", saved_state.id, saved_state_id_file
+            "Wrote saved state id (%s) to %s", self.saved_state_id, saved_state_id_file
         )
 
     def _process_results(self):
