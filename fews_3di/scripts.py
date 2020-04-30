@@ -65,7 +65,6 @@ def main():
     else:
         log_level = logging.INFO
     logging.basicConfig(level=log_level, format="%(levelname)s: %(message)s")
-    # ^^^ TODO: add debug logging to file.
 
     try:
         settings = utils.Settings(Path(options.settings_file))
