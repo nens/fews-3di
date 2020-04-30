@@ -140,7 +140,7 @@ class ThreediSimulation:
         saved_state_id_file = self.settings.base_dir / SAVED_STATE_ID_FILENAME
         if self.settings.save_state:
             self._add_initial_state(saved_state_id_file)
-            self.save_state_id = self._prepare_initial_state()
+            self.saved_state_id = self._prepare_initial_state()
 
         rain_file = self.settings.base_dir / "input" / "precipitation.nc"
         rain_raster_netcdf = utils.convert_rain_events(
