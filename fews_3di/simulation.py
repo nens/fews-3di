@@ -185,7 +185,6 @@ class ThreediSimulation:
         data["threedimodel"] = str(model_id)
         data["organisation"] = self.settings.organisation
         data["start_datetime"] = self.settings.start.isoformat()
-        # TODO: end_datetime is also possible!
         data["duration"] = str(self.settings.duration)
         logger.debug("Creating simulation with these settings: %s", data)
 
@@ -454,8 +453,6 @@ class ThreediSimulation:
         logger.info(
             "Simulated discharges have been exported to %s", discharges_csv_output
         )
-
-        # TODO make similar to convert_rain_events and move to utils.py
 
         open_water_input_file = self.settings.base_dir / "input" / "ow.nc"
         open_water_output_file = self.settings.base_dir / "output" / "ow.nc"
