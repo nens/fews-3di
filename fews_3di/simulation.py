@@ -231,6 +231,7 @@ class ThreediSimulation:
                 return
 
     def _set_initial_state(self, saved_state_id_file: Path):
+        # TODO explain rationale. (likewise for the other methods).
         if not saved_state_id_file.exists():
             msg = f"Saved state id file {saved_state_id_file} not found"
             if self.allow_missing_saved_state:
