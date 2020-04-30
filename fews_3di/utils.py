@@ -39,6 +39,8 @@ class Settings:
     simulationname: str
     start: datetime.datetime
     end: datetime.datetime
+    save_state: bool
+    saved_state_expiry_days: int
 
     def __init__(self, settings_file: Path):
         """Read settings from the xml settings file."""
@@ -50,11 +52,13 @@ class Settings:
             msg = f"Settings file '{settings_file}' not found"
             raise MissingFileException(msg) from e
         required_properties = [
-            "username",
-            "password",
-            "organisation",
             "modelrevision",
+            "organisation",
+            "password",
+            "save_state",
+            "saved_state_expiry_days",
             "simulationname",
+            "username",
         ]
         for property_name in required_properties:
             self._read_property(property_name)
@@ -71,7 +75,14 @@ class Settings:
                 f"Required setting '{property_name}' is missing "
                 f"under <properties> in {self._settings_file}."
             )
-        value = elements[0].attrib["value"]
+        string_value = elements[0].attrib["value"]
+        if property_name == "save_state":
+            value = string_value.lower() == "true"
+        elif property_name == "saved_state_expiry_days":
+            value = int(string_value)
+        else:
+            # Normal situation.
+            value = string_value
         setattr(self, property_name, value)
         if property_name == "password":
             value = "*" * len(value)

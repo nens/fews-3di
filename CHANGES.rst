@@ -5,7 +5,7 @@ Changelog of fews-3di
 0.4 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Reading and storing saved states added.
 
 
 0.3.3 (2020-04-24)

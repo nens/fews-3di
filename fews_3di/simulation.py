@@ -27,6 +27,7 @@ from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 from typing import List
 from typing import Tuple
 
+import datetime
 import logging
 import netCDF4
 import numpy as np
@@ -37,8 +38,9 @@ import time
 
 
 API_HOST = "https://api.3di.live/v3.0"
-USER_AGENT = "fews-3di (https://github.com/nens/fews-3di/)"
+SAVED_STATE_ID_FILENAME = "3di-saved-state-id.txt"
 SIMULATION_STATUS_CHECK_INTERVAL = 30
+USER_AGENT = "fews-3di (https://github.com/nens/fews-3di/)"
 
 logger = logging.getLogger(__name__)
 
@@ -52,6 +54,10 @@ class NotFoundError(Exception):
 
 
 class InvalidDataError(Exception):
+    pass
+
+
+class MissingSavedStateError(Exception):
     pass
 
 
@@ -72,23 +78,28 @@ class ThreediSimulation:
 
     """
 
+    allow_missing_saved_state: bool
     api_client: openapi_client.ApiClient
     configuration: openapi_client.Configuration
+    output_dir: Path
+    saved_state_id: int
     settings: utils.Settings
-    simulations_api: openapi_client.SimulationsApi
     simulation_id: int
     simulation_url: str
-    output_dir: Path
+    simulations_api: openapi_client.SimulationsApi
 
-    def __init__(self, settings):
+    def __init__(
+        self, settings: utils.Settings, allow_missing_saved_state: bool = False
+    ):
         """Set up a 3di API connection."""
         self.settings = settings
+        self.allow_missing_saved_state = allow_missing_saved_state
         self.configuration = openapi_client.Configuration(host=API_HOST)
         self.api_client = openapi_client.ApiClient(self.configuration)
         self.api_client.user_agent = USER_AGENT  # Let's be neat.
         self.output_dir = self.settings.base_dir / "output"
         self.output_dir.mkdir(exist_ok=True)
-        # You need to call login(), but we won't: it makes testing easier.
+        # You need to call login() and run(), but we won't: it makes testing easier.
 
     def login(self):
         """Log in and set the necessary tokens.
@@ -126,6 +137,11 @@ class ThreediSimulation:
         laterals = utils.lateral_timeseries(laterals_csv, self.settings)
         self._add_laterals(laterals)
 
+        saved_state_id_file = self.settings.base_dir / SAVED_STATE_ID_FILENAME
+        if self.settings.save_state:
+            self._add_initial_state(saved_state_id_file)
+            self.saved_state_id = self._prepare_initial_state()
+
         rain_file = self.settings.base_dir / "input" / "precipitation.nc"
         rain_raster_netcdf = utils.convert_rain_events(
             rain_file, self.settings, self.simulation_id
@@ -140,6 +156,8 @@ class ThreediSimulation:
 
         self._run_simulation()
         self._download_results()
+        if self.settings.save_state:
+            self._write_saved_state_id(saved_state_id_file)
         self._process_results()
         logger.info("Done.")
 
@@ -215,6 +233,52 @@ class ThreediSimulation:
 
             if not still_to_process:
                 return
+
+    def _add_initial_state(self, saved_state_id_file: Path):
+        # TODO explain rationale. (likewise for the other methods).
+        if not saved_state_id_file.exists():
+            msg = f"Saved state id file {saved_state_id_file} not found"
+            if self.allow_missing_saved_state:
+                logger.warn(msg)
+                return
+            else:
+                raise utils.MissingFileException(msg)
+        saved_state_id: str = saved_state_id_file.read_text().strip()
+        logger.info("Simulation will use initial state %s", saved_state_id)
+        try:
+            self.simulations_api.simulations_initial_saved_state_create(
+                self.simulation_id, data={"saved_state": saved_state_id}
+            )
+        except openapi_client.exceptions.ApiException as e:
+            if e.status == 400:
+                logger.debug("Saved state setting error: %s", str(e))
+                msg = (
+                    f"Setting initial state to saved state id={saved_state_id} failed. "
+                    f"The error response was {e.body}"
+                )
+                if self.allow_missing_saved_state:
+                    logger.warn(msg)
+                    return
+                else:
+                    raise MissingSavedStateError(msg) from e
+            logger.debug("Error isn't a 400, so we re-raise it.")
+            raise
+
+    def _prepare_initial_state(self) -> int:
+        """Instruct 3di to save the state afterwards and return its ID."""
+        expiry_timestamp = datetime.datetime.now() + datetime.timedelta(
+            days=self.settings.saved_state_expiry_days
+        )
+        saved_state = self.simulations_api.simulations_create_saved_states_timed_create(
+            self.simulation_id,
+            data={
+                "name": self.settings.simulationname,
+                "time": self.settings.duration,
+                "expiry": expiry_timestamp.isoformat(),
+            },
+        )
+        logger.info("Saved state will be stored: %s", saved_state.url)
+        return saved_state.id
 
     def _add_rain(self, rain_raster_netcdf: Path):
         """Upload rain raster netcdf file and wait for it to be processed."""
@@ -340,6 +404,18 @@ class ThreediSimulation:
                 response.raise_for_status()
                 f.write(response.content)
             logger.info("Downloaded %s", target)
+
+    def _write_saved_state_id(self, saved_state_id_file):
+        """Write ID of the saved style to the file for later usage.
+
+        3Di was instructed to save the state previously, now we write its
+        previously-determined ID to a file.
+
+        """
+        saved_state_id_file.write_text(str(self.saved_state_id))
+        logger.info(
+            "Wrote saved state id (%s) to %s", self.saved_state_id, saved_state_id_file
+        )
 
     def _process_results(self):
         # Input files

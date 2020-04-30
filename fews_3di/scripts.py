@@ -13,6 +13,8 @@ import logging
 OWN_EXCEPTIONS = (
     simulation.AuthenticationError,
     simulation.InvalidDataError,
+    simulation.MissingSavedStateError,
+    simulation.NotFoundError,
     utils.MissingFileException,
     utils.MissingSettingException,
 )
@@ -39,6 +41,13 @@ def get_parser():
         default="run_info.xml",
         help="xml settings file",
     )
+    parser.add_argument(
+        "-m",
+        "--allow-missing-saved-state",
+        action="store_true",
+        default=False,
+        help="Allow a saved state to be initially missing",
+    )
     return parser
 
 
@@ -60,7 +69,9 @@ def main():
 
     try:
         settings = utils.Settings(Path(options.settings_file))
-        threedi_simulation = simulation.ThreediSimulation(settings)
+        threedi_simulation = simulation.ThreediSimulation(
+            settings, options.allow_missing_saved_state
+        )
         threedi_simulation.login()
         threedi_simulation.run()
         return 0  # Success!
