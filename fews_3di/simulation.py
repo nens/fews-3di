@@ -30,7 +30,6 @@ from typing import Tuple
 import datetime
 import logging
 import netCDF4
-import numpy as np
 import openapi_client
 import pandas as pd
 import requests
@@ -87,6 +86,7 @@ class ThreediSimulation:
     simulation_id: int
     simulation_url: str
     simulations_api: openapi_client.SimulationsApi
+    threedimodels_api: openapi_client.ThreedimodelsApi
 
     def __init__(
         self, settings: utils.Settings, allow_missing_saved_state: bool = False
@@ -104,7 +104,9 @@ class ThreediSimulation:
     def login(self):
         """Log in and set the necessary tokens.
 
-        Called from the init. It is a separate method to make testing easier.
+        Should be called right after initialising the class. It is a separate
+        method to make testing easier.
+
         """
         logger.info("Logging in on %s as user %s...", API_HOST, self.settings.username)
         auth_api = openapi_client.AuthApi(self.api_client)
@@ -128,9 +130,22 @@ class ThreediSimulation:
         self.configuration.api_key_prefix["Authorization"] = "Bearer"
 
     def run(self):
-        """Main method, should be called after login()."""
+        """Main method
+
+        Should be called as second method right after ``.login()`` and
+        ``__init__()``. It is a separate method to make testing easier.
+
+        We call helper methods (``._find_model()``) for all the individual
+        steps. This makes it easy to add more steps later. These methods
+        should not themselves set any parameters on ``self``: if something is
+        needed later on (like ``saved_state_id``), it should be returned. The
+        ``.run()`` method is the one that should keep track of those
+        variables. Otherwise methods become harder to test in isolation.
+
+        """
         model_id = self._find_model()
         self.simulations_api = openapi_client.SimulationsApi(self.api_client)
+        self.threedimodels_api = openapi_client.ThreedimodelsApi(self.api_client)
         self.simulation_id, self.simulation_url = self._create_simulation(model_id)
 
         laterals_csv = self.settings.base_dir / "input" / "lateral.csv"
@@ -143,14 +158,14 @@ class ThreediSimulation:
             self.saved_state_id = self._prepare_initial_state()
 
         rain_file = self.settings.base_dir / "input" / "precipitation.nc"
-        rain_raster_netcdf = utils.convert_rain_events(
-            rain_file, self.settings, self.simulation_id
+        rain_raster_netcdf = utils.write_netcdf_with_time_indexes(
+            rain_file, self.settings
         )
         self._add_rain(rain_raster_netcdf)
 
         evaporation_file = self.settings.base_dir / "input" / "evaporation.nc"
-        evaporation_raster_netcdf = utils.convert_evaporation(
-            evaporation_file, self.settings, self.simulation_id
+        evaporation_raster_netcdf = utils.write_netcdf_with_time_indexes(
+            evaporation_file, self.settings
         )
         self._add_evaporation(evaporation_raster_netcdf)
 
@@ -166,16 +181,16 @@ class ThreediSimulation:
         logger.debug(
             "Searching model based on revision=%s...", self.settings.modelrevision
         )
-        threedimodels_api = openapi_client.ThreedimodelsApi(self.api_client)
-        threedimodels_result = threedimodels_api.threedimodels_list(
+        threedimodels_result = self.threedimodels_api.threedimodels_list(
             slug__contains=self.settings.modelrevision
         )
-        if not threedimodels_result.results:
+        results = threedimodels_result.results
+        if not results:
             raise NotFoundError(
                 "Model with revision={self.settings.modelrevision} not found"
             )
-        id = threedimodels_result.results[0].id
-        url = threedimodels_result.results[0].url
+        id = results[0].id
+        url = results[0].url
         logger.info("Simulation uses model %s", url)
         return id
 
@@ -186,7 +201,6 @@ class ThreediSimulation:
         data["threedimodel"] = str(model_id)
         data["organisation"] = self.settings.organisation
         data["start_datetime"] = self.settings.start.isoformat()
-        # TODO: end_datetime is also possible!
         data["duration"] = str(self.settings.duration)
         logger.debug("Creating simulation with these settings: %s", data)
 
@@ -456,27 +470,13 @@ class ThreediSimulation:
             "Simulated discharges have been exported to %s", discharges_csv_output
         )
 
-        # TODO make similar to convert_rain_events and move to utils.py
-
         open_water_input_file = self.settings.base_dir / "input" / "ow.nc"
         open_water_output_file = self.settings.base_dir / "output" / "ow.nc"
-        open_water_timestamps = utils.timestamps_from_netcdf(open_water_input_file)
-
-        # Figure out which are valid for the given simulation period
-        # precipation_datetimes
-        time_indexes = (
-            np.argwhere(
-                (open_water_timestamps >= self.settings.start)
-                & (open_water_timestamps <= self.settings.end)
-            )
-            .flatten()
-            .tolist()
+        converted_netcdf = utils.write_netcdf_with_time_indexes(
+            open_water_input_file, self.settings
         )
-
-        # Create new file with only time_indexes
-        utils.write_new_netcdf(
-            open_water_input_file, open_water_output_file, time_indexes
-        )
+        # converted_netcdf is a temp file, so move it to the correct spot.
+        converted_netcdf.replace(open_water_output_file)
         logger.debug("Started open water output file %s", open_water_output_file)
         dset = netCDF4.Dataset(open_water_output_file, "a")
         s1 = (

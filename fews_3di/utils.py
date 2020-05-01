@@ -32,22 +32,23 @@ class MissingFileException(Exception):
 
 class Settings:
     # Instance variables with their types
-    username: str
-    password: str
-    organisation: str
-    modelrevision: str
-    simulationname: str
-    start: datetime.datetime
     end: datetime.datetime
+    modelrevision: str
+    organisation: str
+    password: str
     save_state: bool
     saved_state_expiry_days: int
+    settings_file: Path
+    simulationname: str
+    start: datetime.datetime
+    username: str
 
     def __init__(self, settings_file: Path):
         """Read settings from the xml settings file."""
-        self._settings_file = settings_file
-        logger.info("Reading settings from %s...", self._settings_file)
+        self.settings_file = settings_file
+        logger.info("Reading settings from %s...", self.settings_file)
         try:
-            self._root = ET.fromstring(self._settings_file.read_text())
+            self._root = ET.fromstring(self.settings_file.read_text())
         except FileNotFoundError as e:
             msg = f"Settings file '{settings_file}' not found"
             raise MissingFileException(msg) from e
@@ -73,7 +74,7 @@ class Settings:
         if not elements:
             raise MissingSettingException(
                 f"Required setting '{property_name}' is missing "
-                f"under <properties> in {self._settings_file}."
+                f"under <properties> in {self.settings_file}."
             )
         string_value = elements[0].attrib["value"]
         if property_name == "save_state":
@@ -96,7 +97,7 @@ class Settings:
         if not elements:
             raise MissingSettingException(
                 f"Required setting '{element_name}' is missing in "
-                f"{self._settings_file}."
+                f"{self.settings_file}."
             )
         date = elements[0].attrib["date"]
         time = elements[0].attrib["time"]
@@ -113,7 +114,7 @@ class Settings:
 
     @property
     def base_dir(self) -> Path:
-        return self._settings_file.parent
+        return self.settings_file.parent
 
 
 def lateral_timeseries(
@@ -188,7 +189,7 @@ def lateral_timeseries(
             timeseries[name] = shifted_timeserie
     for name in to_remove:
         logger.warn(
-            "Removing lateral timeserie '%s' because there are fewer than two values",
+            "Removing lateral timeserie '%s' because there are less than two values",
             name,
         )
         del timeseries[name]
@@ -233,60 +234,26 @@ def write_new_netcdf(source_file: Path, target_file: Path, time_indexes: List):
     source.close()
 
 
-def convert_rain_events(
-    rain_file: Path, settings: Settings, simulation_id: int
-) -> Path:
-    """Return netcdf file with only time indexes."""
-    if not rain_file.exists():
-        raise MissingFileException("Rain file %s not found", rain_file)
+def write_netcdf_with_time_indexes(source_file: Path, settings: Settings):
+    """Return netcdf file with only time indexes"""
+    if not source_file.exists():
+        raise MissingFileException("Source netcdf file %s not found", source_file)
 
-    logger.info("Extracting rain from %s", rain_file)
-    precipitation_timestamps = timestamps_from_netcdf(rain_file)
-
-    # Figure out which are valid for the given simulation period.
+    logger.info("Converting %s to a file with only time indexes", source_file)
+    relevant_timestamps = timestamps_from_netcdf(source_file)
+    # Figure out which timestamps are valid for the given simulation period.
     time_indexes: List = (
         np.argwhere(  # type: ignore
-            (precipitation_timestamps >= settings.start)  # type: ignore
-            & (precipitation_timestamps <= settings.end)  # type: ignore
+            (relevant_timestamps >= settings.start)  # type: ignore
+            & (relevant_timestamps <= settings.end)  # type: ignore
         )
         .flatten()
         .tolist()
     )
 
-    # Create new file with only time_indexes
+    # Create new file with only time indexes
     temp_dir = Path(tempfile.mkdtemp(prefix="fews-3di"))
-    target_file = temp_dir / rain_file.name.replace(".nc", f"_{simulation_id}.nc")
-    write_new_netcdf(rain_file, target_file, time_indexes)
-    logger.debug("Wrote new rain netcdf to %s", target_file)
-    return target_file
-
-
-# TODO: virtually the same as convert_rain_events.
-def convert_evaporation(
-    evaporation_file: Path, settings: Settings, simulation_id: int
-) -> Path:
-    """Return netcdf file with only time indexes."""
-    if not evaporation_file.exists():
-        raise MissingFileException("Evaporation file %s not found", evaporation_file)
-
-    logger.info("Extracting evaporation from %s", evaporation_file)
-    precipitation_timestamps = timestamps_from_netcdf(evaporation_file)
-
-    # Figure out which are valid for the given simulation period.
-    time_indexes: List = (
-        np.argwhere(  # type: ignore
-            (precipitation_timestamps >= settings.start)  # type: ignore
-            & (precipitation_timestamps <= settings.end)  # type: ignore
-        )
-        .flatten()
-        .tolist()
-    )
-
-    # Create new file with only time_indexes
-    temp_dir = Path(tempfile.mkdtemp(prefix="fews-3di"))
-    target_file = temp_dir / evaporation_file.name.replace(
-        ".nc", f"_{simulation_id}.nc"
-    )
-    write_new_netcdf(evaporation_file, target_file, time_indexes)
-    logger.debug("Wrote new evaporation netcdf to %s", target_file)
+    target_file = temp_dir / source_file.name
+    write_new_netcdf(source_file, target_file, time_indexes)
+    logger.debug("Wrote new time-index-only netcdf to %s", target_file)
     return target_file
