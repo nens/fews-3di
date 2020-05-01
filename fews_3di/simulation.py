@@ -86,6 +86,7 @@ class ThreediSimulation:
     simulation_id: int
     simulation_url: str
     simulations_api: openapi_client.SimulationsApi
+    threedimodels_api: openapi_client.ThreedimodelsApi
 
     def __init__(
         self, settings: utils.Settings, allow_missing_saved_state: bool = False
@@ -134,9 +135,17 @@ class ThreediSimulation:
         Should be called as second method right after ``.login()`` and
         ``__init__()``. It is a separate method to make testing easier.
 
+        We call helper methods (``._find_model()``) for all the individual
+        steps. This makes it easy to add more steps later. These methods
+        should not themselves set any parameters on ``self``: if something is
+        needed later on (like ``saved_state_id``), it should be returned. The
+        ``.run()`` method is the one that should keep track of those
+        variables. Otherwise methods become harder to test in isolation.
+
         """
         model_id = self._find_model()
         self.simulations_api = openapi_client.SimulationsApi(self.api_client)
+        self.threedimodels_api = openapi_client.ThreedimodelsApi(self.api_client)
         self.simulation_id, self.simulation_url = self._create_simulation(model_id)
 
         laterals_csv = self.settings.base_dir / "input" / "lateral.csv"
@@ -172,16 +181,16 @@ class ThreediSimulation:
         logger.debug(
             "Searching model based on revision=%s...", self.settings.modelrevision
         )
-        threedimodels_api = openapi_client.ThreedimodelsApi(self.api_client)
-        threedimodels_result = threedimodels_api.threedimodels_list(
+        threedimodels_result = self.threedimodels_api.threedimodels_list(
             slug__contains=self.settings.modelrevision
         )
-        if not threedimodels_result.results:
+        results = threedimodels_result.results
+        if not results:
             raise NotFoundError(
                 "Model with revision={self.settings.modelrevision} not found"
             )
-        id = threedimodels_result.results[0].id
-        url = threedimodels_result.results[0].url
+        id = results[0].id
+        url = results[0].url
         logger.info("Simulation uses model %s", url)
         return id
 
