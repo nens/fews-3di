@@ -51,3 +51,30 @@ def test_run_mock_mock_mock(example_settings):
     threedi_simulation._process_results = mock.MagicMock()
 
     threedi_simulation.run()
+
+
+def test_find_model(example_settings):
+    threedi_simulation = simulation.ThreediSimulation(example_settings)
+    threedi_simulation.threedimodels_api = mock.Mock()
+    # Pfffff, it is a bit hard to mock all this stuff...
+    mock_result = mock.Mock()
+    mock_model = mock.Mock()
+    mock_model.id = 42
+    mock_result.results = [mock_model]
+    threedi_simulation.threedimodels_api.threedimodels_list = mock.MagicMock(
+        return_value=mock_result
+    )
+    assert threedi_simulation._find_model() == 42
+
+
+def test_find_model_not_found(example_settings):
+    threedi_simulation = simulation.ThreediSimulation(example_settings)
+    threedi_simulation.threedimodels_api = mock.Mock()
+    # Pfffff, it is a bit hard to mock all this stuff...
+    mock_result = mock.Mock()
+    mock_result.results = []
+    threedi_simulation.threedimodels_api.threedimodels_list = mock.MagicMock(
+        return_value=mock_result
+    )
+    with pytest.raises(simulation.NotFoundError):
+        threedi_simulation._find_model()
