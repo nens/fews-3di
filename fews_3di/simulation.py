@@ -103,7 +103,9 @@ class ThreediSimulation:
     def login(self):
         """Log in and set the necessary tokens.
 
-        Called from the init. It is a separate method to make testing easier.
+        Should be called right after initialising the class. It is a separate
+        method to make testing easier.
+
         """
         logger.info("Logging in on %s as user %s...", API_HOST, self.settings.username)
         auth_api = openapi_client.AuthApi(self.api_client)
@@ -127,7 +129,12 @@ class ThreediSimulation:
         self.configuration.api_key_prefix["Authorization"] = "Bearer"
 
     def run(self):
-        """Main method, should be called after login()."""
+        """Main method
+
+        Should be called as second method right after ``.login()`` and
+        ``__init__()``. It is a separate method to make testing easier.
+
+        """
         model_id = self._find_model()
         self.simulations_api = openapi_client.SimulationsApi(self.api_client)
         self.simulation_id, self.simulation_url = self._create_simulation(model_id)
