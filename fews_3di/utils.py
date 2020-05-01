@@ -32,22 +32,23 @@ class MissingFileException(Exception):
 
 class Settings:
     # Instance variables with their types
-    username: str
-    password: str
-    organisation: str
-    modelrevision: str
-    simulationname: str
-    start: datetime.datetime
     end: datetime.datetime
+    modelrevision: str
+    organisation: str
+    password: str
     save_state: bool
     saved_state_expiry_days: int
+    settings_file: Path
+    simulationname: str
+    start: datetime.datetime
+    username: str
 
     def __init__(self, settings_file: Path):
         """Read settings from the xml settings file."""
-        self._settings_file = settings_file
-        logger.info("Reading settings from %s...", self._settings_file)
+        self.settings_file = settings_file
+        logger.info("Reading settings from %s...", self.settings_file)
         try:
-            self._root = ET.fromstring(self._settings_file.read_text())
+            self._root = ET.fromstring(self.settings_file.read_text())
         except FileNotFoundError as e:
             msg = f"Settings file '{settings_file}' not found"
             raise MissingFileException(msg) from e
@@ -73,7 +74,7 @@ class Settings:
         if not elements:
             raise MissingSettingException(
                 f"Required setting '{property_name}' is missing "
-                f"under <properties> in {self._settings_file}."
+                f"under <properties> in {self.settings_file}."
             )
         string_value = elements[0].attrib["value"]
         if property_name == "save_state":
@@ -96,7 +97,7 @@ class Settings:
         if not elements:
             raise MissingSettingException(
                 f"Required setting '{element_name}' is missing in "
-                f"{self._settings_file}."
+                f"{self.settings_file}."
             )
         date = elements[0].attrib["date"]
         time = elements[0].attrib["time"]
@@ -113,7 +114,7 @@ class Settings:
 
     @property
     def base_dir(self) -> Path:
-        return self._settings_file.parent
+        return self.settings_file.parent
 
 
 def lateral_timeseries(

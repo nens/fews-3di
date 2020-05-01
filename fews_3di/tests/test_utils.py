@@ -47,7 +47,8 @@ def test_read_settings_duration(example_settings):
 
 
 def test_read_settings_base_dir(example_settings):
-    assert example_settings.base_dir == TEST_DIR
+    assert (example_settings.base_dir / "example_settings.xml").exists()
+    assert (example_settings.base_dir / "input").exists()
 
 
 def test_read_settings_save_state(example_settings):
