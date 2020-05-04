@@ -5,7 +5,10 @@ Changelog of fews-3di
 0.5 (unreleased)
 ----------------
 
-- Code cleanup.
+- Code cleanup + more coverage.
+
+- Improved the documentation, including a separate ``DEVELOPMENT.rst`` to keep
+  those details out of the generic readme.
 
 
 0.4 (2020-04-30)
