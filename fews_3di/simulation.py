@@ -268,7 +268,8 @@ class ThreediSimulation:
                 logger.debug("Saved state setting error: %s", str(e))
                 msg = (
                     f"Setting initial state to saved state id={saved_state_id} failed. "
-                    f"The error response was {e.body}"
+                    f"The error response was {e.body}, perhaps use "
+                    f"--allow-missing-saved-state initially?"
                 )
                 if self.allow_missing_saved_state:
                     logger.warn(msg)
