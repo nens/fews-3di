@@ -30,9 +30,7 @@ coverage.xml
 .pytest_cache
 .mypy_cache
 
-original/run_info.xml
-original/output/
-original/*.txt
+original/
 dist/
 
 # Pycharm, visual studio
