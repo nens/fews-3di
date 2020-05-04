@@ -1,4 +1,11 @@
-"""Pytest fixtures for the tests."""
+"""Pytest fixtures for the tests.
+
+If you see a test like ``def test_something(example_settings)``, the
+example_settings is a "fixture" that the function with the same name (see
+below) returns. In this case a settings object in a temp directory with the
+necessary sample data.
+
+"""
 from fews_3di import utils
 from pathlib import Path
 

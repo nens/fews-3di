@@ -5,19 +5,16 @@ Changelog of fews-3di
 0.5 (unreleased)
 ----------------
 
-- Code cleanup.
+- Code cleanup + more coverage.
+
+- Improved the documentation, including a separate ``DEVELOPMENT.rst`` to keep
+  those details out of the generic readme.
 
 
 0.4 (2020-04-30)
 ----------------
 
 - Reading and storing saved states added.
-
-
-0.3.3 (2020-04-24)
-------------------
-
-- Another release mechanism fix.
 
 
 0.3 (2020-04-23)

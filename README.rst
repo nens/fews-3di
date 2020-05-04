@@ -17,66 +17,62 @@ problems.
 
 ``run-fews-3di`` looks for a ``run_info.xml`` in the current directory by
 default, but you can pass a different file in a different location with
-``--settings``.
+``--settings``::
+
+  $ run-fews-3di
+  $ run-fews-3di --help
+  $ run-fews-3di --settings /some/directory/run_info.xml
+
+
+Configuration and input/output files
+------------------------------------
+
+The expected information in run_info.xml is::
+
+  <?xml version="1.0" encoding="UTF-8"?>
+  <Run xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns="http://www.wldelft.nl/fews/PI"
+       xsi:schemaLocation="http://www.wldelft.nl/fews/PI
+			   http://fews.wldelft.nl/schemas/version1.0/pi-schemas/pi_run.xsd"
+			   version="1.5">
+      <startDateTime date="2020-01-26" time="10:00:00"/>
+      <endDateTime date="2020-01-30" time="12:00:00"/>
+      <properties>
+	  <string key="username" value="pietje"/>
+	  <string key="password" value="onder-de-deurmat"/>
+	  <string key="organisation" value="12345678abcd"/>
+	  <string key="modelrevision" value="abcd123456787"/>
+	  <string key="simulationname" value="Simulation name"/>
+	  <string key="save_state" value="True"/>
+	  <string key="saved_state_expiry_days" value="5"/>
+      </properties>
+  </Run>
+
+**Note:** ``saved_state_expiry_days`` used to be spelled as
+``save_state_expiry_days``, without a "d".
 
 Several input files are needed, they should be in the ``input`` directory
-**relative** to the ``run_info.xml``, like ``input/evaporation.nc``.
-Output is stored in the ``output`` directory relative to the ``run_info.xml``.
+**relative** to the ``run_info.xml``::
+
+- ``run_info.xml``
+- ``input/lateral.csv``
+- ``input/precipitation.nc``
+- ``input/evaporation.nc``
+- ``input/ow.nc``
+- ``model/gridadmin.h5``
+
+Output is stored in the ``output`` directory relative to the
+``run_info.xml``::
+
+- ``output/simulation.log`` (unavailable, but included in the zip)
+- ``output/flow_summary.log`` (idem)
+- ``output/log_files_sim_ID.zip``
+- ``output/results_3di.nc``
+- ``output/dischages.csv``
+- ``output/ow.nc``
 
 
-Development instructions (only for the programmers, not for regular use)
-------------------------------------------------------------------------
+Development
+-----------
 
-We use python's build-in "virtualenv" to get a nice isolated directory. You
-only need to run this once::
-
-  $ python3 -m venv .
-
-A virtualenv puts its commands in the ``bin`` directory. So ``bin/pip``,
-``bin/pytest``, etc. Set up the dependencies like this::
-
-  $ bin/pip install -r requirements.txt
-
-There will be a script you can run like this::
-
-  $ bin/run-fews-3di
-
-It runs the `main()` function in `fews-3di/scripts.py`,
-adjust that if necessary. The script is configured in `setup.py` (see
-`entry_points`).
-
-In order to get nicely formatted python files without having to spend manual
-work on it, run the following command periodically::
-
-  $ bin/black fews_3di
-
-Run the tests regularly. This also checks with pyflakes, black and it reports
-coverage. Pure luxury::
-
-  $ bin/pytest
-
-The tests are also run automatically `on "github actions"
-<https://githug.com/nens/fews-3di/actions>`_ for
-"master" and for pull requests. So don't just make a branch, but turn it into
-a pull request right away:
-
-- Prepend the title with "[WIP]", work in progress. That way you make clear it
-  isn't ready yet to be merged.
-
-- **Important**: it is easy to give feedback on pull requests. Little comments
-  on the individual lines, for instance. So use it to get early feedback, if
-  you think that's useful.
-
-- On your pull request page, you also automatically get the feedback from the
-  automated tests.
-
-There's also
-`coverage reporting <https://coveralls.io/github/nens/fews-3di>`_
-on coveralls.io.
-
-If you need a new dependency (like ``requests``), add it in ``setup.py`` in
-``install_requires``. Local development tools, like "black", can be added to the
-``requirements.txt`` directoy. In both cases, run install again to actuall
-install your dependency::
-
-  $ bin/pip install -r requirements.txt
+Development happens on github. See ``DEVELOPMENT.rst`` for more information.

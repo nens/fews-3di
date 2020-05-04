@@ -5,6 +5,7 @@ import mock
 import pytest
 
 
+# Note: example_settings is an automatic fixture, see conftest.py
 def test_init(example_settings):
     simulation.ThreediSimulation(example_settings)
 
