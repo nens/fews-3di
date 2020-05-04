@@ -2,7 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-1.1 (unreleased)
+1.1 (2020-05-04)
 ----------------
 
 - When an existing saved state isn't found, it can be because it is the first
