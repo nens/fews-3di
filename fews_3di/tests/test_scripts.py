@@ -1,13 +1,8 @@
 """Tests for script.py"""
 from fews_3di import scripts
-from pathlib import Path
 
 import mock
 import pytest
-
-
-TEST_DIR = Path(__file__).parent
-EXAMPLE_SETTINGS_FILE = TEST_DIR / "example_settings.xml"
 
 
 def test_get_parser():
@@ -35,6 +30,7 @@ def test_main_error():
         assert scripts.main() == 1  # Exit error code.
 
 
+# Note: example_settings is an automatic fixture, see conftest.py
 def test_main_login_error(example_settings):
     with mock.patch(
         "sys.argv", ["program", "--settings", str(example_settings.settings_file)]
@@ -52,7 +48,9 @@ def test_main_login_error_verbose(example_settings):
         assert scripts.main() == 1  # exit code 1: expected login error.
 
 
-def test_main_dummy_run():
-    with mock.patch("sys.argv", ["program", "--settings", str(EXAMPLE_SETTINGS_FILE)]):
+def test_main_dummy_run(example_settings):
+    with mock.patch(
+        "sys.argv", ["program", "--settings", str(example_settings.settings_file)]
+    ):
         with mock.patch("fews_3di.scripts.simulation.ThreediSimulation"):
             assert scripts.main() == 0  # Success

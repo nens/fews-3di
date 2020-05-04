@@ -22,6 +22,7 @@ def test_read_settings_smoke():
     utils.Settings(EXAMPLE_SETTINGS_FILE)
 
 
+# Note: example_settings is an automatic fixture, see conftest.py
 def test_read_settings_extracts_properties(example_settings):
     assert example_settings.username == "pietje"
 
