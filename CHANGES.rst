@@ -5,7 +5,13 @@ Changelog of fews-3di
 1.1 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- When an existing saved state isn't found, it can be because it is the first
+  time the script is run. Or the previous saved data has expired. The error
+  message now points at the ``--allow-missing-saved-state`` possibility. This
+  can be used to allow the missing of the saved state: a new one will be
+  created.
+
+- Fixed bug: two lines were accidentally swapped, leading to an early crash.
 
 
 1.0 (2020-05-04)
