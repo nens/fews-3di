@@ -2,7 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-0.5 (unreleased)
+1.0 (2020-05-04)
 ----------------
 
 - Code cleanup + more coverage.
