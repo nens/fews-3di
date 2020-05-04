@@ -143,9 +143,9 @@ class ThreediSimulation:
         variables. Otherwise methods become harder to test in isolation.
 
         """
-        model_id = self._find_model()
         self.simulations_api = openapi_client.SimulationsApi(self.api_client)
         self.threedimodels_api = openapi_client.ThreedimodelsApi(self.api_client)
+        model_id = self._find_model()
         self.simulation_id, self.simulation_url = self._create_simulation(model_id)
 
         laterals_csv = self.settings.base_dir / "input" / "lateral.csv"
