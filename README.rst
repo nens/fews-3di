@@ -52,23 +52,33 @@ The expected information in run_info.xml is::
 ``save_state_expiry_days``, without a "d".
 
 Several input files are needed, they should be in the ``input`` directory
-**relative** to the ``run_info.xml``::
+**relative** to the ``run_info.xml``:
 
 - ``run_info.xml``
+
 - ``input/lateral.csv``
+
 - ``input/precipitation.nc``
+
 - ``input/evaporation.nc``
+
 - ``input/ow.nc``
+
 - ``model/gridadmin.h5``
 
 Output is stored in the ``output`` directory relative to the
-``run_info.xml``::
+``run_info.xml``:
 
 - ``output/simulation.log`` (unavailable, but included in the zip)
+
 - ``output/flow_summary.log`` (idem)
+
 - ``output/log_files_sim_ID.zip``
+
 - ``output/results_3di.nc``
+
 - ``output/dischages.csv``
+
 - ``output/ow.nc``
 
 
