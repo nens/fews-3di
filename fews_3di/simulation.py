@@ -34,7 +34,8 @@ import openapi_client
 import pandas as pd
 import requests
 import time
-
+import os.path
+from os import path
 
 API_HOST = "https://api.3di.live/v3.0"
 SAVED_STATE_ID_FILENAME = "3di-saved-state-id.txt"
@@ -149,8 +150,9 @@ class ThreediSimulation:
         self.simulation_id, self.simulation_url = self._create_simulation(model_id)
 
         laterals_csv = self.settings.base_dir / "input" / "lateral.csv"
-        laterals = utils.lateral_timeseries(laterals_csv, self.settings)
-        self._add_laterals(laterals)
+        if path.exists(laterals_csv):
+            laterals = utils.lateral_timeseries(laterals_csv, self.settings)
+            self._add_laterals(laterals)
 
         saved_state_id_file = self.settings.base_dir / SAVED_STATE_ID_FILENAME
         if self.settings.save_state:
@@ -158,18 +160,23 @@ class ThreediSimulation:
             self.saved_state_id = self._prepare_initial_state()
 
         rain_file = self.settings.base_dir / "input" / "precipitation.nc"
-        rain_raster_netcdf = utils.write_netcdf_with_time_indexes(
-            rain_file, self.settings
-        )
-        self._add_rain(rain_raster_netcdf)
+        if path.exists(rain_file):
+            rain_raster_netcdf = utils.write_netcdf_with_time_indexes(
+                rain_file, self.settings
+            )
+            self._add_rain(rain_raster_netcdf)
 
         evaporation_file = self.settings.base_dir / "input" / "evaporation.nc"
-        evaporation_raster_netcdf = utils.write_netcdf_with_time_indexes(
-            evaporation_file, self.settings
-        )
-        self._add_evaporation(evaporation_raster_netcdf)
+        if path.exists(evaporation_file):
+            evaporation_raster_netcdf = utils.write_netcdf_with_time_indexes(
+                evaporation_file, self.settings
+            )
+            self._add_evaporation(evaporation_raster_netcdf)
 
         self._run_simulation()
+        process_basic_lizard_results=True
+        if process_basic_lizard_results==True:
+            self._process_basic_lizard_results()
         self._download_results()
         if self.settings.save_state:
             self._write_saved_state_id(saved_state_id_file)
@@ -420,6 +427,14 @@ class ThreediSimulation:
                 f.write(response.content)
             logger.info("Downloaded %s", target)
 
+    def _process_basic_lizard_results(self):
+        self.simulations_api.simulations_results_post_processing_lizard_basic_create(
+        simulation_pk=self.simulation_id,
+        data={
+                    "scenario_name": "test_ivar",
+                    "process_basic_results": True
+                }
+        )
     def _write_saved_state_id(self, saved_state_id_file):
         """Write ID of the saved style to the file for later usage.
 
