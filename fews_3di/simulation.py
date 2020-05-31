@@ -153,6 +153,8 @@ class ThreediSimulation:
         if path.exists(laterals_csv):
             laterals = utils.lateral_timeseries(laterals_csv, self.settings)
             self._add_laterals(laterals)
+        else:
+            logger.info("No lateral timeseries found, skipping..")
 
         saved_state_id_file = self.settings.base_dir / SAVED_STATE_ID_FILENAME
         if self.settings.save_state:
@@ -172,11 +174,11 @@ class ThreediSimulation:
                 evaporation_file, self.settings
             )
             self._add_evaporation(evaporation_raster_netcdf)
-
-        self._run_simulation()
+        
         process_basic_lizard_results=True
         if process_basic_lizard_results==True:
             self._process_basic_lizard_results()
+        self._run_simulation()
         self._download_results()
         if self.settings.save_state:
             self._write_saved_state_id(saved_state_id_file)
