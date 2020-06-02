@@ -157,12 +157,12 @@ class ThreediSimulation:
             logger.info("No lateral timeseries found, skipping...")
 
         saved_state_id_file = self.settings.base_dir / SAVED_STATE_ID_FILENAME
-        if self.settings.save_state==True:
+        if self.settings.save_state:
             self._add_initial_state(saved_state_id_file)
             self.saved_state_id = self._prepare_initial_state()
         else:
             logger.info("Not using saved state, skipping...")
-            
+
         rain_file = self.settings.base_dir / "input" / "precipitation.nc"
         if path.exists(rain_file):
             rain_raster_netcdf = utils.write_netcdf_with_time_indexes(
@@ -171,7 +171,7 @@ class ThreediSimulation:
             self._add_rain(rain_raster_netcdf)
         else:
             logger.info("No rain file found, skipping...")
-            
+
         evaporation_file = self.settings.base_dir / "input" / "evaporation.nc"
         if path.exists(evaporation_file):
             evaporation_raster_netcdf = utils.write_netcdf_with_time_indexes(
@@ -180,17 +180,17 @@ class ThreediSimulation:
             self._add_evaporation(evaporation_raster_netcdf)
         else:
             logger.info("No evaporation file found, skipping...")
-        
-        print(self.settings.process_basic_results)        
-        if self.settings.process_basic_results==True:
+
+        print(self.settings.process_basic_results)
+        if self.settings.process_basic_results:
             self._process_basic_lizard_results()
         else:
             logger.info("Not processing basic results in Lizard")
 
         self._run_simulation()
         self._download_results()
-        if self.settings.save_state==True:
-           self._write_saved_state_id(saved_state_id_file)
+        if self.settings.save_state:
+            self._write_saved_state_id(saved_state_id_file)
         self._process_results()
         logger.info("Done.")
 
@@ -439,16 +439,18 @@ class ThreediSimulation:
             logger.info("Downloaded %s", target)
 
     def _process_basic_lizard_results(self):
-        print('hoi')
+        print("hoi")
         self.simulations_api.simulations_results_post_processing_lizard_basic_create(
-        simulation_pk=self.simulation_id,
-        data={
-                    "scenario_name": self.settings.results_scenario_name,
-                    "process_basic_results": True
-                }
+            simulation_pk=self.simulation_id,
+            data={
+                "scenario_name": self.settings.results_scenario_name,
+                "process_basic_results": True,
+            },
         )
-        logger.info("Basic lizard results will be processed as %s", result_scenario_name)
-        
+        logger.info(
+            "Basic lizard results will be processed as %s", result_scenario_name
+        )
+
     def _write_saved_state_id(self, saved_state_id_file):
         """Write ID of the saved style to the file for later usage.
 

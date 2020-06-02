@@ -62,11 +62,9 @@ class Settings:
             "saved_state_expiry_days",
             "simulationname",
             "username",
-            "process_basic_results"
+            "process_basic_results",
         ]
-        optional_properties = [
-            "results_scenario_name"
-        ]
+        optional_properties = ["results_scenario_name"]
         for property_name in required_properties:
             self._read_property(property_name)
 
@@ -74,7 +72,8 @@ class Settings:
             try:
                 self._read_property(property_name)
             except:
-                pass
+                logger.info("optional property %s not provided", property_name)
+
         datetime_variables = ["start", "end"]
         for datetime_variable in datetime_variables:
             self._read_datetime(datetime_variable)
