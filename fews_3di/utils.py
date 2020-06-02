@@ -42,6 +42,8 @@ class Settings:
     simulationname: str
     start: datetime.datetime
     username: str
+    process_basic_results: bool
+    results_scenario_name: str
 
     def __init__(self, settings_file: Path):
         """Read settings from the xml settings file."""
@@ -60,9 +62,19 @@ class Settings:
             "saved_state_expiry_days",
             "simulationname",
             "username",
+            "process_basic_results"
+        ]
+        optional_properties = [
+            "results_scenario_name"
         ]
         for property_name in required_properties:
             self._read_property(property_name)
+
+        for property_name in optional_properties:
+            try:
+                self._read_property(property_name)
+            except:
+                pass
         datetime_variables = ["start", "end"]
         for datetime_variable in datetime_variables:
             self._read_datetime(datetime_variable)
