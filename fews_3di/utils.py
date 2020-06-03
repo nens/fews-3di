@@ -92,6 +92,8 @@ class Settings:
             value = string_value.lower() == "true"
         elif property_name == "saved_state_expiry_days":
             value = int(string_value)
+        elif property_name == "process_basic_results":
+            value = string_value.lower() == "true"
         else:
             # Normal situation.
             value = string_value

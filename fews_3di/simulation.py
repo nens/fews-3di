@@ -181,7 +181,6 @@ class ThreediSimulation:
         else:
             logger.info("No evaporation file found, skipping...")
 
-        print(self.settings.process_basic_results)
         if self.settings.process_basic_results:
             self._process_basic_lizard_results()
         else:
@@ -424,9 +423,7 @@ class ThreediSimulation:
         }
         for desired_result in desired_results:
             if desired_result not in available_results:
-                logger.warning(
-                    "Desired result file %s isn't available.", desired_result
-                )
+                logger.error("Desired result file %s isn't available.", desired_result)
                 continue
             resource = self.simulations_api.simulations_results_files_download(
                 available_results[desired_result].id, self.simulation_id
@@ -439,7 +436,6 @@ class ThreediSimulation:
             logger.info("Downloaded %s", target)
 
     def _process_basic_lizard_results(self):
-        print("hoi")
         self.simulations_api.simulations_results_post_processing_lizard_basic_create(
             simulation_pk=self.simulation_id,
             data={
@@ -448,7 +444,8 @@ class ThreediSimulation:
             },
         )
         logger.info(
-            "Basic lizard results will be processed as %s", result_scenario_name
+            "Basic lizard results will be processed as %s",
+            self.settings.results_scenario_name,
         )
 
     def _write_saved_state_id(self, saved_state_id_file):
