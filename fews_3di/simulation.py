@@ -34,7 +34,6 @@ import openapi_client
 import pandas as pd
 import requests
 import time
-import os.path
 from os import path
 
 API_HOST = "https://api.3di.live/v3.0"
