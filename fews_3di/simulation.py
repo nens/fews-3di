@@ -34,7 +34,6 @@ import openapi_client
 import pandas as pd
 import requests
 import time
-from os import path
 
 API_HOST = "https://api.3di.live/v3.0"
 SAVED_STATE_ID_FILENAME = "3di-saved-state-id.txt"
@@ -149,36 +148,36 @@ class ThreediSimulation:
         self.simulation_id, self.simulation_url = self._create_simulation(model_id)
 
         laterals_csv = self.settings.base_dir / "input" / "lateral.csv"
-        if path.exists(laterals_csv):
+        if laterals_csv.exists():
             laterals = utils.lateral_timeseries(laterals_csv, self.settings)
             self._add_laterals(laterals)
         else:
-            logger.info("No lateral timeseries found, skipping...")
+            logger.info("No lateral timeseries found at %s, skipping.", laterals_csv)
 
         saved_state_id_file = self.settings.base_dir / SAVED_STATE_ID_FILENAME
         if self.settings.save_state:
             self._add_initial_state(saved_state_id_file)
             self.saved_state_id = self._prepare_initial_state()
         else:
-            logger.info("Not using saved state, skipping...")
+            logger.info("Saved state not enabled in the configuration, skipping.")
 
         rain_file = self.settings.base_dir / "input" / "precipitation.nc"
-        if path.exists(rain_file):
+        if rain_file.exists():
             rain_raster_netcdf = utils.write_netcdf_with_time_indexes(
                 rain_file, self.settings
             )
             self._add_rain(rain_raster_netcdf)
         else:
-            logger.info("No rain file found, skipping...")
+            logger.info("No rain file found at %s, skipping.", rain_file)
 
         evaporation_file = self.settings.base_dir / "input" / "evaporation.nc"
-        if path.exists(evaporation_file):
+        if evaporation_file.exists():
             evaporation_raster_netcdf = utils.write_netcdf_with_time_indexes(
                 evaporation_file, self.settings
             )
             self._add_evaporation(evaporation_raster_netcdf)
         else:
-            logger.info("No evaporation file found, skipping...")
+            logger.info("No evaporation file found at %s, skipping.", evaporation_file)
 
         if self.settings.process_basic_results:
             self._process_basic_lizard_results()
