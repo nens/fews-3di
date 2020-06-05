@@ -22,7 +22,6 @@
         <string key="simulationname" value="Simulation name"/>
         <string key="save_state" value="True"/>
         <string key="saved_state_expiry_days" value="5"/>
-        <string key="process_basic_results" value="True"/>
-        <string key="results_scenario_name" value="ivar test"/>
+        <string key="lizard_results_scenario_name" value="ivar test"/>
     </properties>
 </Run>

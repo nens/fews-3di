@@ -179,7 +179,7 @@ class ThreediSimulation:
         else:
             logger.info("No evaporation file found at %s, skipping.", evaporation_file)
 
-        if self.settings.process_basic_results:
+        if hasattr(self.settings, "lizard_results_scenario_name"):
             self._process_basic_lizard_results()
         else:
             logger.info("Not processing basic results in Lizard")

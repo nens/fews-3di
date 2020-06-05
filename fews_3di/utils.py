@@ -62,27 +62,23 @@ class Settings:
             "saved_state_expiry_days",
             "simulationname",
             "username",
-            "process_basic_results",
         ]
-        optional_properties = ["results_scenario_name"]
+        optional_properties = ["lizard_results_scenario_name"]
         for property_name in required_properties:
             self._read_property(property_name)
 
         for property_name in optional_properties:
-            try:
-                self._read_property(property_name)
-            except:
-                logger.info("optional property %s not provided", property_name)
+            self._read_property(property_name, True)
 
         datetime_variables = ["start", "end"]
         for datetime_variable in datetime_variables:
             self._read_datetime(datetime_variable)
 
-    def _read_property(self, property_name):
+    def _read_property(self, property_name, optional=False):
         """Extract <properties><string> element with the correct key attribute."""
         xpath = f"pi:properties/pi:string[@key='{property_name}']"
         elements = self._root.findall(xpath, NAMESPACES)
-        if not elements:
+        if not elements and not optional:
             raise MissingSettingException(
                 f"Required setting '{property_name}' is missing "
                 f"under <properties> in {self.settings_file}."
@@ -92,8 +88,6 @@ class Settings:
             value = string_value.lower() == "true"
         elif property_name == "saved_state_expiry_days":
             value = int(string_value)
-        elif property_name == "process_basic_results":
-            value = string_value.lower() == "true"
         else:
             # Normal situation.
             value = string_value
