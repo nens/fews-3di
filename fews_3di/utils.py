@@ -73,7 +73,6 @@ class Settings:
         datetime_variables = ["start", "end"]
         for datetime_variable in datetime_variables:
             self._read_datetime(datetime_variable)
-        
 
     def _read_property(self, property_name, optional=False):
         """Extract <properties><string> element with the correct key attribute."""
