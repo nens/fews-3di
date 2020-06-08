@@ -83,6 +83,9 @@ class Settings:
                 f"Required setting '{property_name}' is missing "
                 f"under <properties> in {self.settings_file}."
             )
+        if not elements and optional:
+            return
+
         string_value = elements[0].attrib["value"]
         if property_name == "save_state":
             value = string_value.lower() == "true"
