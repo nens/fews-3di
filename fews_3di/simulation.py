@@ -179,7 +179,7 @@ class ThreediSimulation:
         else:
             logger.info("No evaporation file found at %s, skipping.", evaporation_file)
 
-        if hasattr(self.settings, "lizard_results_scenario_name"):
+        if self.settings.lizard_results_scenario_name:
             self._process_basic_lizard_results()
         else:
             logger.info("Not processing basic results in Lizard")
@@ -437,13 +437,13 @@ class ThreediSimulation:
         self.simulations_api.simulations_results_post_processing_lizard_basic_create(
             simulation_pk=self.simulation_id,
             data={
-                "scenario_name": self.settings.results_scenario_name,
+                "scenario_name": self.settings.lizard_results_scenario_name,
                 "process_basic_results": True,
             },
         )
         logger.info(
             "Basic lizard results will be processed as %s",
-            self.settings.results_scenario_name,
+            self.settings.lizard_results_scenario_name,
         )
 
     def _write_saved_state_id(self, saved_state_id_file):
