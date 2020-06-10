@@ -256,6 +256,10 @@ class ThreediSimulation:
                 elif lateral.state.lower() == "invalid":
                     msg = f"Lateral {lateral.url} is invalid according to the server."
                     raise InvalidDataError(msg)
+                elif lateral.state.lower() == "error":
+                    state_description = lateral.state_description
+                    msg = f"Server returned an error. Response is: {state_description}"
+                    raise InvalidDataError(msg)
                 elif lateral.state.lower() == "valid":
                     logger.debug("Lateral %s is valid.", lateral.url)
                     still_to_process.remove(id)
@@ -335,6 +339,10 @@ class ThreediSimulation:
             elif state.lower() == "invalid":
                 msg = f"Rain raster upload (to {log_url}) is invalid according to the server."
                 raise InvalidDataError(msg)
+            elif state.lower() == "error":
+                state_description = upload_status.results[0].file.state_description
+                msg = f"Server returned an error. Response is: {state_description}"
+                raise InvalidDataError(msg)
             elif state.lower() == "processed":
                 logger.debug("Rain raster %s has been processed.", log_url)
                 return
@@ -371,6 +379,10 @@ class ThreediSimulation:
                 continue
             elif state.lower() == "invalid":
                 msg = f"Evaporation raster upload (to {log_url}) is invalid according to the server."
+                raise InvalidDataError(msg)
+            elif state.lower() == "error":
+                state_description = upload_status.results[0].file.state_description
+                msg = f"Server returned an error. Response is: {state_description}"
                 raise InvalidDataError(msg)
             elif state.lower() == "processed":
                 logger.debug("Evaporation raster %s has been processed.", log_url)
