@@ -23,5 +23,6 @@
         <string key="save_state" value="True"/>
         <string key="saved_state_expiry_days" value="5"/>
         <string key="lizard_results_scenario_name" value="ivar test"/>
+        <string key="lizard_results_scenario_uuid" value=""/>
     </properties>
 </Run>

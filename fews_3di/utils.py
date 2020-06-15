@@ -48,6 +48,7 @@ class Settings:
         """Read settings from the xml settings file."""
         self.settings_file = settings_file
         setattr(self, "lizard_results_scenario_name", "")
+        setattr(self, "lizard_results_scenario_uuid", "")
         logger.info("Reading settings from %s...", self.settings_file)
         try:
             self._root = ET.fromstring(self.settings_file.read_text())
@@ -63,7 +64,10 @@ class Settings:
             "simulationname",
             "username",
         ]
-        optional_properties = ["lizard_results_scenario_name"]
+        optional_properties = [
+            "lizard_results_scenario_name",
+            "lizard_results_scenario_uuid",
+        ]
         for property_name in required_properties:
             self._read_property(property_name)
 
