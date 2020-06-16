@@ -23,5 +23,7 @@
 	<string key="use_state" value="./state.txt"/>
 	<string key="save_state" value="True"/>
 	<string key="save_state_expiry_days" value="5"/>
+    <string key="lizard_results_scenario_name" value="ivar test"/>
+    <string key="lizard_results_scenario_uuid" value=""/>
     </properties>
 </Run>

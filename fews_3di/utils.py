@@ -42,10 +42,13 @@ class Settings:
     simulationname: str
     start: datetime.datetime
     username: str
+    lizard_results_scenario_name: str
 
     def __init__(self, settings_file: Path):
         """Read settings from the xml settings file."""
         self.settings_file = settings_file
+        setattr(self, "lizard_results_scenario_name", "")
+        setattr(self, "lizard_results_scenario_uuid", "")
         logger.info("Reading settings from %s...", self.settings_file)
         try:
             self._root = ET.fromstring(self.settings_file.read_text())
@@ -61,21 +64,32 @@ class Settings:
             "simulationname",
             "username",
         ]
+        optional_properties = [
+            "lizard_results_scenario_name",
+            "lizard_results_scenario_uuid",
+        ]
         for property_name in required_properties:
             self._read_property(property_name)
+
+        for property_name in optional_properties:
+            self._read_property(property_name, True)
+
         datetime_variables = ["start", "end"]
         for datetime_variable in datetime_variables:
             self._read_datetime(datetime_variable)
 
-    def _read_property(self, property_name):
+    def _read_property(self, property_name, optional=False):
         """Extract <properties><string> element with the correct key attribute."""
         xpath = f"pi:properties/pi:string[@key='{property_name}']"
         elements = self._root.findall(xpath, NAMESPACES)
-        if not elements:
+        if not elements and not optional:
             raise MissingSettingException(
                 f"Required setting '{property_name}' is missing "
                 f"under <properties> in {self.settings_file}."
             )
+        if not elements and optional:
+            return
+
         string_value = elements[0].attrib["value"]
         if property_name == "save_state":
             value = string_value.lower() == "true"

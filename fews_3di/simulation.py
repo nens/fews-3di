@@ -35,7 +35,6 @@ import pandas as pd
 import requests
 import time
 
-
 API_HOST = "https://api.3di.live/v3.0"
 SAVED_STATE_ID_FILENAME = "3di-saved-state-id.txt"
 SIMULATION_STATUS_CHECK_INTERVAL = 30
@@ -149,25 +148,41 @@ class ThreediSimulation:
         self.simulation_id, self.simulation_url = self._create_simulation(model_id)
 
         laterals_csv = self.settings.base_dir / "input" / "lateral.csv"
-        laterals = utils.lateral_timeseries(laterals_csv, self.settings)
-        self._add_laterals(laterals)
+        if laterals_csv.exists():
+            laterals = utils.lateral_timeseries(laterals_csv, self.settings)
+            self._add_laterals(laterals)
+        else:
+            logger.info("No lateral timeseries found at %s, skipping.", laterals_csv)
 
         saved_state_id_file = self.settings.base_dir / SAVED_STATE_ID_FILENAME
         if self.settings.save_state:
             self._add_initial_state(saved_state_id_file)
             self.saved_state_id = self._prepare_initial_state()
+        else:
+            logger.info("Saved state not enabled in the configuration, skipping.")
 
         rain_file = self.settings.base_dir / "input" / "precipitation.nc"
-        rain_raster_netcdf = utils.write_netcdf_with_time_indexes(
-            rain_file, self.settings
-        )
-        self._add_rain(rain_raster_netcdf)
+        if rain_file.exists():
+            rain_raster_netcdf = utils.write_netcdf_with_time_indexes(
+                rain_file, self.settings
+            )
+            self._add_rain(rain_raster_netcdf)
+        else:
+            logger.info("No rain file found at %s, skipping.", rain_file)
 
         evaporation_file = self.settings.base_dir / "input" / "evaporation.nc"
-        evaporation_raster_netcdf = utils.write_netcdf_with_time_indexes(
-            evaporation_file, self.settings
-        )
-        self._add_evaporation(evaporation_raster_netcdf)
+        if evaporation_file.exists():
+            evaporation_raster_netcdf = utils.write_netcdf_with_time_indexes(
+                evaporation_file, self.settings
+            )
+            self._add_evaporation(evaporation_raster_netcdf)
+        else:
+            logger.info("No evaporation file found at %s, skipping.", evaporation_file)
+
+        if self.settings.lizard_results_scenario_name:
+            self._process_basic_lizard_results()
+        else:
+            logger.info("Not processing basic results in Lizard")
 
         self._run_simulation()
         self._download_results()
@@ -240,6 +255,10 @@ class ThreediSimulation:
                     continue
                 elif lateral.state.lower() == "invalid":
                     msg = f"Lateral {lateral.url} is invalid according to the server."
+                    raise InvalidDataError(msg)
+                elif lateral.state.lower() == "error":
+                    state_description = lateral.state_description
+                    msg = f"Server returned an error. Response is: {state_description}"
                     raise InvalidDataError(msg)
                 elif lateral.state.lower() == "valid":
                     logger.debug("Lateral %s is valid.", lateral.url)
@@ -320,6 +339,10 @@ class ThreediSimulation:
             elif state.lower() == "invalid":
                 msg = f"Rain raster upload (to {log_url}) is invalid according to the server."
                 raise InvalidDataError(msg)
+            elif state.lower() == "error":
+                state_description = upload_status.results[0].file.state_description
+                msg = f"Server returned an error. Response is: {state_description}"
+                raise InvalidDataError(msg)
             elif state.lower() == "processed":
                 logger.debug("Rain raster %s has been processed.", log_url)
                 return
@@ -356,6 +379,10 @@ class ThreediSimulation:
                 continue
             elif state.lower() == "invalid":
                 msg = f"Evaporation raster upload (to {log_url}) is invalid according to the server."
+                raise InvalidDataError(msg)
+            elif state.lower() == "error":
+                state_description = upload_status.results[0].file.state_description
+                msg = f"Server returned an error. Response is: {state_description}"
                 raise InvalidDataError(msg)
             elif state.lower() == "processed":
                 logger.debug("Evaporation raster %s has been processed.", log_url)
@@ -406,9 +433,7 @@ class ThreediSimulation:
         }
         for desired_result in desired_results:
             if desired_result not in available_results:
-                logger.warning(
-                    "Desired result file %s isn't available.", desired_result
-                )
+                logger.error("Desired result file %s isn't available.", desired_result)
                 continue
             resource = self.simulations_api.simulations_results_files_download(
                 available_results[desired_result].id, self.simulation_id
@@ -419,6 +444,24 @@ class ThreediSimulation:
                 response.raise_for_status()
                 f.write(response.content)
             logger.info("Downloaded %s", target)
+
+    def _process_basic_lizard_results(self):
+
+        data = {
+            "scenario_name": self.settings.lizard_results_scenario_name,
+            "process_basic_results": True,
+        }
+        if self.settings.lizard_results_scenario_uuid:
+            data["result_uuid"] = self.settings.lizard_results_scenario_uuid
+
+        self.simulations_api.simulations_results_post_processing_lizard_basic_create(
+            simulation_pk=self.simulation_id, data=data
+        )
+
+        logger.info(
+            "Basic lizard results will be processed as %s",
+            self.settings.lizard_results_scenario_name,
+        )
 
     def _write_saved_state_id(self, saved_state_id_file):
         """Write ID of the saved style to the file for later usage.
@@ -449,27 +492,32 @@ class ThreediSimulation:
             )
 
         results = GridH5ResultAdmin(str(gridadmin_file), str(results_file))
-        times = results.pumps.timestamps[()] + self.settings.start.timestamp()
+        times = results.nodes.timestamps[()] + self.settings.start.timestamp()
         times = times.astype("datetime64[s]")
         times = pd.Series(times).dt.round("10 min")
-        endtime = results.pumps.timestamps[-1]
-        pump_id = results.pumps.display_name.astype("U13")
-        discharges = results.pumps.timeseries(start_time=0, end_time=endtime).data[
-            "q_pump"
-        ]
-        discharges_dataframe = pd.DataFrame(discharges, index=times, columns=pump_id)
-        params = ["Q.sim" for x in range(len(discharges_dataframe.columns))]
+        endtime = results.nodes.timestamps[-1]
 
-        discharges_dataframe.columns = pd.MultiIndex.from_arrays(
-            [pump_id, pump_id, params]
-        )
-        discharges_csv_output = self.output_dir / "discharges.csv"
-        discharges_dataframe.to_csv(
-            discharges_csv_output, index=True, header=True, sep=","
-        )
-        logger.info(
-            "Simulated discharges have been exported to %s", discharges_csv_output
-        )
+        if results.has_pumpstations:
+            pump_id = results.pumps.display_name.astype("U13")
+            discharges = results.pumps.timeseries(start_time=0, end_time=endtime).data[
+                "q_pump"
+            ]
+            discharges_dataframe = pd.DataFrame(
+                discharges, index=times, columns=pump_id
+            )
+            params = ["Q.sim" for x in range(len(discharges_dataframe.columns))]
+
+            discharges_dataframe.columns = pd.MultiIndex.from_arrays(
+                [pump_id, pump_id, params]
+            )
+            discharges_csv_output = self.output_dir / "discharges.csv"
+            discharges_dataframe.to_csv(
+                discharges_csv_output, index=True, header=True, sep=","
+            )
+            logger.info(
+                "Simulated pump discharges have been exported to %s",
+                discharges_csv_output,
+            )
 
         open_water_input_file = self.settings.base_dir / "input" / "ow.nc"
         open_water_output_file = self.settings.base_dir / "output" / "ow.nc"
