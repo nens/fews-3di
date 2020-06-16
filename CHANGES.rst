@@ -6,13 +6,16 @@ Changelog of fews-3di
 ----------------
 
 - The code has been set-up to look for specific filenames in predefined
-  folders. A readme will define how the data should be provided later on. 
-  All inputs (rain, evaporation etc.) have now become optional, if one is 
+  folders. 
+
+- All inputs (rain, evaporation etc.) have now become optional, if one is 
   absent a logging message is returned but the code will run. This allows for 
-  flexibility in the usage of the code with different kinds of input. A new 
-  option, process basic results in Lizard, has been added. If a Lizard results
-  scenario name is provided, results will be processed in Lizard. If it is not
-  provided, the simulation runs as usual without processing. 
+  flexibility in the usage of the code with different kinds of input. 
+  
+- Two new optional parameters have been added: lizard_results_scenario_uuid and 
+  lizard_results_scenario_name. If a Lizard results   scenario name is provided, 
+  results will be processed in Lizard. If it is not provided, the simulation 
+  runs as usual without processing. 
 
 
 1.1 (2020-05-04)
