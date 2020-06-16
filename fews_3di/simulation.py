@@ -446,23 +446,18 @@ class ThreediSimulation:
             logger.info("Downloaded %s", target)
 
     def _process_basic_lizard_results(self):
+    
+        data = {
+                    "scenario_name": self.settings.lizard_results_scenario_name,
+                    "process_basic_results": True,
+                } 
         if self.settings.lizard_results_scenario_uuid:
-            self.simulations_api.simulations_results_post_processing_lizard_basic_create(
-                simulation_pk=self.simulation_id,
-                data={
-                    "scenario_name": self.settings.lizard_results_scenario_name,
-                    "process_basic_results": True,
-                    "result_uuid": self.settings.lizard_results_scenario_uuid,
-                },
-            )
-        if not self.settings.lizard_results_scenario_uuid:
-            self.simulations_api.simulations_results_post_processing_lizard_basic_create(
-                simulation_pk=self.simulation_id,
-                data={
-                    "scenario_name": self.settings.lizard_results_scenario_name,
-                    "process_basic_results": True,
-                },
-            )
+            data['result_uuid'] = self.settings.lizard_results_scenario_uuid
+
+        self.simulations_api.simulations_results_post_processing_lizard_basic_create(
+            simulation_pk=self.simulation_id,
+            data=data,
+        )
 
         logger.info(
             "Basic lizard results will be processed as %s",
