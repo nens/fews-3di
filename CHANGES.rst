@@ -2,7 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-1.2 (unreleased)
+1.2 (2020-07-09)
 ----------------
 
 - The code has been set-up to look for specific filenames in predefined
