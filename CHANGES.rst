@@ -5,7 +5,8 @@ Changelog of fews-3di
 1.3 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- A minor bugfix in the location where the script searches for the saved-state
+  file
 
 
 1.2 (2020-07-09)
