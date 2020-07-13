@@ -154,7 +154,7 @@ class ThreediSimulation:
         else:
             logger.info("No lateral timeseries found at %s, skipping.", laterals_csv)
 
-        saved_state_id_file = self.settings.base_dir / SAVED_STATE_ID_FILENAME
+        saved_state_id_file = self.settings.base_dir / "states" / SAVED_STATE_ID_FILENAME
         if self.settings.save_state:
             self._add_initial_state(saved_state_id_file)
             self.saved_state_id = self._prepare_initial_state()
