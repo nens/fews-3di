@@ -22,9 +22,11 @@ def example_settings(tmp_path):
     input_dir = tmp_path / "input"
     model_dir = tmp_path / "model"
     output_dir = tmp_path / "output"
+    states_dir = tmp_path / "states"
     input_dir.mkdir()
     model_dir.mkdir()
     output_dir.mkdir()
+    states_dir.mkdir()
 
     shutil.copy(
         TEST_DIR / EXAMPLE_SETTINGS_FILENAME, tmp_path / EXAMPLE_SETTINGS_FILENAME
