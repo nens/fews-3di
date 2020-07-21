@@ -5,7 +5,7 @@ Changelog of fews-3di
 1.4 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- A minor bugfix in the result files which are downloaded after the simulation
 
 
 1.3 (2020-07-16)
