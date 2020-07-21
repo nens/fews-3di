@@ -424,8 +424,6 @@ class ThreediSimulation:
         ).results
         logger.debug("All simulation results: %s", simulation_results)
         desired_results = [
-            "simulation.log",
-            "flow_summary.log",
             f"log_files_sim_{self.simulation_id}.zip",
             "results_3di.nc",
         ]
