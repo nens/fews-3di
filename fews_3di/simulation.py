@@ -33,6 +33,7 @@ import netCDF4
 import openapi_client
 import pandas as pd
 import requests
+import socket
 import time
 
 API_HOST = "https://api.3di.live/v3.0"
@@ -249,8 +250,10 @@ class ThreediSimulation:
         while True:
             time.sleep(2)
             for id in still_to_process:
-                lateral = self.simulations_api.simulations_events_lateral_timeseries_read(
-                    simulation_pk=self.simulation_id, id=id
+                lateral = (
+                    self.simulations_api.simulations_events_lateral_timeseries_read(
+                        simulation_pk=self.simulation_id, id=id
+                    )
                 )
                 if lateral.state.lower() == "processing":
                     logger.debug("Lateral %s is still being processed.", lateral.url)
@@ -319,8 +322,10 @@ class ThreediSimulation:
     def _add_rain(self, rain_raster_netcdf: Path):
         """Upload rain raster netcdf file and wait for it to be processed."""
         logger.info("Uploading rain rasters...")
-        rain_api_call = self.simulations_api.simulations_events_rain_rasters_netcdf_create(
-            self.simulation_id, data={"filename": rain_raster_netcdf.name}
+        rain_api_call = (
+            self.simulations_api.simulations_events_rain_rasters_netcdf_create(
+                self.simulation_id, data={"filename": rain_raster_netcdf.name}
+            )
         )
         log_url = rain_api_call.put_url.split("?")[0]  # Strip off aws credentials.
         with rain_raster_netcdf.open("rb") as f:
@@ -331,8 +336,10 @@ class ThreediSimulation:
         logger.debug("Waiting for rain raster to be processed...")
         while True:
             time.sleep(2)
-            upload_status = self.simulations_api.simulations_events_rain_rasters_netcdf_list(
-                self.simulation_id
+            upload_status = (
+                self.simulations_api.simulations_events_rain_rasters_netcdf_list(
+                    self.simulation_id
+                )
             )
             state = upload_status.results[0].file.state
             if state.lower() == "processing":
@@ -358,8 +365,10 @@ class ThreediSimulation:
     def _add_evaporation(self, evaporation_raster_netcdf: Path):
         """Upload evaporation raster netcdf file and wait for it to be processed."""
         logger.info("Uploading evaporation rasters...")
-        evaporation_api_call = self.simulations_api.simulations_events_sources_sinks_rasters_netcdf_create(
-            self.simulation_id, data={"filename": evaporation_raster_netcdf.name}
+        evaporation_api_call = (
+            self.simulations_api.simulations_events_sources_sinks_rasters_netcdf_create(
+                self.simulation_id, data={"filename": evaporation_raster_netcdf.name}
+            )
         )
         log_url = evaporation_api_call.put_url.split("?")[
             0
@@ -403,9 +412,14 @@ class ThreediSimulation:
         start_time = time.time()
         while True:
             time.sleep(SIMULATION_STATUS_CHECK_INTERVAL)
-            simulation_status = self.simulations_api.simulations_status_list(
-                self.simulation_id
-            )
+            try:
+                simulation_status = self.simulations_api.simulations_status_list(
+                    self.simulation_id
+                )
+            except socket.gaierror as e:
+                logger.debug(e)
+                logger.warning("Hopefully temporary local network hickup")
+                continue
             if simulation_status.name == "finished":
                 logger.info("Simulation has finished")
                 return
