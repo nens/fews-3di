@@ -403,9 +403,14 @@ class ThreediSimulation:
         start_time = time.time()
         while True:
             time.sleep(SIMULATION_STATUS_CHECK_INTERVAL)
-            simulation_status = self.simulations_api.simulations_status_list(
-                self.simulation_id
-            )
+            try:
+                simulation_status = self.simulations_api.simulations_status_list(
+                    self.simulation_id
+                )
+            except socket.gaierror as e:
+                logger.debug(e)
+                logger.warning("Hopefully temporary local network hickup")
+                continue
             if simulation_status.name == "finished":
                 logger.info("Simulation has finished")
                 return
