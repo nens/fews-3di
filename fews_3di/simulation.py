@@ -33,6 +33,7 @@ import netCDF4
 import openapi_client
 import pandas as pd
 import requests
+import socket
 import time
 
 API_HOST = "https://api.3di.live/v3.0"
