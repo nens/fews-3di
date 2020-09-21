@@ -2,7 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-1.5 (unreleased)
+1.5 (2020-09-21)
 ----------------
 
 - Added more resilience to local network errors. The loop that waits for
