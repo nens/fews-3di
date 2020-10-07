@@ -37,6 +37,7 @@ import socket
 import time
 
 API_HOST = "https://api.3di.live/v3.0"
+CHUNK_SIZE = 1024 * 1024  # 1MB
 SAVED_STATE_ID_FILENAME = "3di-saved-state-id.txt"
 SIMULATION_STATUS_CHECK_INTERVAL = 30
 USER_AGENT = "fews-3di (https://github.com/nens/fews-3di/)"
@@ -453,10 +454,11 @@ class ThreediSimulation:
                 available_results[desired_result].id, self.simulation_id
             )
             target = self.output_dir / desired_result
-            with open(target, "wb") as f:
-                response = requests.get(resource.get_url)
-                response.raise_for_status()
-                f.write(response.content)
+
+            with requests.get(resource.get_url, stream=True) as r:
+                with open(target, "wb") as f:
+                    for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
+                        f.write(chunk)
             logger.info("Downloaded %s", target)
 
     def _process_basic_lizard_results(self):
