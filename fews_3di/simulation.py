@@ -36,6 +36,7 @@ import requests
 import socket
 import time
 
+
 API_HOST = "https://api.3di.live/v3.0"
 CHUNK_SIZE = 1024 * 1024  # 1MB
 SAVED_STATE_ID_FILENAME = "3di-saved-state-id.txt"
