@@ -6,7 +6,7 @@
 black
 coveralls
 flake8
-isort
+isort >= 5
 mypy
 wheel
 zest.releaser
