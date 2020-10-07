@@ -207,7 +207,7 @@ class ThreediSimulation:
         results = threedimodels_result.results
         if not results:
             raise NotFoundError(
-                "Model with revision={self.settings.modelrevision} not found"
+                f"Model with revision={self.settings.modelrevision} not found"
             )
         id = results[0].id
         url = results[0].url
@@ -502,15 +502,15 @@ class ThreediSimulation:
         gridadmin_file = self.settings.base_dir / "model" / "gridadmin.h5"
         if not gridadmin_file.exists():
             raise utils.MissingFileException(
-                "Gridadmin file %s not found", gridadmin_file
+                f"Gridadmin file {gridadmin_file} not found"
             )
         results_file = self.output_dir / "results_3di.nc"
         if not results_file.exists():
-            raise utils.MissingFileException("Results file %s not found", results_file)
+            raise utils.MissingFileException(f"Results file {results_file} not found")
         open_water_input_file = self.settings.base_dir / "input" / "ow.nc"
         if not open_water_input_file.exists():
             raise utils.MissingFileException(
-                "Open water input file %s not found", open_water_input_file
+                f"Open water input file {open_water_input_file} not found"
             )
 
         results = GridH5ResultAdmin(str(gridadmin_file), str(results_file))
