@@ -460,6 +460,11 @@ class ThreediSimulation:
                     for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
                         f.write(chunk)
             logger.info("Downloaded %s", target)
+            expected_size = resource.size
+            actual_size = target.stat().st_size
+            if expected_size != actual_size:
+                msg = f"Incomplete download of {resource.get_url}: expected {expected_size}, got {actual_size}."
+                raise utils.FileDownloadException(msg)
 
     def _process_basic_lizard_results(self):
 
