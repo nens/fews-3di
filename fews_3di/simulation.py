@@ -36,7 +36,9 @@ import requests
 import socket
 import time
 
+
 API_HOST = "https://api.3di.live/v3.0"
+CHUNK_SIZE = 1024 * 1024  # 1MB
 SAVED_STATE_ID_FILENAME = "3di-saved-state-id.txt"
 SIMULATION_STATUS_CHECK_INTERVAL = 30
 USER_AGENT = "fews-3di (https://github.com/nens/fews-3di/)"
@@ -205,7 +207,7 @@ class ThreediSimulation:
         results = threedimodels_result.results
         if not results:
             raise NotFoundError(
-                "Model with revision={self.settings.modelrevision} not found"
+                f"Model with revision={self.settings.modelrevision} not found"
             )
         id = results[0].id
         url = results[0].url
@@ -453,11 +455,17 @@ class ThreediSimulation:
                 available_results[desired_result].id, self.simulation_id
             )
             target = self.output_dir / desired_result
-            with open(target, "wb") as f:
-                response = requests.get(resource.get_url)
-                response.raise_for_status()
-                f.write(response.content)
+
+            with requests.get(resource.get_url, stream=True) as r:
+                with open(target, "wb") as f:
+                    for chunk in r.iter_content(chunk_size=CHUNK_SIZE):
+                        f.write(chunk)
             logger.info("Downloaded %s", target)
+            expected_size = resource.size
+            actual_size = target.stat().st_size
+            if expected_size != actual_size:
+                msg = f"Incomplete download of {resource.get_url}: expected {expected_size}, got {actual_size}."
+                raise utils.FileDownloadException(msg)
 
     def _process_basic_lizard_results(self):
 
@@ -494,15 +502,15 @@ class ThreediSimulation:
         gridadmin_file = self.settings.base_dir / "model" / "gridadmin.h5"
         if not gridadmin_file.exists():
             raise utils.MissingFileException(
-                "Gridadmin file %s not found", gridadmin_file
+                f"Gridadmin file {gridadmin_file} not found"
             )
         results_file = self.output_dir / "results_3di.nc"
         if not results_file.exists():
-            raise utils.MissingFileException("Results file %s not found", results_file)
+            raise utils.MissingFileException(f"Results file {results_file} not found")
         open_water_input_file = self.settings.base_dir / "input" / "ow.nc"
         if not open_water_input_file.exists():
             raise utils.MissingFileException(
-                "Open water input file %s not found", open_water_input_file
+                f"Open water input file {open_water_input_file} not found"
             )
 
         results = GridH5ResultAdmin(str(gridadmin_file), str(results_file))

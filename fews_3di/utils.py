@@ -30,6 +30,10 @@ class MissingFileException(Exception):
     pass
 
 
+class FileDownloadException(Exception):
+    pass
+
+
 class Settings:
     # Instance variables with their types
     end: datetime.datetime
