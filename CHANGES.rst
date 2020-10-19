@@ -2,7 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-1.6 (unreleased)
+1.6 (2020-10-19)
 ----------------
 
 - Using a "streaming" download of large files to prevent partial downloads.
