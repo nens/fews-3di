@@ -405,7 +405,7 @@ class ThreediSimulation:
 
     def _run_simulation(self):
         """Start simulation and wait for it to finish."""
-        start_data = {"name": "start"}
+        start_data = {"name": "queue"}
         self.simulations_api.simulations_actions_create(
             self.simulation_id, data=start_data
         )
@@ -424,6 +424,9 @@ class ThreediSimulation:
                 continue
             if simulation_status.name == "finished":
                 logger.info("Simulation has finished")
+                return
+            if simulation_status.name == "crashed":
+                logger.info("Simulation has crashed")
                 return
             running_time = round(time.time() - start_time)
             logger.info(
