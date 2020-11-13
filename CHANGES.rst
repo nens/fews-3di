@@ -2,7 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-1.7 (unreleased)
+1.7 (2020-11-13)
 ----------------
 
 - Checks for crashed status and queue's model. 
