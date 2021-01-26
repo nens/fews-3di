@@ -47,6 +47,11 @@ class Settings:
     start: datetime.datetime
     username: str
     lizard_results_scenario_name: str
+    ## hier moet ook nog iets bij voor rain_type en rain_input
+    rain_type: str
+    rain_input: str
+    ## hier komt ook iets bij voor fews_pre_processing
+    fews_pre_processing: bool
 
     def __init__(self, settings_file: Path):
         """Read settings from the xml settings file."""
@@ -67,7 +72,14 @@ class Settings:
             "saved_state_expiry_days",
             "simulationname",
             "username",
+            ## -------------------------------------------------------------------------------------##
+            ## Uitbreiding voor rain_input, rain_type en fews_pre_processing file in xml-bestand
+            "rain_type",
+            "rain_input",
+            "fews_pre_processing",
         ]
+        ## -------------------------------------------------------------------------------------##
+
         optional_properties = [
             "lizard_results_scenario_name",
             "lizard_results_scenario_uuid",
@@ -95,10 +107,16 @@ class Settings:
             return
 
         string_value = elements[0].attrib["value"]
+
         if property_name == "save_state":
             value = string_value.lower() == "true"
+
+        elif property_name == "fews_pre_processing":
+            value = string_value.lower() == "true"
+
         elif property_name == "saved_state_expiry_days":
             value = int(string_value)
+
         else:
             # Normal situation.
             value = string_value
@@ -106,6 +124,8 @@ class Settings:
         if property_name == "password":
             value = "*" * len(value)
         logger.debug("Found property %s=%s", property_name, value)
+
+    ## -------------------------------------------------
 
     def _read_datetime(self, datetime_variable):
         element_name = f"{datetime_variable}DateTime"
@@ -213,6 +233,45 @@ def lateral_timeseries(
         del timeseries[name]
 
     return timeseries
+
+
+def rain_csv_timeseries(
+    rain_csv: Path, settings: Settings
+) -> Dict[str, List[OffsetAndValue]]:
+    if not rain_csv.exists():
+        raise MissingFileException("rain_csv file %s not found", rain_csv)
+
+    logger.info("Extracting rain timeseries from %s", rain_csv)
+    with rain_csv.open() as csv_file:
+        rows = list(csv.reader(csv_file, delimiter=","))
+    rows = rows[2:]  # first two columns in precipitation.csv do not contain values
+    offset = (
+        datetime.datetime.strptime(rows[0][0], "%Y-%m-%d %H:%M:%S") - settings.start
+    ).total_seconds()
+
+    for i in range(len(rows)):
+        # Convert first column to datetime
+        rows[i][0] = datetime.datetime.strptime(rows[i][0], "%Y-%m-%d %H:%M:%S")
+    # Check if in range for simulation
+
+    # if (rows[0][0]< settings.start) or (rows[0][0] > settings.end):
+    # logger.debug("Omitting timestamp %s", rows[0][0])
+    # continue
+
+    # convert to seconds regarding to starttime of model
+    for i in range(len(rows)):
+        difference_from_start_model = (rows[i][0] - settings.start).total_seconds()
+        rows[i][0] = difference_from_start_model
+    for i in range(len(rows)):
+        rows[i][0] = rows[i][0] - offset
+
+    # convert rain intensity values in m/s to float values
+    for i in range(len(rows)):
+        rows[i][1] = float(rows[i][1])
+
+    timeseries = rows
+
+    return offset, timeseries
 
 
 def timestamps_from_netcdf(source_file: Path) -> List[cftime.DatetimeGregorian]:
