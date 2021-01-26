@@ -2,6 +2,7 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Dict
 from typing import List
+from typing import Tuple
 
 import cftime
 import csv
