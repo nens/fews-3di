@@ -38,7 +38,7 @@ import socket
 import time
 
 OffsetAndValue = namedtuple("OffsetAndValue", ["offset", "value"])
-NULL_VALUE = -999
+NULL_VALUE = -999 #nodata value in FEWS
 API_HOST = "https://api.3di.live/v3.0"
 CHUNK_SIZE = 1024 * 1024  # 1MB
 SAVED_STATE_ID_FILENAME = "3di-saved-state-id.txt"
@@ -439,10 +439,6 @@ class ThreediSimulation:
         )
         logger.debug("Added rain csv  timeserie '%s'", rain_api_call.url)
 
-    # TODO: virtually the same as _add_rain()
-    # Perhaps a list with dicts as config? precipitation, evaporation.
-    # Can it be done through
-    # https://api.3di.live/v3.0/simulations/1673/events/rain/rasters/netcdf/ ?
     def _add_evaporation(self, evaporation_raster_netcdf: Path):
         """Upload evaporation raster netcdf file and wait for it to be processed."""
         logger.info("Uploading evaporation rasters...")

@@ -56,7 +56,8 @@ The expected information in run_info.xml is::
   
 
 **Note:** ``saved_state_expiry_days`` used to be spelled as
-``save_state_expiry_days``, without a "d".
+``save_state_expiry_days``, without a "d". The example radar uuid
+is the Dutch rainfall radar (NRR).
 
 
 **Rain_type:** multipe rain-types can be used in the configuration: 
