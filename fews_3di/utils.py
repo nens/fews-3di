@@ -47,10 +47,8 @@ class Settings:
     start: datetime.datetime
     username: str
     lizard_results_scenario_name: str
-    ## hier moet ook nog iets bij voor rain_type en rain_input
     rain_type: str
     rain_input: str
-    ## hier komt ook iets bij voor fews_pre_processing
     fews_pre_processing: bool
 
     def __init__(self, settings_file: Path):
@@ -72,17 +70,14 @@ class Settings:
             "saved_state_expiry_days",
             "simulationname",
             "username",
-            ## -------------------------------------------------------------------------------------##
-            ## Uitbreiding voor rain_input, rain_type en fews_pre_processing file in xml-bestand
-            "rain_type",
-            "rain_input",
             "fews_pre_processing",
         ]
-        ## -------------------------------------------------------------------------------------##
 
         optional_properties = [
             "lizard_results_scenario_name",
             "lizard_results_scenario_uuid",
+            "rain_type",
+            "rain_input",
         ]
         for property_name in required_properties:
             self._read_property(property_name)
@@ -124,8 +119,6 @@ class Settings:
         if property_name == "password":
             value = "*" * len(value)
         logger.debug("Found property %s=%s", property_name, value)
-
-    ## -------------------------------------------------
 
     def _read_datetime(self, datetime_variable):
         element_name = f"{datetime_variable}DateTime"

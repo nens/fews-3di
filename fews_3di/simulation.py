@@ -21,18 +21,14 @@ happening where...
 
 """
 
-import utils
+from fews_3di import utils
 from pathlib import Path
 from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
-from typing import List
 from typing import Tuple
-from typing import Dict
 from typing import List
-from openapi_client.models import ConstantRain
 from collections import namedtuple
 
 import datetime
-import csv
 import logging
 import netCDF4
 import openapi_client
@@ -172,11 +168,7 @@ class ThreediSimulation:
         else:
             logger.info("Saved state not enabled in the configuration, skipping.")
 
-        ## -------------------------------------------------------------------------------------##
-        # rain_type: constant rain, design rain, radar rain,custom rain
-
         if self.settings.rain_type == "constant":
-            print("hello")
             self._add_constant_rain()
 
         # deze functie bestaat nog niet (nog niet in api ingebouwd)
@@ -187,23 +179,18 @@ class ThreediSimulation:
             self._add_radar_rain()
 
         elif self.settings.rain_type == "custom":
-            # deze functie bestaat al
             if self.settings.rain_input == "rain_netcdf":
                 rain_netcdf = self.settings.base_dir / "input" / "precipitation.nc"
                 rain_raster_netcdf = utils.write_netcdf_with_time_indexes(
                     rain_netcdf, self.settings
                 )
                 self._add_netcdf_rain(rain_raster_netcdf)
-
             if self.settings.rain_input == "rain_csv":
                 rain_csv = self.settings.base_dir / "input" / "rain.csv"
                 rain = utils.rain_csv_timeseries(rain_csv, self.settings)
                 self._add_csv_rain(rain)
-
-        else:
-            logger.info("No custom rain file found at %s, skipping.", rain_file)
-
-        ## -------------------------------------------------------------------------------------##
+            else:
+                logger.info("No custom rain file found, skipping.")
 
         evaporation_file = self.settings.base_dir / "input" / "evaporation.nc"
         if evaporation_file.exists():
@@ -218,7 +205,7 @@ class ThreediSimulation:
             self._process_basic_lizard_results()
         else:
             logger.info("Not processing basic results in Lizard")
-        # print (type(self.settings.fews_pre_processing))
+
         self._run_simulation()
         self._download_results()
         if self.settings.save_state:
@@ -284,10 +271,8 @@ class ThreediSimulation:
         while True:
             time.sleep(2)
             for id in still_to_process:
-                lateral = (
-                    self.simulations_api.simulations_events_lateral_timeseries_read(
-                        simulation_pk=self.simulation_id, id=id
-                    )
+                lateral = self.simulations_api.simulations_events_lateral_timeseries_read(
+                    simulation_pk=self.simulation_id, id=id
                 )
                 if lateral.state.lower() == "processing":
                     logger.debug("Lateral %s is still being processed.", lateral.url)
@@ -353,15 +338,11 @@ class ThreediSimulation:
         logger.info("Saved state will be stored: %s", saved_state.url)
         return saved_state.id
 
-    ## -------------------------------------------------------------------------------------##
-    ## dit is voor de net_cdf
     def _add_netcdf_rain(self, rain_raster_netcdf: Path):
         """Upload rain raster netcdf file and wait for it to be processed."""
         logger.info("Uploading rain rasters...")
-        rain_api_call = (
-            self.simulations_api.simulations_events_rain_rasters_netcdf_create(
-                self.simulation_id, data={"filename": rain_raster_netcdf.name}
-            )
+        rain_api_call = self.simulations_api.simulations_events_rain_rasters_netcdf_create(
+            self.simulation_id, data={"filename": rain_raster_netcdf.name}
         )
         log_url = rain_api_call.put_url.split("?")[0]  # Strip off aws credentials.
         with rain_raster_netcdf.open("rb") as f:
@@ -372,10 +353,8 @@ class ThreediSimulation:
         logger.debug("Waiting for rain raster to be processed...")
         while True:
             time.sleep(2)
-            upload_status = (
-                self.simulations_api.simulations_events_rain_rasters_netcdf_list(
-                    self.simulation_id
-                )
+            upload_status = self.simulations_api.simulations_events_rain_rasters_netcdf_list(
+                self.simulation_id
             )
             state = upload_status.results[0].file.state
             if state.lower() == "processing":
@@ -394,13 +373,11 @@ class ThreediSimulation:
             else:
                 logger.debug("Unknown state: %s", state)
 
-    ## -------------------------------------------------------------------------------------##
-    ## functie voor add_constant_rain
     def _add_constant_rain(self):
         """Upload constant rainfall and wait for it to be processed."""
         logger.info("Uploading constant rainfall")
         duration = self.settings.end - self.settings.start
-        const_rain = ConstantRain(
+        const_rain = openapi_client.models.ConstantRain(
             simulation=self.simulation_id,
             offset=0,
             duration=int(duration.total_seconds()),
@@ -408,7 +385,7 @@ class ThreediSimulation:
             units="m/s",
         )
 
-        rain_api_call = self.simulations_api.simulations_events_rain_constant_create(
+        self.simulations_api.simulations_events_rain_constant_create(
             self.simulation_id, const_rain
         )
 
@@ -425,28 +402,22 @@ class ThreediSimulation:
     # 'units': 'm/s'}
     # )
 
-    ## -------------------------------------------------------------------------------------##
-    ## functie voor add_radar_rain -- hiervoor gebruiken we een uuid van lizard
     def _add_radar_rain(self):
         """Upload radar rainfall from Lizard and wait for it to be processed."""
         logger.info("Uploading radar rainfall")
         duration = self.settings.end - self.settings.start
 
-        rain_api_call = (
-            self.simulations_api.simulations_events_rain_rasters_lizard_create(
-                self.simulation_id,
-                data={
-                    "offset": 0,
-                    "duration": int(duration.total_seconds()),
-                    "reference_uuid": self.settings.rain_input,
-                    "start_datetime": self.settings.start,
-                    "units": "m/s",
-                },
-            )
+        self.simulations_api.simulations_events_rain_rasters_lizard_create(
+            self.simulation_id,
+            data={
+                "offset": 0,
+                "duration": int(duration.total_seconds()),
+                "reference_uuid": self.settings.rain_input,
+                "start_datetime": self.settings.start,
+                "units": "m/s",
+            },
         )
 
-    ## -------------------------------------------------------------------------------------##
-    ## functie voor add_csv_rain -- hiervoor gebruiken we een csv bestand waarin we de timeseries uit halen
     def _add_csv_rain(self, rain):
         """Upload rain csv timeseries and wait for them to be processed."""
         still_to_process: List[int] = []
@@ -461,48 +432,7 @@ class ThreediSimulation:
                 "units": "m/s",
             },
         )
-        logger.debug("Added rain csv  timeserie '%s': %s", rain_api_call.url)
-        still_to_process.append(rain_api_call.id)
-
-        # logger.debug("Waiting for rain csv timeserie to be processed...")
-        # while True:
-        # #state = rain_api_call.results[0].file.state
-        # time.sleep(2)
-        # # for id in still_to_process:
-        # # rain_api_call = (
-        # # self.simulations_api.simulations_events_rain_timeseries_read(
-        # # simulation_pk=self.simulation_id, id=id
-        # # )
-        # # )
-        # # if state.lower() == "processing":
-        # logger.debug("Rain csv timeserie %s is still being processed.", rain_api_call.url)
-        # continue
-        # elif state.lower() == "invalid":
-        # msg = f"Rain csv timeserie {rain_api_call.url} is invalid according to the server."
-        # raise InvalidDataError(msg)
-        # elif state.lower() == "error":
-        # state_description = rain_api_call.state_description
-        # msg = f"Server returned an error. Response is: {state_description}"
-        # raise InvalidDataError(msg)
-        # elif state.lower() == "valid":
-        # logger.debug("Rain csv timeserie %s is valid.", rain_api_call.url)
-        # still_to_process.remove(id)
-
-        # if not still_to_process:
-        # return
-        # rain_api_call = self.simulations_api.simulations_events_rain_timeseries_create(
-        # simulation_pk=self.simulation_id,
-        # data={
-        # "offset": rain[0],
-        # "interpolate": False,
-        # "values": rain[1],
-        # "units": "m/s"
-        # },
-        # )
-        # logger.debug("Added Rain csv timeserie '%s': %s", rain_api_call.url)
-        # still_to_process.append(rain_api_call.id)
-
-    ## -------------------------------------------------------------------------------------#
+        logger.debug("Added rain csv  timeserie '%s'", rain_api_call.url)
 
     # TODO: virtually the same as _add_rain()
     # Perhaps a list with dicts as config? precipitation, evaporation.
@@ -511,10 +441,8 @@ class ThreediSimulation:
     def _add_evaporation(self, evaporation_raster_netcdf: Path):
         """Upload evaporation raster netcdf file and wait for it to be processed."""
         logger.info("Uploading evaporation rasters...")
-        evaporation_api_call = (
-            self.simulations_api.simulations_events_sources_sinks_rasters_netcdf_create(
-                self.simulation_id, data={"filename": evaporation_raster_netcdf.name}
-            )
+        evaporation_api_call = self.simulations_api.simulations_events_sources_sinks_rasters_netcdf_create(
+            self.simulation_id, data={"filename": evaporation_raster_netcdf.name}
         )
         log_url = evaporation_api_call.put_url.split("?")[
             0
@@ -525,27 +453,27 @@ class ThreediSimulation:
         logger.debug("Added evaporation raster to %s", log_url)
 
         logger.debug("Waiting for evaporation raster to be processed...")
-        # while True:
-        # time.sleep(2)
-        # upload_status = self.simulations_api.simulations_events_sources_sinks_rasters_netcdf_list(
-        # self.simulation_id
-        # )
-        # state = upload_status.results[0].file.state
-        # if state.lower() == "processing":
-        # logger.debug("Evaporation raster is still being processed.")
-        # continue
-        # elif state.lower() == "invalid":
-        # msg = f"Evaporation raster upload (to {log_url}) is invalid according to the server."
-        # raise InvalidDataError(msg)
-        # elif state.lower() == "error":
-        # state_description = upload_status.results[0].file.state_description
-        # msg = f"Server returned an error. Response is: {state_description}"
-        # raise InvalidDataError(msg)
-        # elif state.lower() == "processed":
-        # logger.debug("Evaporation raster %s has been processed.", log_url)
-        # return
-        # else:
-        # logger.debug("Unknown state: %s", state)
+        while True:
+            time.sleep(2)
+            upload_status = self.simulations_api.simulations_events_sources_sinks_rasters_netcdf_list(
+                self.simulation_id
+            )
+            state = upload_status.results[0].file.state
+            if state.lower() == "processing":
+                logger.debug("Evaporation raster is still being processed.")
+                continue
+            elif state.lower() == "invalid":
+                msg = f"Evaporation raster upload (to {log_url}) is invalid according to the server."
+                raise InvalidDataError(msg)
+            elif state.lower() == "error":
+                state_description = upload_status.results[0].file.state_description
+                msg = f"Server returned an error. Response is: {state_description}"
+                raise InvalidDataError(msg)
+            elif state.lower() == "processed":
+                logger.debug("Evaporation raster %s has been processed.", log_url)
+                return
+            else:
+                logger.debug("Unknown state: %s", state)
 
     def _run_simulation(self):
         """Start simulation and wait for it to finish."""
