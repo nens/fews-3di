@@ -45,6 +45,9 @@ The expected information in run_info.xml is::
 	  <string key="simulationname" value="Simulation name"/>
 	  <string key="save_state" value="True"/>
 	  <string key="saved_state_expiry_days" value="5"/>
+	  <string key="rain_type" value="radar"/>
+	  <string key="rain_input" value="730d6675-35dd-4a35-aa9b-bfb8155f9ca7"/>
+	  <string key="fews_pre_processing" value="True"/>
       </properties>
   </Run>
 
