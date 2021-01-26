@@ -188,7 +188,9 @@ class ThreediSimulation:
                     )
                     self._add_netcdf_rain(rain_raster_netcdf)
                 else:
-                    logger.info("No netcdf rain file found at %s, skipping.", rain_netcdf)
+                    logger.info(
+                        "No netcdf rain file found at %s, skipping.", rain_netcdf
+                    )
             if self.settings.rain_input == "rain_csv":
                 rain_csv = self.settings.base_dir / "input" / "rain.csv"
                 if rain_csv.exists():
