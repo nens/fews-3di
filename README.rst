@@ -58,6 +58,7 @@ The expected information in run_info.xml is::
 
 
 **Rain_type:** multipe rain-types can be used in the configuration: 
+
 - ``constant``
 
 - ``radar``
@@ -66,6 +67,7 @@ The expected information in run_info.xml is::
 
 
 **Rain_input:** according to the chosen rain-type, a rain input must be given in the configuration:
+
 - ``constant`` --> ``integer``
 
 - ``radar`` --> ``lizard uuid``
