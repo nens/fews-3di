@@ -182,7 +182,7 @@ class ThreediSimulation:
         elif self.settings.rain_type == "custom":
             if self.settings.rain_input == "rain_netcdf":
                 rain_netcdf = self.settings.base_dir / "input" / "precipitation.nc"
-                if rain_file.exists():
+                if rain_netcdf.exists():
                     rain_raster_netcdf = utils.write_netcdf_with_time_indexes(
                         rain_netcdf, self.settings
                     )
