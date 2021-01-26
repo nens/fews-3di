@@ -21,12 +21,12 @@ happening where...
 
 """
 
+from collections import namedtuple
 from fews_3di import utils
 from pathlib import Path
 from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
-from typing import Tuple
 from typing import List
-from collections import namedtuple
+from typing import Tuple
 
 import datetime
 import logging
@@ -36,6 +36,7 @@ import pandas as pd
 import requests
 import socket
 import time
+
 
 OffsetAndValue = namedtuple("OffsetAndValue", ["offset", "value"])
 NULL_VALUE = -999  # nodata value in FEWS
@@ -181,16 +182,20 @@ class ThreediSimulation:
         elif self.settings.rain_type == "custom":
             if self.settings.rain_input == "rain_netcdf":
                 rain_netcdf = self.settings.base_dir / "input" / "precipitation.nc"
-                rain_raster_netcdf = utils.write_netcdf_with_time_indexes(
-                    rain_netcdf, self.settings
-                )
-                self._add_netcdf_rain(rain_raster_netcdf)
+                if rain_file.exists():
+                    rain_raster_netcdf = utils.write_netcdf_with_time_indexes(
+                        rain_netcdf, self.settings
+                    )
+                    self._add_netcdf_rain(rain_raster_netcdf)
+                else:
+                    logger.info("No netcdf rain file found at %s, skipping.", rain_netcdf)
             if self.settings.rain_input == "rain_csv":
                 rain_csv = self.settings.base_dir / "input" / "rain.csv"
-                rain = utils.rain_csv_timeseries(rain_csv, self.settings)
-                self._add_csv_rain(rain)
-            else:
-                logger.info("No custom rain file found, skipping.")
+                if rain_csv.exists():
+                    rain = utils.rain_csv_timeseries(rain_csv, self.settings)
+                    self._add_csv_rain(rain)
+                else:
+                    logger.info("No csv rain file found, skipping.")
 
         evaporation_file = self.settings.base_dir / "input" / "evaporation.nc"
         if evaporation_file.exists():
@@ -598,7 +603,7 @@ class ThreediSimulation:
         times = pd.Series(times).dt.round("10 min")
         endtime = results.nodes.timestamps[-1]
 
-        # op de termijn dit uitbreiden
+        # to be expanded
         if results.has_pumpstations:
             pump_id = results.pumps.display_name.astype("U13")
             discharges = results.pumps.timeseries(start_time=0, end_time=endtime).data[
