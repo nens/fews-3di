@@ -2,6 +2,7 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Dict
 from typing import List
+from typing import Tuple
 
 import cftime
 import csv
@@ -230,7 +231,7 @@ def lateral_timeseries(
 
 def rain_csv_timeseries(
     rain_csv: Path, settings: Settings
-) -> Dict[str, List[OffsetAndValue]]:
+) -> Tuple[float, List[List[float]]]:
     if not rain_csv.exists():
         raise MissingFileException("rain_csv file %s not found", rain_csv)
 
@@ -242,9 +243,10 @@ def rain_csv_timeseries(
         datetime.datetime.strptime(rows[0][0], "%Y-%m-%d %H:%M:%S") - settings.start
     ).total_seconds()
 
-    for i in range(len(rows)):
+    datetime_csv = []
+    for i in range(len(rows[0])):
         # Convert first column to datetime
-        rows[i][0] = datetime.datetime.strptime(rows[i][0], "%Y-%m-%d %H:%M:%S")
+        datetime_csv.append(datetime.datetime.strptime(rows[i][0], "%Y-%m-%d %H:%M:%S"))
     # Check if in range for simulation
 
     # if (rows[0][0]< settings.start) or (rows[0][0] > settings.end):
@@ -252,17 +254,25 @@ def rain_csv_timeseries(
     # continue
 
     # convert to seconds regarding to starttime of model
-    for i in range(len(rows)):
-        difference_from_start_model = (rows[i][0] - settings.start).total_seconds()
-        rows[i][0] = difference_from_start_model
-    for i in range(len(rows)):
-        rows[i][0] = rows[i][0] - offset
+    difference_from_start_model = []
+    for i in range(len(datetime_csv)):
+        difference_from_start_model.append(
+            (datetime_csv[i] - settings.start).total_seconds()
+        )
 
+    # rows[i][0] = difference_from_start_model
+    new_datetime_csv_with_offset = []
+    for i in range(len(difference_from_start_model)):
+        new_datetime_csv_with_offset.append(difference_from_start_model[i] - offset)
+
+    rain_value = []
     # convert rain intensity values in m/s to float values
-    for i in range(len(rows)):
-        rows[i][1] = float(rows[i][1])
+    for i in range(len(rows[1])):
+        rain_value.append(float(rows[i][1]))
 
-    timeseries = rows
+    timeseries = [
+        list(timeseries) for timeseries in zip(new_datetime_csv_with_offset, rain_value)
+    ]
 
     return offset, timeseries
 
