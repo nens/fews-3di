@@ -403,7 +403,7 @@ class ThreediSimulation:
         )
 
     ## -------------------------------------------------------------------------------------##
-    ## functie voor add_design_rain -- nog niet in api ingebouwd -- kan later nog worden geimplementeerd
+    ## function for add_design_rain for future implementation
     # def _add_design_rain(self):
     # """Upload design rainfall and wait for it to be processed."""
     # logger.info("Uploading design rainfall")
