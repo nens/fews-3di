@@ -78,7 +78,7 @@ is the Dutch rainfall radar (NRR).
 - ``custom`` --> two options: ``rain_csv`` or ``rain_netcdf``. These files must be stored in the input directory as ``input/rain.csv`` and ``input/precipitation.nc`` 
 
 
-**fews_pre_processing:** can be ``True` or ``False`. Must be True if the results are needed in fews: additional pre_processing of the results is needed.
+**fews_pre_processing:** can be ``True`` or ``False``. Must be True if the results are needed in fews: additional pre_processing of the results is needed.
 
 
 Several input files are needed, they should be in the ``input`` directory
