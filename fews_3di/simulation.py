@@ -21,6 +21,7 @@ happening where...
 
 """
 
+from collections import namedtuple
 from fews_3di import utils
 from pathlib import Path
 from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
@@ -37,6 +38,8 @@ import socket
 import time
 
 
+OffsetAndValue = namedtuple("OffsetAndValue", ["offset", "value"])
+NULL_VALUE = -999  # nodata value in FEWS
 API_HOST = "https://api.3di.live/v3.0"
 CHUNK_SIZE = 1024 * 1024  # 1MB
 SAVED_STATE_ID_FILENAME = "3di-saved-state-id.txt"
@@ -166,14 +169,35 @@ class ThreediSimulation:
         else:
             logger.info("Saved state not enabled in the configuration, skipping.")
 
-        rain_file = self.settings.base_dir / "input" / "precipitation.nc"
-        if rain_file.exists():
-            rain_raster_netcdf = utils.write_netcdf_with_time_indexes(
-                rain_file, self.settings
-            )
-            self._add_rain(rain_raster_netcdf)
-        else:
-            logger.info("No rain file found at %s, skipping.", rain_file)
+        if self.settings.rain_type == "constant":
+            self._add_constant_rain()
+
+        # deze functie bestaat nog niet (nog niet in api ingebouwd)
+        # elif rain_type == 'design':
+        # self._add_design_rain()
+
+        elif self.settings.rain_type == "radar":
+            self._add_radar_rain()
+
+        elif self.settings.rain_type == "custom":
+            if self.settings.rain_input == "rain_netcdf":
+                rain_netcdf = self.settings.base_dir / "input" / "precipitation.nc"
+                if rain_netcdf.exists():
+                    rain_raster_netcdf = utils.write_netcdf_with_time_indexes(
+                        rain_netcdf, self.settings
+                    )
+                    self._add_netcdf_rain(rain_raster_netcdf)
+                else:
+                    logger.info(
+                        "No netcdf rain file found at %s, skipping.", rain_netcdf
+                    )
+            if self.settings.rain_input == "rain_csv":
+                rain_csv = self.settings.base_dir / "input" / "rain.csv"
+                if rain_csv.exists():
+                    rain = utils.rain_csv_timeseries(rain_csv, self.settings)
+                    self._add_csv_rain(rain)
+                else:
+                    logger.info("No csv rain file found, skipping.")
 
         evaporation_file = self.settings.base_dir / "input" / "evaporation.nc"
         if evaporation_file.exists():
@@ -193,7 +217,9 @@ class ThreediSimulation:
         self._download_results()
         if self.settings.save_state:
             self._write_saved_state_id(saved_state_id_file)
-        self._process_results()
+        if self.settings.fews_pre_processing:
+            logger.info("Pre-processing results for fews")
+            self._process_results()
         logger.info("Done.")
 
     def _find_model(self) -> int:
@@ -321,7 +347,7 @@ class ThreediSimulation:
         logger.info("Saved state will be stored: %s", saved_state.url)
         return saved_state.id
 
-    def _add_rain(self, rain_raster_netcdf: Path):
+    def _add_netcdf_rain(self, rain_raster_netcdf: Path):
         """Upload rain raster netcdf file and wait for it to be processed."""
         logger.info("Uploading rain rasters...")
         rain_api_call = (
@@ -360,10 +386,66 @@ class ThreediSimulation:
             else:
                 logger.debug("Unknown state: %s", state)
 
-    # TODO: virtually the same as _add_rain()
-    # Perhaps a list with dicts as config? precipitation, evaporation.
-    # Can it be done through
-    # https://api.3di.live/v3.0/simulations/1673/events/rain/rasters/netcdf/ ?
+    def _add_constant_rain(self):
+        """Upload constant rainfall and wait for it to be processed."""
+        logger.info("Uploading constant rainfall")
+        duration = self.settings.end - self.settings.start
+        const_rain = openapi_client.models.ConstantRain(
+            simulation=self.simulation_id,
+            offset=0,
+            duration=int(duration.total_seconds()),
+            value=float(self.settings.rain_input),
+            units="m/s",
+        )
+
+        self.simulations_api.simulations_events_rain_constant_create(
+            self.simulation_id, const_rain
+        )
+
+    ## -------------------------------------------------------------------------------------##
+    ## function for add_design_rain for future implementation
+    # def _add_design_rain(self):
+    # """Upload design rainfall and wait for it to be processed."""
+    # logger.info("Uploading design rainfall")
+    # rain_api_call = (
+    # self.simulations_api.simulations_events_rain_rasters_lizard_create(
+    # self.simulation_id, data={
+    # 'duration': (self.settings.end - self.settings.start).total_seconds,
+    # 'values': self.settings.rain_input, #m/s , verschil tussen start en eind in secondes
+    # 'units': 'm/s'}
+    # )
+
+    def _add_radar_rain(self):
+        """Upload radar rainfall from Lizard and wait for it to be processed."""
+        logger.info("Uploading radar rainfall")
+        duration = self.settings.end - self.settings.start
+
+        self.simulations_api.simulations_events_rain_rasters_lizard_create(
+            self.simulation_id,
+            data={
+                "offset": 0,
+                "duration": int(duration.total_seconds()),
+                "reference_uuid": self.settings.rain_input,
+                "start_datetime": self.settings.start,
+                "units": "m/s",
+            },
+        )
+
+    def _add_csv_rain(self, rain):
+        """Upload rain csv timeseries and wait for them to be processed."""
+        logger.info("Uploading %s rain csv timeseries...")
+
+        rain_api_call = self.simulations_api.simulations_events_rain_timeseries_create(
+            simulation_pk=self.simulation_id,
+            data={
+                "offset": rain[0],  # offset calculated in utils.py
+                "interpolate": False,
+                "values": rain[1],  # nested list calculated in utils.py
+                "units": "m/s",
+            },
+        )
+        logger.debug("Added rain csv  timeserie '%s'", rain_api_call.url)
+
     def _add_evaporation(self, evaporation_raster_netcdf: Path):
         """Upload evaporation raster netcdf file and wait for it to be processed."""
         logger.info("Uploading evaporation rasters...")
@@ -502,6 +584,7 @@ class ThreediSimulation:
 
     def _process_results(self):
         # Input files
+
         gridadmin_file = self.settings.base_dir / "model" / "gridadmin.h5"
         if not gridadmin_file.exists():
             raise utils.MissingFileException(
@@ -522,6 +605,7 @@ class ThreediSimulation:
         times = pd.Series(times).dt.round("10 min")
         endtime = results.nodes.timestamps[-1]
 
+        # to be expanded
         if results.has_pumpstations:
             pump_id = results.pumps.display_name.astype("U13")
             discharges = results.pumps.timeseries(start_time=0, end_time=endtime).data[

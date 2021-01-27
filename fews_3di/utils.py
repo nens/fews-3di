@@ -2,6 +2,7 @@ from collections import namedtuple
 from pathlib import Path
 from typing import Dict
 from typing import List
+from typing import Tuple
 
 import cftime
 import csv
@@ -47,6 +48,9 @@ class Settings:
     start: datetime.datetime
     username: str
     lizard_results_scenario_name: str
+    rain_type: str
+    rain_input: str
+    fews_pre_processing: bool
 
     def __init__(self, settings_file: Path):
         """Read settings from the xml settings file."""
@@ -67,10 +71,14 @@ class Settings:
             "saved_state_expiry_days",
             "simulationname",
             "username",
+            "fews_pre_processing",
         ]
+
         optional_properties = [
             "lizard_results_scenario_name",
             "lizard_results_scenario_uuid",
+            "rain_type",
+            "rain_input",
         ]
         for property_name in required_properties:
             self._read_property(property_name)
@@ -95,10 +103,16 @@ class Settings:
             return
 
         string_value = elements[0].attrib["value"]
+
         if property_name == "save_state":
             value = string_value.lower() == "true"
+
+        elif property_name == "fews_pre_processing":
+            value = string_value.lower() == "true"
+
         elif property_name == "saved_state_expiry_days":
             value = int(string_value)
+
         else:
             # Normal situation.
             value = string_value
@@ -213,6 +227,54 @@ def lateral_timeseries(
         del timeseries[name]
 
     return timeseries
+
+
+def rain_csv_timeseries(
+    rain_csv: Path, settings: Settings
+) -> Tuple[float, List[List[float]]]:
+    if not rain_csv.exists():
+        raise MissingFileException("rain_csv file %s not found", rain_csv)
+
+    logger.info("Extracting rain timeseries from %s", rain_csv)
+    with rain_csv.open() as csv_file:
+        rows = list(csv.reader(csv_file, delimiter=","))
+    rows = rows[2:]  # first two columns in precipitation.csv do not contain values
+    offset = (
+        datetime.datetime.strptime(rows[0][0], "%Y-%m-%d %H:%M:%S") - settings.start
+    ).total_seconds()
+
+    datetime_csv = []
+    for i in range(len(rows[0])):
+        # Convert first column to datetime
+        datetime_csv.append(datetime.datetime.strptime(rows[i][0], "%Y-%m-%d %H:%M:%S"))
+    # Check if in range for simulation
+
+    # if (rows[0][0]< settings.start) or (rows[0][0] > settings.end):
+    # logger.debug("Omitting timestamp %s", rows[0][0])
+    # continue
+
+    # convert to seconds regarding to starttime of model
+    difference_from_start_model = []
+    for i in range(len(datetime_csv)):
+        difference_from_start_model.append(
+            (datetime_csv[i] - settings.start).total_seconds()
+        )
+
+    # rows[i][0] = difference_from_start_model
+    new_datetime_csv_with_offset = []
+    for i in range(len(difference_from_start_model)):
+        new_datetime_csv_with_offset.append(difference_from_start_model[i] - offset)
+
+    rain_value = []
+    # convert rain intensity values in m/s to float values
+    for i in range(len(rows[1])):
+        rain_value.append(float(rows[i][1]))
+
+    timeseries = [
+        list(timeseries) for timeseries in zip(new_datetime_csv_with_offset, rain_value)
+    ]
+
+    return offset, timeseries
 
 
 def timestamps_from_netcdf(source_file: Path) -> List[cftime.DatetimeGregorian]:

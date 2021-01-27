@@ -45,11 +45,41 @@ The expected information in run_info.xml is::
 	  <string key="simulationname" value="Simulation name"/>
 	  <string key="save_state" value="True"/>
 	  <string key="saved_state_expiry_days" value="5"/>
+	  <string key="rain_type" value="radar"/>
+	  <string key="rain_input" value="730d6675-35dd-4a35-aa9b-bfb8155f9ca7"/>
+	  <string key="fews_pre_processing" value="True"/>
+	  <string key="lizard_results_scenario_name" value="Testsimulatie"/>
+	  <string key="lizard_results_scenario_uuid" value=""/>
       </properties>
   </Run>
+  
+  
 
 **Note:** ``saved_state_expiry_days`` used to be spelled as
-``save_state_expiry_days``, without a "d".
+``save_state_expiry_days``, without a "d". The example radar uuid
+is the Dutch rainfall radar (NRR).
+
+
+**Rain_type:** multipe rain-types can be used in the configuration: 
+
+- ``constant``
+
+- ``radar``
+
+- ``custom``
+
+
+**Rain_input:** according to the chosen rain-type, a rain input must be given in the configuration:
+
+- ``constant`` --> ``integer [m/s]``
+
+- ``radar`` --> ``lizard uuid``
+
+- ``custom`` --> two options: ``rain_csv`` or ``rain_netcdf``. These files must be stored in the input directory as ``input/rain.csv`` and ``input/precipitation.nc`` 
+
+
+**fews_pre_processing:** can be ``True` or ``False`. Must be True if the results are needed in fews: additional pre_processing of the results is needed.
+
 
 Several input files are needed, they should be in the ``input`` directory
 **relative** to the ``run_info.xml``:

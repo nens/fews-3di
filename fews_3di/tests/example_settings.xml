@@ -1,28 +1,18 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<Run xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-     xmlns="http://www.wldelft.nl/fews/PI"
-     xsi:schemaLocation="http://www.wldelft.nl/fews/PI
-			 http://fews.wldelft.nl/schemas/version1.0/pi-schemas/pi_run.xsd"
-			 version="1.5">
-    <timeZone>0.0</timeZone>
-    <startDateTime date="2020-01-26" time="10:00:00"/>
-    <endDateTime date="2020-01-30" time="12:00:00"/>
-    <time0 date="2020-01-28" time="12:00:00"/>
-    <lastObservationDateTime date="2020-01-30" time="12:00:00"/>
-    <workDir>D:\fews\fss\FewsShell\FSS01\LOGIC\Modules\3Di</workDir>
-    <inputTimeSeriesFile>D:\fews\fss\FewsShell\FSS01\LOGIC\Modules\3Di\input\lateral.csv</inputTimeSeriesFile>
-    <outputDiagnosticFile>D:\fews\fss\FewsShell\FSS01\LOGIC\Modules\3Di\logs\3Di_log.txt</outputDiagnosticFile>
-    <outputTimeSeriesFile>D:\fews\fss\FewsShell\FSS01\LOGIC\Modules\3Di\output\discharges.csv</outputTimeSeriesFile>
-    <outputNetcdfFile>D:\fews\fss\FewsShell\FSS01\LOGIC\Modules\3Di\output\ow.nc</outputNetcdfFile>
-    <properties>
-        <string key="username" value="pietje"/>
-        <string key="password" value="onder-de-deurmat"/>
-        <string key="organisation" value="12345678abcd"/>
-        <string key="modelrevision" value="abcd123456787"/>
-        <string key="simulationname" value="Simulation name"/>
-        <string key="save_state" value="True"/>
-        <string key="saved_state_expiry_days" value="5"/>
-        <string key="lizard_results_scenario_name" value="ivar test"/>
-        <string key="lizard_results_scenario_uuid" value=""/>
-    </properties>
-</Run>
+<ns0:Run xmlns:ns0="http://www.wldelft.nl/fews/PI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.5" xsi:schemaLocation="http://www.wldelft.nl/fews/PI     http://fews.wldelft.nl/schemas/version1.0/pi-schemas/pi_run.xsd">
+    <ns0:startDateTime date="2020-01-26" time="10:00:00"/>
+    <ns0:endDateTime date="2020-01-30" time="12:00:00"/>
+    <ns0:properties>
+        <ns0:string key="username" value="pietje" />
+        <ns0:string key="password" value="onder-de-deurmat" />
+        <ns0:string key="organisation" value="12345678abcd" />
+        <ns0:string key="modelrevision" value="abcd123456787" />
+        <ns0:string key="simulationname" value="Simulation name" />
+        <ns0:string key="save_state" value="True" />
+        <ns0:string key="saved_state_expiry_days" value="5" />
+        <ns0:string key="rain_type" value="constant" />   
+        <ns0:string key="rain_input" value="0.00001" />
+        <ns0:string key="fews_pre_processing" value="False" />
+        <ns0:string key="lizard_results_scenario_name" value="Testsimulatie ivar"/>
+        <ns0:string key="lizard_results_scenario_uuid" value=""/>
+    </ns0:properties>
+</ns0:Run>
