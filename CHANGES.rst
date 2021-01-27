@@ -2,13 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-1.9 (unreleased)
-----------------
-
-- Nothing changed yet.
-
-
-1.8 (2021-01-27)
+1.8 (unreleased)
 ----------------
 
 - Added new rainfall modules, constant, csv and radar rain.
