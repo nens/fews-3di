@@ -5,7 +5,9 @@ Changelog of fews-3di
 1.8 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Added new rainfall modules, constant, csv and radar rain.
+
+- Processing results into fews is now optional.
 
 
 1.7 (2020-11-13)
