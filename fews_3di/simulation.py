@@ -43,6 +43,7 @@ NULL_VALUE = -999  # nodata value in FEWS
 API_HOST = "https://api.3di.live/v3.0"
 CHUNK_SIZE = 1024 * 1024  # 1MB
 SAVED_STATE_ID_FILENAME = "3di-saved-state-id.txt"
+COLD_STATE_ID_FILENAME = "3di-cold-state-id.txt"
 SIMULATION_STATUS_CHECK_INTERVAL = 30
 USER_AGENT = "fews-3di (https://github.com/nens/fews-3di/)"
 
@@ -163,8 +164,9 @@ class ThreediSimulation:
         saved_state_id_file = (
             self.settings.base_dir / "states" / SAVED_STATE_ID_FILENAME
         )
+        cold_state_id_file = self.settings.base_dir / "states" / COLD_STATE_ID_FILENAME
         if self.settings.save_state:
-            self._add_initial_state(saved_state_id_file)
+            self._add_initial_state(saved_state_id_file, cold_state_id_file)
             self.saved_state_id = self._prepare_initial_state()
         else:
             logger.info("Saved state not enabled in the configuration, skipping.")
@@ -300,7 +302,7 @@ class ThreediSimulation:
             if not still_to_process:
                 return
 
-    def _add_initial_state(self, saved_state_id_file: Path):
+    def _add_initial_state(self, saved_state_id_file: Path, cold_state_id_file: Path):
         # TODO explain rationale. (likewise for the other methods).
         if not saved_state_id_file.exists():
             msg = f"Saved state id file {saved_state_id_file} not found"
@@ -326,6 +328,27 @@ class ThreediSimulation:
                 if self.allow_missing_saved_state:
                     logger.warn(msg)
                     return
+                elif cold_state_id_file.exists():
+                    msg = f"Warm state failed to set; Cold state id file {cold_state_id_file} found"
+                    logger.info(msg)
+                    cold_state_id: str = cold_state_id_file.read_text().strip()
+                    logger.info("Simulation will use initial state %s", cold_state_id)
+                    try:
+                        self.simulations_api.simulations_initial_saved_state_create(
+                            self.simulation_id, data={"saved_state": cold_state_id}
+                        )
+                        return
+                    except openapi_client.exceptions.ApiException as e:
+                        if e.status == 400:
+                            logger.debug("Cold state setting error: %s", str(e))
+                            msg = (
+                                f"Setting initial state to cold state id={cold_state_id} failed. "
+                                f"The error response was {e.body}"
+                            )
+                            raise MissingSavedStateError(msg) from e
+                        else:
+                            logger.debug("Error isn't a 400, so we re-raise it.")
+                            raise
                 else:
                     raise MissingSavedStateError(msg) from e
             logger.debug("Error isn't a 400, so we re-raise it.")
