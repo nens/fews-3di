@@ -338,12 +338,12 @@ class ThreediSimulation:
                             self.simulation_id, data={"saved_state": cold_state_id}
                         )
                         return
-                    except openapi_client.exceptions.ApiException as e:
-                        if e.status == 400:
-                            logger.debug("Cold state setting error: %s", str(e))
+                    except openapi_client.exceptions.ApiException as f:
+                        if f.status == 400:
+                            logger.debug("Cold state setting error: %s", str(f))
                             msg = (
                                 f"Setting initial state to cold state id={cold_state_id} failed. "
-                                f"The error response was {e.body}"
+                                f"The error response was {f.body}"
                             )
                             raise MissingSavedStateError(msg) from e
                         else:
