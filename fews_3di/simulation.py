@@ -313,7 +313,11 @@ class ThreediSimulation:
                 else:
                     raise utils.MissingFileException(msg)
             saved_state_id: str = state_file.read_text().strip()
-            logger.info("Simulation will use initial state %s", saved_state_id)
+            logger.info(
+                "Simulation will use initial state %s from %s",
+                saved_state_id,
+                state_file,
+            )
             try:
                 self.simulations_api.simulations_initial_saved_state_create(
                     self.simulation_id, data={"saved_state": saved_state_id}
