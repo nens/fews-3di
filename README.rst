@@ -59,6 +59,10 @@ The expected information in run_info.xml is::
 ``save_state_expiry_days``, without a "d". The example radar uuid
 is the Dutch rainfall radar (NRR).
 
+**Using saved states:** To use a warm state provide a text file with 
+id in the states folder using the name ``3di-saved-state-id.txt``.
+A cold state is supplied in a similar way with the name: 
+``3di-cold-state-id.txt``. 
 
 **Rain_type:** multipe rain-types can be used in the configuration: 
 
