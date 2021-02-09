@@ -5,7 +5,9 @@ Changelog of fews-3di
 1.10 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Added the functionality to provide a cold state file. 
+  Place next to original state file with the name:
+  3di-cold-state-id.txt.
 
 
 1.9 (2021-01-27)
