@@ -304,7 +304,7 @@ class ThreediSimulation:
 
     def _add_initial_state(self, saved_state_id_file: Path, cold_state_id_file: Path):
         # TODO explain rationale. (likewise for the other methods).
-        for state_file in [saved_state_id_file,cold_state_id_file]:
+        for state_file in [saved_state_id_file, cold_state_id_file]:
             if not state_file.exists():
                 msg = f"Saved state id file {state_file} not found"
                 if self.allow_missing_saved_state:
@@ -331,9 +331,8 @@ class ThreediSimulation:
                         logger.warn(msg)
                         return
                 else:
-                    ogger.debug("Error isn't a 400, so we re-raise it.")
+                    logger.debug("Error isn't a 400, so we re-raise it.")
                     raise
-                    continue
 
     def _prepare_initial_state(self) -> int:
         """Instruct 3di to save the state afterwards and return its ID."""
