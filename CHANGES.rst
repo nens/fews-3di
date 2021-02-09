@@ -2,7 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-1.10 (unreleased)
+1.10 (2021-02-09)
 -----------------
 
 - Added the functionality to provide a cold state file. 
