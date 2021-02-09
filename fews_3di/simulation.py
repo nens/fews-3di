@@ -304,36 +304,55 @@ class ThreediSimulation:
 
     def _add_initial_state(self, saved_state_id_file: Path, cold_state_id_file: Path):
         # TODO explain rationale. (likewise for the other methods).
-        for state_file in [saved_state_id_file,cold_state_id_file]:
-            if not state_file.exists():
-                msg = f"Saved state id file {state_file} not found"
+        if not saved_state_id_file.exists():
+            msg = f"Saved state id file {saved_state_id_file} not found"
+            if self.allow_missing_saved_state:
+                logger.warn(msg)
+                return
+            else:
+                raise utils.MissingFileException(msg)
+        saved_state_id: str = saved_state_id_file.read_text().strip()
+        logger.info("Simulation will use initial state %s", saved_state_id)
+        try:
+            self.simulations_api.simulations_initial_saved_state_create(
+                self.simulation_id, data={"saved_state": saved_state_id}
+            )
+        except openapi_client.exceptions.ApiException as e:
+            if e.status == 400:
+                logger.debug("Saved state setting error: %s", str(e))
+                msg = (
+                    f"Setting initial state to saved state id={saved_state_id} failed. "
+                    f"The error response was {e.body}, perhaps use "
+                    f"--allow-missing-saved-state initially?"
+                )
                 if self.allow_missing_saved_state:
                     logger.warn(msg)
                     return
-                else:
-                    raise utils.MissingFileException(msg)
-            saved_state_id: str = state_file.read_text().strip()
-            logger.info("Simulation will use initial state %s", saved_state_id)
-            try:
-                self.simulations_api.simulations_initial_saved_state_create(
-                    self.simulation_id, data={"saved_state": saved_state_id}
-                )
-                return
-            except openapi_client.exceptions.ApiException as e:
-                if e.status == 400:
-                    logger.debug("Saved state setting error: %s", str(e))
-                    msg = (
-                        f"Setting initial state to saved state id={saved_state_id} failed. "
-                        f"The error response was {e.body}, perhaps use "
-                        f"--allow-missing-saved-state initially?"
-                    )
-                    if self.allow_missing_saved_state:
-                        logger.warn(msg)
+                elif cold_state_id_file.exists():
+                    msg = f"Warm state failed to set; Cold state id file {cold_state_id_file} found"
+                    logger.info(msg)
+                    cold_state_id: str = cold_state_id_file.read_text().strip()
+                    logger.info("Simulation will use initial state %s", cold_state_id)
+                    try:
+                        self.simulations_api.simulations_initial_saved_state_create(
+                            self.simulation_id, data={"saved_state": cold_state_id}
+                        )
                         return
+                    except openapi_client.exceptions.ApiException as f:
+                        if f.status == 400:
+                            logger.debug("Cold state setting error: %s", str(f))
+                            msg = (
+                                f"Setting initial state to cold state id={cold_state_id} failed. "
+                                f"The error response was {f.body}"
+                            )
+                            raise MissingSavedStateError(msg) from e
+                        else:
+                            logger.debug("Error isn't a 400, so we re-raise it.")
+                            raise
                 else:
-                    ogger.debug("Error isn't a 400, so we re-raise it.")
-                    raise
-                    continue
+                    raise MissingSavedStateError(msg) from e
+            logger.debug("Error isn't a 400, so we re-raise it.")
+            raise
 
     def _prepare_initial_state(self) -> int:
         """Instruct 3di to save the state afterwards and return its ID."""

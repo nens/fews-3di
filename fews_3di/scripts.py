@@ -1,8 +1,8 @@
 """Script to start 3Di simulations from FEWS.
 """
 # ^^^ This docstring is automatically used in the command line help text.
-import simulation
-import utils
+from fews_3di import simulation
+from fews_3di import utils
 from pathlib import Path
 
 import argparse
@@ -82,6 +82,3 @@ def main():
             logger.error("↓↓↓↓↓   Pass --verbose to get more information   ↓↓↓↓↓")
             logger.error(e)
         return 1  # Exit code signalling an error.
-
-if __name__ == "__main__":
-    exit(main())
