@@ -214,7 +214,7 @@ class ThreediSimulation:
             self._process_basic_lizard_results()
         else:
             logger.info("Not processing basic results in Lizard")
-      
+
         if self.settings.initial_waterlevel:
             self._add_initial_waterlevel_raster()
         else:
