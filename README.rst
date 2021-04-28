@@ -88,6 +88,16 @@ A cold state is supplied in a similar way with the name:
 **initial_waterlevel:** can be ``min``, ``max``, or ``mean``. When specified the initial waterlevel raster is taken into account. If left empty no initial waterlevel is used in the simulation. 
 
 
+**initial_waterlevel:** if you want to use the initial waterlevel raster as defined in the settings (leave empty if no initial waterlevel is predefined):
+
+- ``min``
+
+- ``mean``
+
+- ``max``
+
+
+
 Several input files are needed, they should be in the ``input`` directory
 **relative** to the ``run_info.xml``:
 
