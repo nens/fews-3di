@@ -215,7 +215,7 @@ class ThreediSimulation:
         else:
             logger.info("Not processing basic results in Lizard")
       
-        if self.settings.initial_waterlevel.exists():
+        if self.settings.initial_waterlevel:
             self._add_initial_waterlevel_raster()
         else:
             logger.info("No initial waterlevel raster predefined")
