@@ -52,6 +52,7 @@ def test_run_mock_mock_mock(example_settings):
     threedi_simulation._run_simulation = mock.MagicMock()
     threedi_simulation._download_results = mock.MagicMock()
     threedi_simulation._process_basic_lizard_results = mock.MagicMock()
+    threedi_simulation._add_initial_waterlevel_raster = mock.MagicMock()
     # ._write_saved_state_id() doesn't need mocking.
     threedi_simulation._process_results = mock.MagicMock()
 

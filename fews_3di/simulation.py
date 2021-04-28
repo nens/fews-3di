@@ -165,6 +165,12 @@ class ThreediSimulation:
             self.settings.base_dir / "states" / SAVED_STATE_ID_FILENAME
         )
         cold_state_id_file = self.settings.base_dir / "states" / COLD_STATE_ID_FILENAME
+
+        if self.settings.initial_waterlevel:
+            self._add_initial_waterlevel_raster(model_id)
+        else:
+            logger.info("No initial waterlevel raster predefined")
+
         if self.settings.save_state:
             self._add_initial_state(saved_state_id_file, cold_state_id_file)
             self.saved_state_id = self._prepare_initial_state()
@@ -354,17 +360,24 @@ class ThreediSimulation:
         logger.info("Saved state will be stored: %s", saved_state.url)
         return saved_state.id
 
-    def _add_initial_waterlevel_raster(self):
+    def _add_initial_waterlevel_raster(self, model_id):
         """Upload initial waterlevel raster and wait for it to be processed."""
         logger.info("Uploading initial waterlevel raster...")
-        ini_wl_api_call = (
-            self.simulations_api.simulations_initial1d_water_level_predfined_create(
-                simulation_pk=self.simulation_id,
-                data={},
-                aggregation_method=self.settings.initial_waterlevel,
-            )
+        self.waterlevel_raster_id = (
+            self.threedimodels_api.threedimodels_initial_waterlevels_list(model_id)
+            .results[0]
+            .id
         )
 
+        ini_wl_api_call = (
+            self.simulations_api.simulations_initial2d_water_level_raster_create(
+                simulation_pk=self.simulation_id,
+                data={
+                    "aggregation_method": self.settings.initial_waterlevel,
+                    "initial_waterlevel": self.waterlevel_raster_id,
+                },
+            )
+        )
         logger.info("Added initial waterlevel raster to %s", ini_wl_api_call.url)
 
     def _add_netcdf_rain(self, rain_raster_netcdf: Path):
