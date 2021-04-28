@@ -2,7 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-1.11 (unreleased)
+1.11 (2021-04-28)
 -----------------
 
 - Added possibility to add initial waterlevel raster.
