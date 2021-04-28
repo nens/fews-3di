@@ -51,6 +51,7 @@ class Settings:
     rain_type: str
     rain_input: str
     fews_pre_processing: bool
+    initial_waterlevel: str
 
     def __init__(self, settings_file: Path):
         """Read settings from the xml settings file."""
@@ -79,6 +80,7 @@ class Settings:
             "lizard_results_scenario_uuid",
             "rain_type",
             "rain_input",
+            "initial_waterlevel",
         ]
         for property_name in required_properties:
             self._read_property(property_name)
