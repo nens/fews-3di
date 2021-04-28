@@ -5,13 +5,13 @@ Changelog of fews-3di
 1.11 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Added possibility to add initial waterlevel raster.
 
 
 1.10 (2021-02-09)
 -----------------
 
-- Added the functionality to provide a cold state file. 
+- Added the functionality to provide a cold state file.
   Place next to original state file with the name:
   3di-cold-state-id.txt.
 
@@ -27,7 +27,7 @@ Changelog of fews-3di
 1.7 (2020-11-13)
 ----------------
 
-- Checks for crashed status and queue's model. 
+- Checks for crashed status and queue's model.
 
 
 1.6 (2020-10-19)
