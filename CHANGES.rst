@@ -2,7 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-1.12 (unreleased)
+1.12 (2021-04-28)
 -----------------
 
 - Fixes for 1.11, initial waterlevel should work now.
