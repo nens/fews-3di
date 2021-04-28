@@ -365,7 +365,7 @@ def _add_initial_waterlevel_raster(self):
         """Upload initial waterlevel raster and wait for it to be processed."""
         logger.info("Uploading initial waterlevel raster...")
         ini_wl_api_call = self.simulations_api.simulations_initial1d_water_level_predfined_create(
-                simulation_pk=self.simulation_id, data={}, aggregation_method=self.settings.initial_waterlevel))
+                simulation_pk=self.simulation_id, data={}, aggregation_method=self.settings.initial_waterlevel)
        
         logger.info("Added initial waterlevel raster to %s", ini_wl_api_call.url)
 
