@@ -50,6 +50,7 @@ The expected information in run_info.xml is::
 	  <string key="fews_pre_processing" value="True"/>
 	  <string key="lizard_results_scenario_name" value="Testsimulatie"/>
 	  <string key="lizard_results_scenario_uuid" value=""/>
+	  <string key="iniitial_waterlevel" value=""/>
       </properties>
   </Run>
   
@@ -83,6 +84,16 @@ A cold state is supplied in a similar way with the name:
 
 
 **fews_pre_processing:** can be ``True`` or ``False``. Must be True if the results are needed in fews: additional pre_processing of the results is needed.
+
+
+**initial_waterlevel:** if you want to use the initial waterlevel raster as defined in the settings (leave empty if no initial waterlevel is predefined):
+
+- ``min``
+
+- ``mean``
+
+- ``max``
+
 
 
 Several input files are needed, they should be in the ``input`` directory
