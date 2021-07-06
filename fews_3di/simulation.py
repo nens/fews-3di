@@ -172,8 +172,12 @@ class ThreediSimulation:
             logger.info("No initial waterlevel raster predefined")
 
         if self.settings.save_state:
-            self._add_initial_state(saved_state_id_file, cold_state_id_file)
-            self.saved_state_id = self._prepare_initial_state()
+            if self.settings.use_last_available_state:
+                self._add_last_available_state(model_id)
+                self.saved_state_id = self._prepare_initial_state()
+            else:
+                self._add_initial_state(saved_state_id_file, cold_state_id_file)
+                self.saved_state_id = self._prepare_initial_state()
         else:
             logger.info("Saved state not enabled in the configuration, skipping.")
 
@@ -221,7 +225,7 @@ class ThreediSimulation:
         else:
             logger.info("Not processing basic results in Lizard")
 
-        self._run_simulation()
+        # self._run_simulation()
         self._download_results()
         if self.settings.save_state:
             self._write_saved_state_id(saved_state_id_file)
@@ -305,6 +309,33 @@ class ThreediSimulation:
 
             if not still_to_process:
                 return
+
+    def _add_last_available_state(self, model_id):
+        states_result = self.threedimodels_api.threedimodels_saved_states_list(model_id)
+        results = states_result.results
+        if not results:
+            raise NotFoundError(f"State for model id:{model_id} not found")
+        saved_state_id = results[0].id
+        logger.info("last available state is: %s", saved_state_id)
+        try:
+            self.simulations_api.simulations_initial_saved_state_create(
+                self.simulation_id, data={"saved_state": saved_state_id}
+            )
+            return
+        except openapi_client.exceptions.ApiException as e:
+            if e.status == 400:
+                logger.debug("Saved state setting error: %s", str(e))
+                msg = (
+                    f"Setting initial state to saved state id={saved_state_id} failed. "
+                    f"The error response was {e.body}, perhaps use "
+                    f"--allow-missing-saved-state initially?"
+                )
+                if self.allow_missing_saved_state:
+                    logger.warn(msg)
+                    return
+            else:
+                logger.debug("Error isn't a 400, so we re-raise it.")
+                raise
 
     def _add_initial_state(self, saved_state_id_file: Path, cold_state_id_file: Path):
         # TODO explain rationale. (likewise for the other methods).

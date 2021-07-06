@@ -43,6 +43,7 @@ class Settings:
     password: str
     save_state: bool
     save_state_time: int
+    use_last_available_state: bool
     saved_state_expiry_days: int
     settings_file: Path
     simulationname: str
@@ -74,6 +75,7 @@ class Settings:
             "simulationname",
             "username",
             "fews_pre_processing",
+            "use_last_available_state",
         ]
 
         optional_properties = [
@@ -112,6 +114,9 @@ class Settings:
             value = string_value.lower() == "true"
 
         elif property_name == "fews_pre_processing":
+            value = string_value.lower() == "true"
+
+        elif property_name == "use_last_available_state":
             value = string_value.lower() == "true"
 
         elif property_name == "saved_state_expiry_days":
