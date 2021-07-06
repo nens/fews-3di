@@ -42,6 +42,7 @@ class Settings:
     organisation: str
     password: str
     save_state: bool
+    save_state_time: int
     saved_state_expiry_days: int
     settings_file: Path
     simulationname: str
@@ -81,6 +82,7 @@ class Settings:
             "rain_type",
             "rain_input",
             "initial_waterlevel",
+            "save_state_time",
         ]
         for property_name in required_properties:
             self._read_property(property_name)
