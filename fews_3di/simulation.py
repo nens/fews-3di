@@ -290,8 +290,10 @@ class ThreediSimulation:
         while True:
             time.sleep(2)
             for id in still_to_process:
-                lateral = self.simulations_api.simulations_events_lateral_timeseries_read(
-                    simulation_pk=self.simulation_id, id=id
+                lateral = (
+                    self.simulations_api.simulations_events_lateral_timeseries_read(
+                        simulation_pk=self.simulation_id, id=id
+                    )
                 )
                 if lateral.state.lower() == "processing":
                     logger.debug("Lateral %s is still being processed.", lateral.url)
@@ -403,20 +405,24 @@ class ThreediSimulation:
             .id
         )
 
-        ini_wl_api_call = self.simulations_api.simulations_initial2d_water_level_raster_create(
-            simulation_pk=self.simulation_id,
-            data={
-                "aggregation_method": self.settings.initial_waterlevel,
-                "initial_waterlevel": self.waterlevel_raster_id,
-            },
+        ini_wl_api_call = (
+            self.simulations_api.simulations_initial2d_water_level_raster_create(
+                simulation_pk=self.simulation_id,
+                data={
+                    "aggregation_method": self.settings.initial_waterlevel,
+                    "initial_waterlevel": self.waterlevel_raster_id,
+                },
+            )
         )
         logger.info("Added initial waterlevel raster to %s", ini_wl_api_call.url)
 
     def _add_netcdf_rain(self, rain_raster_netcdf: Path):
         """Upload rain raster netcdf file and wait for it to be processed."""
         logger.info("Uploading rain rasters...")
-        rain_api_call = self.simulations_api.simulations_events_rain_rasters_netcdf_create(
-            self.simulation_id, data={"filename": rain_raster_netcdf.name}
+        rain_api_call = (
+            self.simulations_api.simulations_events_rain_rasters_netcdf_create(
+                self.simulation_id, data={"filename": rain_raster_netcdf.name}
+            )
         )
         log_url = rain_api_call.put_url.split("?")[0]  # Strip off aws credentials.
         with rain_raster_netcdf.open("rb") as f:
@@ -427,8 +433,10 @@ class ThreediSimulation:
         logger.debug("Waiting for rain raster to be processed...")
         while True:
             time.sleep(2)
-            upload_status = self.simulations_api.simulations_events_rain_rasters_netcdf_list(
-                self.simulation_id
+            upload_status = (
+                self.simulations_api.simulations_events_rain_rasters_netcdf_list(
+                    self.simulation_id
+                )
             )
             state = upload_status.results[0].file.state
             if state.lower() == "processing":
@@ -510,8 +518,10 @@ class ThreediSimulation:
     def _add_evaporation(self, evaporation_raster_netcdf: Path):
         """Upload evaporation raster netcdf file and wait for it to be processed."""
         logger.info("Uploading evaporation rasters...")
-        evaporation_api_call = self.simulations_api.simulations_events_sources_sinks_rasters_netcdf_create(
-            self.simulation_id, data={"filename": evaporation_raster_netcdf.name}
+        evaporation_api_call = (
+            self.simulations_api.simulations_events_sources_sinks_rasters_netcdf_create(
+                self.simulation_id, data={"filename": evaporation_raster_netcdf.name}
+            )
         )
         log_url = evaporation_api_call.put_url.split("?")[
             0
