@@ -10,3 +10,5 @@ isort >= 5
 mypy
 wheel
 zest.releaser
+types-requests
+types-mock
