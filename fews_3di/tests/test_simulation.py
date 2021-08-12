@@ -42,6 +42,7 @@ def test_run_mock_mock_mock(example_settings):
         return_value=(43, "https://example.org/model/43/")
     )
     threedi_simulation._add_laterals = mock.MagicMock()
+    threedi_simulation._add_last_available_state = mock.MagicMock()
     threedi_simulation._add_initial_state = mock.MagicMock()
     threedi_simulation._prepare_initial_state = mock.MagicMock(return_value=21)
     threedi_simulation._add_constant_rain = mock.MagicMock()

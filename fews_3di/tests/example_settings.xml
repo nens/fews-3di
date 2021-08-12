@@ -8,6 +8,8 @@
         <ns0:string key="modelrevision" value="abcd123456787" />
         <ns0:string key="simulationname" value="Simulation name" />
         <ns0:string key="save_state" value="True" />
+        <ns0:string key="save_state_time" value="" />
+        <ns0:string key="use_last_available_state" value="False" />
         <ns0:string key="saved_state_expiry_days" value="5" />
         <ns0:string key="rain_type" value="constant" />   
         <ns0:string key="rain_input" value="0.00001" />
