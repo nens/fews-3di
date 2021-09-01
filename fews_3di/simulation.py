@@ -225,7 +225,7 @@ class ThreediSimulation:
         else:
             logger.info("Not processing basic results in Lizard")
 
-        # self._run_simulation()
+        self._run_simulation()
         self._download_results()
         if self.settings.save_state:
             self._write_saved_state_id(saved_state_id_file)
