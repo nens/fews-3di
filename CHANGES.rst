@@ -2,7 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-1.13 (unreleased)
+1.13 (2021-09-01)
 -----------------
 
 - Added possibility to write state at specific time intervall.
