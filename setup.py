@@ -11,7 +11,13 @@ long_description = "\n\n".join(
     ]
 )
 
-install_requires = ["netCDF4", "threedi-api-client", "threedigrid", "pandas"]
+install_requires = [
+    "netCDF4",
+    "threedi-api-client",
+    "threedigrid",
+    "pandas",
+    "requests",
+]
 
 tests_require = [
     "data-science-types",
