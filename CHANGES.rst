@@ -5,7 +5,7 @@ Changelog of fews-3di
 1.14 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Added missing requests dependency to package setup.
 
 
 1.13 (2021-09-01)
