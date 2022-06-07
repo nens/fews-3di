@@ -40,7 +40,6 @@ import time
 
 OffsetAndValue = namedtuple("OffsetAndValue", ["offset", "value"])
 NULL_VALUE = -999  # nodata value in FEWS
-API_HOST = "https://api.3di.live/v3.0"
 CHUNK_SIZE = 1024 * 1024  # 1MB
 SAVED_STATE_ID_FILENAME = "3di-saved-state-id.txt"
 COLD_STATE_ID_FILENAME = "3di-cold-state-id.txt"
@@ -93,12 +92,13 @@ class ThreediSimulation:
     simulation_url: str
     simulations_api: openapi_client.SimulationsApi
     threedimodels_api: openapi_client.ThreedimodelsApi
-
+    
     def __init__(
         self, settings: utils.Settings, allow_missing_saved_state: bool = False
     ):
         """Set up a 3di API connection."""
         self.settings = settings
+        API_HOST = self.settings.api_host
         self.allow_missing_saved_state = allow_missing_saved_state
         self.configuration = openapi_client.Configuration(host=API_HOST)
         self.api_client = openapi_client.ApiClient(self.configuration)
@@ -114,6 +114,7 @@ class ThreediSimulation:
         method to make testing easier.
 
         """
+        API_HOST = self.settings.api_host
         logger.info("Logging in on %s as user %s...", API_HOST, self.settings.username)
         auth_api = openapi_client.AuthApi(self.api_client)
         user_plus_password = openapi_client.Authenticate(

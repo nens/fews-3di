@@ -37,6 +37,7 @@ class FileDownloadException(Exception):
 
 class Settings:
     # Instance variables with their types
+    api_host: str
     end: datetime.datetime
     modelrevision: str
     organisation: str
@@ -60,6 +61,7 @@ class Settings:
         self.settings_file = settings_file
         setattr(self, "lizard_results_scenario_name", "")
         setattr(self, "lizard_results_scenario_uuid", "")
+        setattr(self, "api_host", "https://api.3di.live/v3.0")
         logger.info("Reading settings from %s...", self.settings_file)
         try:
             self._root = ET.fromstring(self.settings_file.read_text())
@@ -85,6 +87,7 @@ class Settings:
             "rain_input",
             "initial_waterlevel",
             "save_state_time",
+            "api_host",
         ]
         for property_name in required_properties:
             self._read_property(property_name)
@@ -121,7 +124,11 @@ class Settings:
 
         elif property_name == "saved_state_expiry_days":
             value = int(string_value)
-
+        elif property_name == "api_host":
+            # check if a different api_host is provided in settings.xml
+            # otherwise use the default provided with setattr
+            if string_value:
+                value = string_value
         else:
             # Normal situation.
             value = string_value
