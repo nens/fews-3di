@@ -8,7 +8,7 @@ Changelog of fews-3di
 - Added optional api_host parameter to the settings file.
 
 
-1.14 (unreleased)
+1.14 (2022-02-08)
 -----------------
 
 - Added missing requests dependency to package setup.
