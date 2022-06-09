@@ -92,15 +92,14 @@ class ThreediSimulation:
     simulation_url: str
     simulations_api: openapi_client.SimulationsApi
     threedimodels_api: openapi_client.ThreedimodelsApi
-    
+
     def __init__(
         self, settings: utils.Settings, allow_missing_saved_state: bool = False
     ):
         """Set up a 3di API connection."""
         self.settings = settings
-        API_HOST = self.settings.api_host
         self.allow_missing_saved_state = allow_missing_saved_state
-        self.configuration = openapi_client.Configuration(host=API_HOST)
+        self.configuration = openapi_client.Configuration(host=self.settings.api_host)
         self.api_client = openapi_client.ApiClient(self.configuration)
         self.api_client.user_agent = USER_AGENT  # Let's be neat.
         self.output_dir = self.settings.base_dir / "output"
@@ -114,8 +113,7 @@ class ThreediSimulation:
         method to make testing easier.
 
         """
-        API_HOST = self.settings.api_host
-        logger.info("Logging in on %s as user %s...", API_HOST, self.settings.username)
+        logger.info("Logging in on %s as user %s...", self.settings.api_host, self.settings.username)
         auth_api = openapi_client.AuthApi(self.api_client)
         user_plus_password = openapi_client.Authenticate(
             username=self.settings.username, password=self.settings.password

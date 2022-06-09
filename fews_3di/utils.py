@@ -16,6 +16,7 @@ import xml.etree.ElementTree as ET
 
 NAMESPACES = {"pi": "http://www.wldelft.nl/fews/PI"}
 NULL_VALUE = -999
+DEFAULT_API_HOST = "https://api.3di.live/v3.0"
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +62,7 @@ class Settings:
         self.settings_file = settings_file
         setattr(self, "lizard_results_scenario_name", "")
         setattr(self, "lizard_results_scenario_uuid", "")
-        setattr(self, "api_host", "https://api.3di.live/v3.0")
+        setattr(self, "api_host", DEFAULT_API_HOST)
         logger.info("Reading settings from %s...", self.settings_file)
         try:
             self._root = ET.fromstring(self.settings_file.read_text())
@@ -124,11 +125,6 @@ class Settings:
 
         elif property_name == "saved_state_expiry_days":
             value = int(string_value)
-        elif property_name == "api_host":
-            # check if a different api_host is provided in settings.xml
-            # otherwise use the default provided with setattr
-            if string_value:
-                value = string_value
         else:
             # Normal situation.
             value = string_value
