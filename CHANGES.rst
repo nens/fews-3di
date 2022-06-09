@@ -2,7 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-1.15 (unreleased)
+1.15 (2022-06-10)
 -----------------
 
 - Added optional api_host parameter to the settings file.
