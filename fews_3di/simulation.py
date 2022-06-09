@@ -113,7 +113,11 @@ class ThreediSimulation:
         method to make testing easier.
 
         """
-        logger.info("Logging in on %s as user %s...", self.settings.api_host, self.settings.username)
+        logger.info(
+            "Logging in on %s as user %s...",
+            self.settings.api_host,
+            self.settings.username,
+        )
         auth_api = openapi_client.AuthApi(self.api_client)
         user_plus_password = openapi_client.Authenticate(
             username=self.settings.username, password=self.settings.password
@@ -125,7 +129,7 @@ class ThreediSimulation:
             if status == 401:
                 msg = (
                     f"Authentication of '{self.settings.username}' failed on "
-                    f"{API_HOST} with the given password"
+                    f"{self.settings.api_host} with the given password"
                 )
                 raise AuthenticationError(msg) from e
             logger.debug("Error isn't a 401, so we re-raise it.")
