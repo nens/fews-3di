@@ -124,11 +124,6 @@ class Settings:
 
         elif property_name == "saved_state_expiry_days":
             value = int(string_value)
-        elif property_name == "api_host":
-            # check if a different api_host is provided in settings.xml
-            # otherwise use the default provided with setattr
-            if string_value:
-                value = string_value
         else:
             # Normal situation.
             value = string_value
