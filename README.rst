@@ -53,7 +53,7 @@ The expected information in run_info.xml is::
           <string key="lizard_results_scenario_name" value="Testsimulatie"/>
           <string key="lizard_results_scenario_uuid" value=""/>
           <string key="initial_waterlevel" value=""/>
-      <string key="api_host" value=""/>
+          <string key="api_host" value=""/>
       </properties>
   </Run>
 
