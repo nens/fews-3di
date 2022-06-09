@@ -2,6 +2,12 @@ Changelog of fews-3di
 ===================================================
 
 
+1.15 (unreleased)
+-----------------
+
+- Added optional api_host parameter to the settings file.
+
+
 1.14 (unreleased)
 -----------------
 

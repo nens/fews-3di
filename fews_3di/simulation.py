@@ -40,7 +40,6 @@ import time
 
 OffsetAndValue = namedtuple("OffsetAndValue", ["offset", "value"])
 NULL_VALUE = -999  # nodata value in FEWS
-API_HOST = "https://api.3di.live/v3.0"
 CHUNK_SIZE = 1024 * 1024  # 1MB
 SAVED_STATE_ID_FILENAME = "3di-saved-state-id.txt"
 COLD_STATE_ID_FILENAME = "3di-cold-state-id.txt"
@@ -100,7 +99,7 @@ class ThreediSimulation:
         """Set up a 3di API connection."""
         self.settings = settings
         self.allow_missing_saved_state = allow_missing_saved_state
-        self.configuration = openapi_client.Configuration(host=API_HOST)
+        self.configuration = openapi_client.Configuration(host=self.settings.api_host)
         self.api_client = openapi_client.ApiClient(self.configuration)
         self.api_client.user_agent = USER_AGENT  # Let's be neat.
         self.output_dir = self.settings.base_dir / "output"
@@ -114,7 +113,11 @@ class ThreediSimulation:
         method to make testing easier.
 
         """
-        logger.info("Logging in on %s as user %s...", API_HOST, self.settings.username)
+        logger.info(
+            "Logging in on %s as user %s...",
+            self.settings.api_host,
+            self.settings.username,
+        )
         auth_api = openapi_client.AuthApi(self.api_client)
         user_plus_password = openapi_client.Authenticate(
             username=self.settings.username, password=self.settings.password
@@ -126,7 +129,7 @@ class ThreediSimulation:
             if status == 401:
                 msg = (
                     f"Authentication of '{self.settings.username}' failed on "
-                    f"{API_HOST} with the given password"
+                    f"{self.settings.api_host} with the given password"
                 )
                 raise AuthenticationError(msg) from e
             logger.debug("Error isn't a 401, so we re-raise it.")

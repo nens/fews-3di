@@ -16,6 +16,7 @@ import xml.etree.ElementTree as ET
 
 NAMESPACES = {"pi": "http://www.wldelft.nl/fews/PI"}
 NULL_VALUE = -999
+DEFAULT_API_HOST = "https://api.3di.live/v3.0"
 
 logger = logging.getLogger(__name__)
 
@@ -37,6 +38,7 @@ class FileDownloadException(Exception):
 
 class Settings:
     # Instance variables with their types
+    api_host: str
     end: datetime.datetime
     modelrevision: str
     organisation: str
@@ -60,6 +62,7 @@ class Settings:
         self.settings_file = settings_file
         setattr(self, "lizard_results_scenario_name", "")
         setattr(self, "lizard_results_scenario_uuid", "")
+        setattr(self, "api_host", DEFAULT_API_HOST)
         logger.info("Reading settings from %s...", self.settings_file)
         try:
             self._root = ET.fromstring(self.settings_file.read_text())
@@ -85,6 +88,7 @@ class Settings:
             "rain_input",
             "initial_waterlevel",
             "save_state_time",
+            "api_host",
         ]
         for property_name in required_properties:
             self._read_property(property_name)
@@ -121,7 +125,6 @@ class Settings:
 
         elif property_name == "saved_state_expiry_days":
             value = int(string_value)
-
         else:
             # Normal situation.
             value = string_value

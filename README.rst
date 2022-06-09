@@ -53,6 +53,7 @@ The expected information in run_info.xml is::
 	  <string key="lizard_results_scenario_name" value="Testsimulatie"/>
 	  <string key="lizard_results_scenario_uuid" value=""/>
 	  <string key="initial_waterlevel" value=""/>
+      <string key="api_host" value=""/>
       </properties>
   </Run>
   
@@ -106,7 +107,7 @@ should be saved. If left empty the end of the simulation is used.
 
 - ``max``
 
-
+**api_host:** (optional) api_host address can be added here. If not provided the default api_host address ("https://api.3di.live/v3.0") will be used.
 
 Several input files are needed, they should be in the ``input`` directory
 **relative** to the ``run_info.xml``:
