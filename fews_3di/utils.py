@@ -61,7 +61,7 @@ class Settings:
         self.settings_file = settings_file
         setattr(self, "lizard_results_scenario_name", "")
         setattr(self, "lizard_results_scenario_uuid", "")
-        setattr(self, "api_host", "https://api.3di.live/v3.0")
+        setattr(self, "api_host", DEFAULT_API_HOST)
         logger.info("Reading settings from %s...", self.settings_file)
         try:
             self._root = ET.fromstring(self.settings_file.read_text())
