@@ -23,9 +23,7 @@ tests_require = [
     "data-science-types",
     "mock",
     "pytest",
-    "pytest-black",
     "pytest-cov",
-    "pytest-flakes",
     "pytest-mypy",
 ]
 

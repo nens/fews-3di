@@ -16,6 +16,7 @@ bin/run-fews-3di: requirements.txt setup.py setup.cfg
 
 test: install
 	bin/flake8 fews_3di/
+	bin/black --check fews_3di/
 	bin/pytest
 
 beautiful: install
