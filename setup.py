@@ -15,7 +15,7 @@ install_requires = [
     "netCDF4",
     "pandas",
     "requests",
-    "threedi-api-client",
+    "threedi-api-client >= 4.0.1",
     "threedigrid",
 ]
 
