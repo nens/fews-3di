@@ -16,7 +16,7 @@ import xml.etree.ElementTree as ET
 
 NAMESPACES = {"pi": "http://www.wldelft.nl/fews/PI"}
 NULL_VALUE = -999
-DEFAULT_API_HOST = "https://api.3di.live/v3.0"
+DEFAULT_API_HOST = "https://api.3di.live/"
 
 logger = logging.getLogger(__name__)
 
@@ -159,6 +159,14 @@ class Settings:
     @property
     def base_dir(self) -> Path:
         return self.settings_file.parent
+
+    def as_api_config(self) -> dict:
+        """Return config dict as used by threedi_api_client's __init__()"""
+        return {
+            "THREEDI_API_HOST": self.api_host,
+            "THREEDI_API_USERNAME": self.username,
+            "THREEDI_API_PASSWORD": self.password,
+        }
 
 
 def lateral_timeseries(

@@ -1,27 +1,8 @@
-"""
-Notes
-=====
-
-threedi_api_client looks like a bit of a mess. ThreediApiClient doesn't have
-an init, but a __new__. And it doesn't return a ThreediApiCLient, but
-something else. ThreediApiClient doesn't even inherit from that other
-thingy... That's not something that mypy with its proper type hints is going
-to like very much...
-
-APIConfiguration is at least a wrapper around Configuration. But somehow it
-generates an api_client inside _get_api_tokens(), which it passes part of its
-own configuration.... That looks terribly unclean.
-
-Probably too much is happening. Configuration belongs in the apps that use
-it. Some helper is OK, but it took me half an hour to figure out what was
-happening where...
-
-"""
-
 from collections import namedtuple
 from fews_3di import utils
 from pathlib import Path
 from threedi_api_client import openapi
+from threedi_api_client import ThreediApi
 from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 from typing import List
 from typing import Tuple
@@ -80,15 +61,12 @@ class ThreediSimulation:
     """
 
     allow_missing_saved_state: bool
-    api_client: openapi.ApiClient
-    configuration: openapi.Configuration
+    api_client: ThreediApi
     output_dir: Path
     saved_state_id: int
     settings: utils.Settings
     simulation_id: int
     simulation_url: str
-    simulations_api: openapi.SimulationsApi
-    threedimodels_api: openapi.ThreedimodelsApi
 
     def __init__(
         self, settings: utils.Settings, allow_missing_saved_state: bool = False
@@ -96,44 +74,14 @@ class ThreediSimulation:
         """Set up a 3di API connection."""
         self.settings = settings
         self.allow_missing_saved_state = allow_missing_saved_state
-        self.configuration = openapi.Configuration(host=self.settings.api_host)
-        self.api_client = openapi.ApiClient(self.configuration)
+        self.api_client = ThreediApi(config=self.settings.as_api_config())
         self.api_client.user_agent = USER_AGENT  # Let's be neat.
         self.output_dir = self.settings.base_dir / "output"
         self.output_dir.mkdir(exist_ok=True)
         # You need to call login() and run(), but we won't: it makes testing easier.
 
     def login(self):
-        """Log in and set the necessary tokens.
-
-        Should be called right after initialising the class. It is a separate
-        method to make testing easier.
-
-        """
-        logger.info(
-            "Logging in on %s as user %s...",
-            self.settings.api_host,
-            self.settings.username,
-        )
-        auth_api = openapi.AuthApi(self.api_client)
-        user_plus_password = openapi.Authenticate(
-            username=self.settings.username, password=self.settings.password
-        )
-        try:
-            tokens = auth_api.auth_token_create(user_plus_password)
-        except openapi.exceptions.ApiException as e:
-            status = getattr(e, "status", None)
-            if status == 401:
-                msg = (
-                    f"Authentication of '{self.settings.username}' failed on "
-                    f"{self.settings.api_host} with the given password"
-                )
-                raise AuthenticationError(msg) from e
-            logger.debug("Error isn't a 401, so we re-raise it.")
-            raise
-        # Set tokens on the configuration (which is used by self.api_client).
-        self.configuration.api_key["Authorization"] = tokens.access
-        self.configuration.api_key_prefix["Authorization"] = "Bearer"
+        self.api_client.login()
 
     def run(self):
         """Main method
@@ -149,8 +97,6 @@ class ThreediSimulation:
         variables. Otherwise methods become harder to test in isolation.
 
         """
-        self.simulations_api = openapi.SimulationsApi(self.api_client)
-        self.threedimodels_api = openapi.ThreedimodelsApi(self.api_client)
         model_id = self._find_model()
         self.simulation_id, self.simulation_url = self._create_simulation(model_id)
 
@@ -239,7 +185,7 @@ class ThreediSimulation:
         logger.debug(
             "Searching model based on revision=%s...", self.settings.modelrevision
         )
-        threedimodels_result = self.threedimodels_api.threedimodels_list(
+        threedimodels_result = self.api_client.threedimodels_list(
             slug__contains=self.settings.modelrevision
         )
         results = threedimodels_result.results
@@ -262,7 +208,7 @@ class ThreediSimulation:
         data["duration"] = str(self.settings.duration)
         logger.debug("Creating simulation with these settings: %s", data)
 
-        simulation = self.simulations_api.simulations_create(data)
+        simulation = self.api_client.simulations_create(data)
         logger.info("Simulation %s has been created", simulation.url)
         return simulation.id, simulation.url
 
@@ -273,7 +219,7 @@ class ThreediSimulation:
 
         for name, timeserie in laterals.items():
             first_offset = timeserie[0].offset  # TODO: by definition, this is 0???
-            lateral = self.simulations_api.simulations_events_lateral_timeseries_create(
+            lateral = self.api_client.simulations_events_lateral_timeseries_create(
                 simulation_pk=self.simulation_id,
                 data={
                     "offset": first_offset,
@@ -291,7 +237,7 @@ class ThreediSimulation:
             time.sleep(2)
             for id in still_to_process:
                 lateral = (
-                    self.simulations_api.simulations_events_lateral_timeseries_read(
+                    self.api_client.simulations_events_lateral_timeseries_read(
                         simulation_pk=self.simulation_id, id=id
                     )
                 )
@@ -313,14 +259,14 @@ class ThreediSimulation:
                 return
 
     def _add_last_available_state(self, model_id):
-        states_result = self.threedimodels_api.threedimodels_saved_states_list(model_id)
+        states_result = self.api_client.threedimodels_saved_states_list(model_id)
         results = states_result.results
         if not results:
             raise NotFoundError(f"State for model id:{model_id} not found")
         saved_state_id = results[0].id
         logger.info("last available state is: %s", saved_state_id)
         try:
-            self.simulations_api.simulations_initial_saved_state_create(
+            self.api_client.simulations_initial_saved_state_create(
                 self.simulation_id, data={"saved_state": saved_state_id}
             )
             return
@@ -356,7 +302,7 @@ class ThreediSimulation:
                 state_file,
             )
             try:
-                self.simulations_api.simulations_initial_saved_state_create(
+                self.api_client.simulations_initial_saved_state_create(
                     self.simulation_id, data={"saved_state": saved_state_id}
                 )
                 return
@@ -386,7 +332,7 @@ class ThreediSimulation:
         else:
             save_time = self.settings.duration
 
-        saved_state = self.simulations_api.simulations_create_saved_states_timed_create(
+        saved_state = self.api_client.simulations_create_saved_states_timed_create(
             self.simulation_id,
             data={
                 "name": self.settings.simulationname,
@@ -401,13 +347,13 @@ class ThreediSimulation:
         """Upload initial waterlevel raster and wait for it to be processed."""
         logger.info("Uploading initial waterlevel raster...")
         self.waterlevel_raster_id = (
-            self.threedimodels_api.threedimodels_initial_waterlevels_list(model_id)
+            self.api_client.threedimodels_initial_waterlevels_list(model_id)
             .results[0]
             .id
         )
 
         ini_wl_api_call = (
-            self.simulations_api.simulations_initial2d_water_level_raster_create(
+            self.api_client.simulations_initial2d_water_level_raster_create(
                 simulation_pk=self.simulation_id,
                 data={
                     "aggregation_method": self.settings.initial_waterlevel,
@@ -421,7 +367,7 @@ class ThreediSimulation:
         """Upload rain raster netcdf file and wait for it to be processed."""
         logger.info("Uploading rain rasters...")
         rain_api_call = (
-            self.simulations_api.simulations_events_rain_rasters_netcdf_create(
+            self.api_client.simulations_events_rain_rasters_netcdf_create(
                 self.simulation_id, data={"filename": rain_raster_netcdf.name}
             )
         )
@@ -435,7 +381,7 @@ class ThreediSimulation:
         while True:
             time.sleep(2)
             upload_status = (
-                self.simulations_api.simulations_events_rain_rasters_netcdf_list(
+                self.api_client.simulations_events_rain_rasters_netcdf_list(
                     self.simulation_id
                 )
             )
@@ -471,7 +417,7 @@ class ThreediSimulation:
             units="m/s",
         )
 
-        self.simulations_api.simulations_events_rain_constant_create(
+        self.api_client.simulations_events_rain_constant_create(
             self.simulation_id, const_rain
         )
 
@@ -480,7 +426,7 @@ class ThreediSimulation:
         logger.info("Uploading radar rainfall")
         duration = self.settings.end - self.settings.start
 
-        self.simulations_api.simulations_events_rain_rasters_lizard_create(
+        self.api_client.simulations_events_rain_rasters_lizard_create(
             self.simulation_id,
             data={
                 "offset": 0,
@@ -495,7 +441,7 @@ class ThreediSimulation:
         """Upload rain csv timeseries and wait for them to be processed."""
         logger.info("Uploading %s rain csv timeseries...")
 
-        rain_api_call = self.simulations_api.simulations_events_rain_timeseries_create(
+        rain_api_call = self.api_client.simulations_events_rain_timeseries_create(
             simulation_pk=self.simulation_id,
             data={
                 "offset": rain[0],  # offset calculated in utils.py
@@ -510,7 +456,7 @@ class ThreediSimulation:
         """Upload evaporation raster netcdf file and wait for it to be processed."""
         logger.info("Uploading evaporation rasters...")
         evaporation_api_call = (
-            self.simulations_api.simulations_events_sources_sinks_rasters_netcdf_create(
+            self.api_client.simulations_events_sources_sinks_rasters_netcdf_create(
                 self.simulation_id, data={"filename": evaporation_raster_netcdf.name}
             )
         )
@@ -525,7 +471,7 @@ class ThreediSimulation:
         logger.debug("Waiting for evaporation raster to be processed...")
         while True:
             time.sleep(2)
-            upload_status = self.simulations_api.simulations_events_sources_sinks_rasters_netcdf_list(  # noqa: E501
+            upload_status = self.api_client.simulations_events_sources_sinks_rasters_netcdf_list(  # noqa: E501
                 self.simulation_id
             )
             state = upload_status.results[0].file.state
@@ -551,7 +497,7 @@ class ThreediSimulation:
     def _run_simulation(self):
         """Start simulation and wait for it to finish."""
         start_data = {"name": "queue"}
-        self.simulations_api.simulations_actions_create(
+        self.api_client.simulations_actions_create(
             self.simulation_id, data=start_data
         )
         logger.info("Simulation %s has been started.", self.simulation_url)
@@ -560,7 +506,7 @@ class ThreediSimulation:
         while True:
             time.sleep(SIMULATION_STATUS_CHECK_INTERVAL)
             try:
-                simulation_status = self.simulations_api.simulations_status_list(
+                simulation_status = self.api_client.simulations_status_list(
                     self.simulation_id
                 )
             except socket.gaierror as e:
@@ -583,7 +529,7 @@ class ThreediSimulation:
 
     def _download_results(self):
         logger.info("Downloading results into %s...", self.output_dir)
-        simulation_results = self.simulations_api.simulations_results_files_list(
+        simulation_results = self.api_client.simulations_results_files_list(
             self.simulation_id
         ).results
         logger.debug("All simulation results: %s", simulation_results)
@@ -599,7 +545,7 @@ class ThreediSimulation:
             if desired_result not in available_results:
                 logger.error("Desired result file %s isn't available.", desired_result)
                 continue
-            resource = self.simulations_api.simulations_results_files_download(
+            resource = self.api_client.simulations_results_files_download(
                 available_results[desired_result].id, self.simulation_id
             )
             target = self.output_dir / desired_result
@@ -627,7 +573,7 @@ class ThreediSimulation:
         if self.settings.lizard_results_scenario_uuid:
             data["result_uuid"] = self.settings.lizard_results_scenario_uuid
 
-        self.simulations_api.simulations_results_post_processing_lizard_basic_create(
+        self.api_client.simulations_results_post_processing_lizard_basic_create(
             simulation_pk=self.simulation_id, data=data
         )
 
