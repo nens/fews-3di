@@ -5,7 +5,8 @@ Changelog of fews-3di
 1.16 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Requiring threedi-api-client 4.0.1 or higher. This has several import and
+  functionality changes, which we'll have to use (and compensate for).
 
 
 1.15 (2022-06-10)
