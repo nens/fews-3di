@@ -5,15 +5,14 @@ Development instructions
 Development installation
 ------------------------
 
-We use python's build-in "virtualenv" to get a nice isolated directory. You
-only need to run this once::
+To install::
 
-  $ python3 -m venv .
+  $ make install
 
-A virtualenv puts its commands in the ``bin`` directory. So ``bin/pip``,
-``bin/pytest``, etc. Set up the dependencies like this::
+If you want to use a specific version of python, you can first run something
+like this::
 
-  $ bin/pip install -r requirements.txt
+  $ python3.9 -m venv .
 
 There will be a script you can run like this::
 
@@ -24,10 +23,7 @@ necessary. The script is configured in ``setup.py`` (see ``entry_points``).
 
 If you need a new dependency (like ``requests``), add it in ``setup.py`` in
 ``install_requires``. Local development tools, like "black", can be added to
-the ``requirements.txt`` file. In both cases, run install again to actuall
-install your dependency::
-
-  $ bin/pip install -r requirements.txt
+the ``requirements.txt`` file. In both cases, run ``make install`` again.
 
 
 Code structure
