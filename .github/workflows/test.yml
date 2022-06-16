@@ -21,9 +21,7 @@ jobs:
         with:
           python-version: '3.7'
       - name: build
-        run: |
-          python3 -m venv .
-          bin/pip install -r requirements.txt
+        run: make install
       - name: test
         run: make test
       - name: create packages
