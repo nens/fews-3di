@@ -11,6 +11,9 @@ Changelog of fews-3di
 
   - The api host setting should not include the api version number.
 
+- ``.login()`` no longer needs to be called. threedi-api-client handles it
+  automatically.
+
 
 1.15 (2022-06-10)
 -----------------
