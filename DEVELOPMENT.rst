@@ -77,8 +77,12 @@ work on it, run the following command periodically::
 If you don't have "make" installed, look in the Makefile for the commands it
 runs (black, flake8, isort).
 
-Run the tests regularly. This also checks with pyflakes, black and it reports
-coverage. Pure luxury::
+Run the tests regularly, this includes pyflakes and black checks::
+
+  $ make test
+
+Running pytest by itself is also possible, for instance if you want to pass
+specific options::
 
   $ bin/pytest --disable-warnings
 
