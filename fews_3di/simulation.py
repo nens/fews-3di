@@ -367,7 +367,8 @@ class ThreediSimulation:
                 if e.status == 400:
                     logger.debug("Saved state setting error: %s", str(e))
                     msg = (
-                        f"Setting initial state to saved state id={saved_state_id} failed. "
+                        f"Setting initial state to saved state "
+                        f"id={saved_state_id} failed. "
                         f"The error response was {e.body}, perhaps use "
                         f"--allow-missing-saved-state initially?"
                     )
@@ -446,7 +447,10 @@ class ThreediSimulation:
                 logger.debug("Rain raster is still being processed.")
                 continue
             elif state.lower() == "invalid":
-                msg = f"Rain raster upload (to {log_url}) is invalid according to the server."
+                msg = (
+                    f"Rain raster upload (to {log_url}) is invalid according "
+                    f"to the server."
+                )
                 raise InvalidDataError(msg)
             elif state.lower() == "error":
                 state_description = upload_status.results[0].file.state_description
@@ -473,19 +477,6 @@ class ThreediSimulation:
         self.simulations_api.simulations_events_rain_constant_create(
             self.simulation_id, const_rain
         )
-
-    ## -------------------------------------------------------------------------------------##
-    ## function for add_design_rain for future implementation
-    # def _add_design_rain(self):
-    # """Upload design rainfall and wait for it to be processed."""
-    # logger.info("Uploading design rainfall")
-    # rain_api_call = (
-    # self.simulations_api.simulations_events_rain_rasters_lizard_create(
-    # self.simulation_id, data={
-    # 'duration': (self.settings.end - self.settings.start).total_seconds,
-    # 'values': self.settings.rain_input, #m/s , verschil tussen start en eind in secondes
-    # 'units': 'm/s'}
-    # )
 
     def _add_radar_rain(self):
         """Upload radar rainfall from Lizard and wait for it to be processed."""
@@ -537,7 +528,7 @@ class ThreediSimulation:
         logger.debug("Waiting for evaporation raster to be processed...")
         while True:
             time.sleep(2)
-            upload_status = self.simulations_api.simulations_events_sources_sinks_rasters_netcdf_list(
+            upload_status = self.simulations_api.simulations_events_sources_sinks_rasters_netcdf_list(  # noqa: E501
                 self.simulation_id
             )
             state = upload_status.results[0].file.state
@@ -545,7 +536,10 @@ class ThreediSimulation:
                 logger.debug("Evaporation raster is still being processed.")
                 continue
             elif state.lower() == "invalid":
-                msg = f"Evaporation raster upload (to {log_url}) is invalid according to the server."
+                msg = (
+                    f"Evaporation raster upload (to {log_url}) is invalid according "
+                    f"to the server."
+                )
                 raise InvalidDataError(msg)
             elif state.lower() == "error":
                 state_description = upload_status.results[0].file.state_description
@@ -621,7 +615,10 @@ class ThreediSimulation:
             expected_size = resource.size
             actual_size = target.stat().st_size
             if expected_size != actual_size:
-                msg = f"Incomplete download of {resource.get_url}: expected {expected_size}, got {actual_size}."
+                msg = (
+                    f"Incomplete download of {resource.get_url}: "
+                    f"expected {expected_size}, got {actual_size}."
+                )
                 raise utils.FileDownloadException(msg)
 
     def _process_basic_lizard_results(self):
