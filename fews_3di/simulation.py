@@ -2,9 +2,6 @@
 Notes
 =====
 
-Importing openapi_client: that way you can only have one generated
-openapi_client. So not lizard and 3di next to each other?
-
 threedi_api_client looks like a bit of a mess. ThreediApiClient doesn't have
 an init, but a __new__. And it doesn't return a ThreediApiCLient, but
 something else. ThreediApiClient doesn't even inherit from that other
@@ -24,6 +21,7 @@ happening where...
 from collections import namedtuple
 from fews_3di import utils
 from pathlib import Path
+from threedi_api_client import openapi
 from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
 from typing import List
 from typing import Tuple
@@ -31,7 +29,6 @@ from typing import Tuple
 import datetime
 import logging
 import netCDF4
-import openapi_client
 import pandas as pd
 import requests
 import socket
@@ -83,15 +80,15 @@ class ThreediSimulation:
     """
 
     allow_missing_saved_state: bool
-    api_client: openapi_client.ApiClient
-    configuration: openapi_client.Configuration
+    api_client: openapi.ApiClient
+    configuration: openapi.Configuration
     output_dir: Path
     saved_state_id: int
     settings: utils.Settings
     simulation_id: int
     simulation_url: str
-    simulations_api: openapi_client.SimulationsApi
-    threedimodels_api: openapi_client.ThreedimodelsApi
+    simulations_api: openapi.SimulationsApi
+    threedimodels_api: openapi.ThreedimodelsApi
 
     def __init__(
         self, settings: utils.Settings, allow_missing_saved_state: bool = False
@@ -99,8 +96,8 @@ class ThreediSimulation:
         """Set up a 3di API connection."""
         self.settings = settings
         self.allow_missing_saved_state = allow_missing_saved_state
-        self.configuration = openapi_client.Configuration(host=self.settings.api_host)
-        self.api_client = openapi_client.ApiClient(self.configuration)
+        self.configuration = openapi.Configuration(host=self.settings.api_host)
+        self.api_client = openapi.ApiClient(self.configuration)
         self.api_client.user_agent = USER_AGENT  # Let's be neat.
         self.output_dir = self.settings.base_dir / "output"
         self.output_dir.mkdir(exist_ok=True)
@@ -118,13 +115,13 @@ class ThreediSimulation:
             self.settings.api_host,
             self.settings.username,
         )
-        auth_api = openapi_client.AuthApi(self.api_client)
-        user_plus_password = openapi_client.Authenticate(
+        auth_api = openapi.AuthApi(self.api_client)
+        user_plus_password = openapi.Authenticate(
             username=self.settings.username, password=self.settings.password
         )
         try:
             tokens = auth_api.auth_token_create(user_plus_password)
-        except openapi_client.exceptions.ApiException as e:
+        except openapi.exceptions.ApiException as e:
             status = getattr(e, "status", None)
             if status == 401:
                 msg = (
@@ -152,8 +149,8 @@ class ThreediSimulation:
         variables. Otherwise methods become harder to test in isolation.
 
         """
-        self.simulations_api = openapi_client.SimulationsApi(self.api_client)
-        self.threedimodels_api = openapi_client.ThreedimodelsApi(self.api_client)
+        self.simulations_api = openapi.SimulationsApi(self.api_client)
+        self.threedimodels_api = openapi.ThreedimodelsApi(self.api_client)
         model_id = self._find_model()
         self.simulation_id, self.simulation_url = self._create_simulation(model_id)
 
@@ -327,7 +324,7 @@ class ThreediSimulation:
                 self.simulation_id, data={"saved_state": saved_state_id}
             )
             return
-        except openapi_client.exceptions.ApiException as e:
+        except openapi.exceptions.ApiException as e:
             if e.status == 400:
                 logger.debug("Saved state setting error: %s", str(e))
                 msg = (
@@ -363,7 +360,7 @@ class ThreediSimulation:
                     self.simulation_id, data={"saved_state": saved_state_id}
                 )
                 return
-            except openapi_client.exceptions.ApiException as e:
+            except openapi.exceptions.ApiException as e:
                 if e.status == 400:
                     logger.debug("Saved state setting error: %s", str(e))
                     msg = (
@@ -466,7 +463,7 @@ class ThreediSimulation:
         """Upload constant rainfall and wait for it to be processed."""
         logger.info("Uploading constant rainfall")
         duration = self.settings.end - self.settings.start
-        const_rain = openapi_client.models.ConstantRain(
+        const_rain = openapi.models.ConstantRain(
             simulation=self.simulation_id,
             offset=0,
             duration=int(duration.total_seconds()),

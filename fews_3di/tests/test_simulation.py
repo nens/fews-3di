@@ -1,5 +1,5 @@
 from fews_3di import simulation
-from openapi_client.exceptions import ApiException
+from threedi_api_client.openapi.exceptions import ApiException
 
 import mock
 import pytest
