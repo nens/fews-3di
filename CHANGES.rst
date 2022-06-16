@@ -6,7 +6,10 @@ Changelog of fews-3di
 -----------------
 
 - Requiring threedi-api-client 4.0.1 or higher. This has several import and
-  functionality changes, which we'll have to use (and compensate for).
+  functionality changes, which we'll have to use (and compensate for). Some
+  items to watch out for:
+
+  - The api host setting should not include the api version number.
 
 
 1.15 (2022-06-10)
