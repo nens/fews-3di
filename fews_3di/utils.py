@@ -40,22 +40,22 @@ class Settings:
     # Instance variables with their types
     api_host: str
     end: datetime.datetime
+    fews_pre_processing: bool
+    initial_waterlevel: str
+    lizard_results_scenario_name: str
     modelrevision: str
     organisation: str
     password: str
+    rain_input: str
+    rain_type: str
     save_state: bool
     save_state_time: int
-    use_last_available_state: bool
     saved_state_expiry_days: int
     settings_file: Path
     simulationname: str
     start: datetime.datetime
+    use_last_available_state: bool
     username: str
-    lizard_results_scenario_name: str
-    rain_type: str
-    rain_input: str
-    fews_pre_processing: bool
-    initial_waterlevel: str
 
     def __init__(self, settings_file: Path):
         """Read settings from the xml settings file."""
