@@ -38,7 +38,7 @@ Code structure
 
 - ``fews_3di/simulation.py``: the main ``ThreediSimulation`` class. The
   various steps like "add rain" and "start simulation" are separate methods on
-  that class: this way you can ceep the overview of what's happening. It is a
+  that class: this way you can keep the overview of what's happening. It is a
   class to make it easier to share common data like "simulation id".
 
 - ``fews_3di/utils.py``: reading the settings plus some helper functions like

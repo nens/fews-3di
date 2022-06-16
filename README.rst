@@ -1,7 +1,8 @@
 fews-3di
 ==========================================
 
-Program to start `3Di <https://3diwatermanagement.com/>`_ simulations from FEWS.
+Program to start `3Di <https://3diwatermanagement.com/>`_ simulations from
+FEWS.
 
 
 Installation and usage
@@ -12,8 +13,7 @@ We can be installed using python 3.6+ with::
   $ pip install fews-3di
 
 The script is called ``run-fews-3di``, you can pass ``--help`` to get usage
-instructions and ``--verbose`` to get more verbose output in case of
-problems.
+instructions and ``--verbose`` to get more verbose output in case of problems.
 
 ``run-fews-3di`` looks for a ``run_info.xml`` in the current directory by
 default, but you can pass a different file in a different location with
@@ -60,13 +60,12 @@ The expected information in run_info.xml is::
 
 
 **Note:** ``saved_state_expiry_days`` used to be spelled as
-``save_state_expiry_days``, without a "d". The example radar uuid
-is the Dutch rainfall radar (NRR).
+``save_state_expiry_days``, without a "d". The example radar uuid is the Dutch
+rainfall radar (NRR).
 
-**Using saved states:** To use a warm state provide a text file with
-id in the states folder using the name ``states/3di-saved-state-id.txt``.
-A cold state is supplied in a similar way with the name:
-``states/3di-cold-state-id.txt``.
+**Using saved states:** To use a warm state provide a text file with id in the
+states folder using the name ``states/3di-saved-state-id.txt``.  A cold state
+is supplied in a similar way with the name: ``states/3di-cold-state-id.txt``.
 
 **Use last available state:** To overpass the state management system and
 directly take the last available state in the 3Di database the option:
@@ -85,21 +84,29 @@ should be saved. If left empty the end of the simulation is used.
 - ``custom``
 
 
-**Rain_input:** according to the chosen rain-type, a rain input must be given in the configuration:
+**Rain_input:** according to the chosen rain-type, a rain input must be given
+ in the configuration:
 
 - ``constant`` --> ``integer [m/s]``
 
 - ``radar`` --> ``lizard uuid``
 
-- ``custom`` --> two options: ``rain_csv`` or ``rain_netcdf``. These files must be stored in the input directory as ``input/rain.csv`` and ``input/precipitation.nc``
+- ``custom`` --> two options: ``rain_csv`` or ``rain_netcdf``. These files
+  must be stored in the input directory as ``input/rain.csv`` and
+  ``input/precipitation.nc``
 
 
-**fews_pre_processing:** can be ``True`` or ``False``. Must be True if the results are needed in fews: additional pre_processing of the results is needed.
+**fews_pre_processing:** can be ``True`` or ``False``. Must be True if the
+ results are needed in fews: additional pre_processing of the results is
+ needed.
 
-**initial_waterlevel:** can be ``min``, ``max``, or ``mean``. When specified the initial waterlevel raster is taken into account. If left empty no initial waterlevel is used in the simulation.
+**initial_waterlevel:** can be ``min``, ``max``, or ``mean``. When specified
+ the initial waterlevel raster is taken into account. If left empty no initial
+ waterlevel is used in the simulation.
 
 
-**initial_waterlevel:** if you want to use the initial waterlevel raster as defined in the settings (leave empty if no initial waterlevel is predefined):
+**initial_waterlevel:** if you want to use the initial waterlevel raster as
+ defined in the settings (leave empty if no initial waterlevel is predefined):
 
 - ``min``
 
@@ -107,7 +114,8 @@ should be saved. If left empty the end of the simulation is used.
 
 - ``max``
 
-**api_host:** (optional) api_host address can be added here. If not provided the default api_host address ("https://api.3di.live/v3.0") will be used.
+**api_host:** (optional) api_host address can be added here. If not provided
+ the default api_host address ("https://api.3di.live/v3.0") will be used.
 
 Several input files are needed, they should be in the ``input`` directory
 **relative** to the ``run_info.xml``:
@@ -124,8 +132,7 @@ Several input files are needed, they should be in the ``input`` directory
 
 - ``model/gridadmin.h5``
 
-Output is stored in the ``output`` directory relative to the
-``run_info.xml``:
+Output is stored in the ``output`` directory relative to the ``run_info.xml``:
 
 - ``output/simulation.log`` (unavailable, but included in the zip)
 
