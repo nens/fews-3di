@@ -14,6 +14,7 @@ import pandas as pd
 import requests
 import socket
 import time
+import warnings
 
 
 OffsetAndValue = namedtuple("OffsetAndValue", ["offset", "value"])
@@ -81,7 +82,11 @@ class ThreediSimulation:
         # You need to call login() and run(), but we won't: it makes testing easier.
 
     def login(self):
-        self.api.login()
+        warnings.warn(
+            "login() isn't needed anymore. threedi-api-client automatically "
+            "logs in when needed.",
+            DeprecationWarning,
+        )
 
     def run(self):
         """Main method
