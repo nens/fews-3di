@@ -11,8 +11,12 @@ Changelog of fews-3di
 
   - The api host setting should not include the api version number.
 
+  - Preferrably, don't add a trailing slash to the api host url.
+
 - ``.login()`` no longer needs to be called. threedi-api-client handles it
-  automatically.
+  automatically. If you call it, you get a deprecation warning.
+
+- ``--allow-missing-saved-state`` also works if there are no states found.
 
 
 1.15 (2022-06-10)
