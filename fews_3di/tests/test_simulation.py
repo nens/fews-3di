@@ -16,24 +16,6 @@ def test_login_deprecated(example_settings):
         threedi_simulation.login()
 
 
-def test_login_fails_unknown(example_settings):
-    threedi_simulation = simulation.ThreediSimulation(example_settings)
-    with mock.patch("openapi_client.AuthApi.auth_token_create") as mocked:
-        mocked.side_effect = ApiException(status=500)
-        with pytest.raises(ApiException):
-            threedi_simulation.login()
-
-
-def test_login_succeeds(example_settings):
-    threedi_simulation = simulation.ThreediSimulation(example_settings)
-    with mock.patch("openapi_client.AuthApi.auth_token_create") as mocked:
-        mock_response = mock.Mock()
-        mock_response.access = "my tokens"
-        mocked.side_effect = [mock_response]
-        threedi_simulation.login()
-        assert threedi_simulation.configuration.api_key["Authorization"] == "my tokens"
-
-
 def test_run_mock_mock_mock(example_settings):
     threedi_simulation = simulation.ThreediSimulation(example_settings)
     threedi_simulation._find_model = mock.MagicMock(return_value=42)
