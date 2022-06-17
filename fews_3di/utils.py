@@ -16,7 +16,7 @@ import xml.etree.ElementTree as ET
 
 NAMESPACES = {"pi": "http://www.wldelft.nl/fews/PI"}
 NULL_VALUE = -999
-DEFAULT_API_HOST = "https://api.3di.live/"
+DEFAULT_API_HOST = "https://api.3di.live"
 
 logger = logging.getLogger(__name__)
 
