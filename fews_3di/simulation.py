@@ -28,10 +28,6 @@ USER_AGENT = "fews-3di (https://github.com/nens/fews-3di/)"
 logger = logging.getLogger(__name__)
 
 
-class AuthenticationError(Exception):
-    pass
-
-
 class NotFoundError(Exception):
     pass
 
