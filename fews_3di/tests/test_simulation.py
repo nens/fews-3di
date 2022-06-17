@@ -39,3 +39,39 @@ def test_run_mock_mock_mock(example_settings):
     threedi_simulation._process_results = mock.MagicMock()
 
     threedi_simulation.run()
+
+
+def test_what_we_call_actually_exists(example_settings):
+    # Generate the list of items with the following command:
+    #
+    # grep 'self\.api\.' fews_3di/simulation.py | \
+    # sed 's/^.*self\.api\.//g'|cut -d\( -f1
+    threedi_simulation = simulation.ThreediSimulation(example_settings)
+    missing = []
+    for we_use in [
+        "simulations_actions_create",
+        "simulations_create",
+        "simulations_create_saved_states_timed_create",
+        "simulations_events_lateral_timeseries_create",
+        "simulations_events_lateral_timeseries_read",
+        "simulations_events_rain_constant_create",
+        "simulations_events_rain_rasters_lizard_create",
+        "simulations_events_rain_rasters_netcdf_create",
+        "simulations_events_rain_rasters_netcdf_list",
+        "simulations_events_rain_timeseries_create",
+        "simulations_events_sources_sinks_rasters_netcdf_create",
+        "simulations_events_sources_sinks_rasters_netcdf_list",
+        "simulations_initial2d_water_level_raster_create",
+        "simulations_initial_saved_state_create",
+        "simulations_results_files_download",
+        "simulations_results_files_list",
+        "simulations_results_post_processing_lizard_basic_create",
+        "simulations_status_list",
+        "threedimodels_initial_waterlevels_list",
+        "threedimodels_list",
+        "threedimodels_saved_states_list",
+        "user_agent",
+    ]:
+        if not hasattr(threedi_simulation.api, we_use):
+            missing.append(we_use)
+    assert not missing
