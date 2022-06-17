@@ -241,10 +241,8 @@ class ThreediSimulation:
         while True:
             time.sleep(2)
             for id in still_to_process:
-                lateral = (
-                    self.api.simulations_events_lateral_timeseries_read(
-                        simulation_pk=self.simulation_id, id=id
-                    )
+                lateral = self.api.simulations_events_lateral_timeseries_read(
+                    simulation_pk=self.simulation_id, id=id
                 )
                 if lateral.state.lower() == "processing":
                     logger.debug("Lateral %s is still being processed.", lateral.url)
@@ -352,29 +350,23 @@ class ThreediSimulation:
         """Upload initial waterlevel raster and wait for it to be processed."""
         logger.info("Uploading initial waterlevel raster...")
         self.waterlevel_raster_id = (
-            self.api.threedimodels_initial_waterlevels_list(model_id)
-            .results[0]
-            .id
+            self.api.threedimodels_initial_waterlevels_list(model_id).results[0].id
         )
 
-        ini_wl_api_call = (
-            self.api.simulations_initial2d_water_level_raster_create(
-                simulation_pk=self.simulation_id,
-                data={
-                    "aggregation_method": self.settings.initial_waterlevel,
-                    "initial_waterlevel": self.waterlevel_raster_id,
-                },
-            )
+        ini_wl_api_call = self.api.simulations_initial2d_water_level_raster_create(
+            simulation_pk=self.simulation_id,
+            data={
+                "aggregation_method": self.settings.initial_waterlevel,
+                "initial_waterlevel": self.waterlevel_raster_id,
+            },
         )
         logger.info("Added initial waterlevel raster to %s", ini_wl_api_call.url)
 
     def _add_netcdf_rain(self, rain_raster_netcdf: Path):
         """Upload rain raster netcdf file and wait for it to be processed."""
         logger.info("Uploading rain rasters...")
-        rain_api_call = (
-            self.api.simulations_events_rain_rasters_netcdf_create(
-                self.simulation_id, data={"filename": rain_raster_netcdf.name}
-            )
+        rain_api_call = self.api.simulations_events_rain_rasters_netcdf_create(
+            self.simulation_id, data={"filename": rain_raster_netcdf.name}
         )
         log_url = rain_api_call.put_url.split("?")[0]  # Strip off aws credentials.
         with rain_raster_netcdf.open("rb") as f:
@@ -385,10 +377,8 @@ class ThreediSimulation:
         logger.debug("Waiting for rain raster to be processed...")
         while True:
             time.sleep(2)
-            upload_status = (
-                self.api.simulations_events_rain_rasters_netcdf_list(
-                    self.simulation_id
-                )
+            upload_status = self.api.simulations_events_rain_rasters_netcdf_list(
+                self.simulation_id
             )
             state = upload_status.results[0].file.state
             if state.lower() == "processing":
@@ -422,9 +412,7 @@ class ThreediSimulation:
             units="m/s",
         )
 
-        self.api.simulations_events_rain_constant_create(
-            self.simulation_id, const_rain
-        )
+        self.api.simulations_events_rain_constant_create(self.simulation_id, const_rain)
 
     def _add_radar_rain(self):
         """Upload radar rainfall from Lizard and wait for it to be processed."""
@@ -502,18 +490,14 @@ class ThreediSimulation:
     def _run_simulation(self):
         """Start simulation and wait for it to finish."""
         start_data = {"name": "queue"}
-        self.api.simulations_actions_create(
-            self.simulation_id, data=start_data
-        )
+        self.api.simulations_actions_create(self.simulation_id, data=start_data)
         logger.info("Simulation %s has been started.", self.simulation_url)
 
         start_time = time.time()
         while True:
             time.sleep(SIMULATION_STATUS_CHECK_INTERVAL)
             try:
-                simulation_status = self.api.simulations_status_list(
-                    self.simulation_id
-                )
+                simulation_status = self.api.simulations_status_list(self.simulation_id)
             except socket.gaierror as e:
                 logger.debug(e)
                 logger.warning("Hopefully temporary local network hickup")
