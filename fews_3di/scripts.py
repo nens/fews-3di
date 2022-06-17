@@ -7,6 +7,7 @@ from pathlib import Path
 
 import argparse
 import logging
+import threedi_api_client
 
 
 # Exceptions we raise ourselves that are suitable for printing as error messages.
@@ -18,6 +19,9 @@ OWN_EXCEPTIONS = (
     utils.FileDownloadException,
     utils.MissingFileException,
     utils.MissingSettingException,
+    # The next is not really our own, but we want to handle it as a regular
+    # error message.
+    threedi_api_client.auth.AuthenticationError,
 )
 
 
@@ -72,7 +76,6 @@ def main():
         threedi_simulation = simulation.ThreediSimulation(
             settings, options.allow_missing_saved_state
         )
-        threedi_simulation.login()
         threedi_simulation.run()
         return 0  # Success!
     except OWN_EXCEPTIONS as e:
