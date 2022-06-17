@@ -1,5 +1,4 @@
 from fews_3di import simulation
-from threedi_api_client.openapi.exceptions import ApiException
 
 import mock
 import pytest
@@ -10,10 +9,10 @@ def test_init(example_settings):
     simulation.ThreediSimulation(example_settings)
 
 
-def test_login_fails(example_settings):
+def test_login_deprecated(example_settings):
     threedi_simulation = simulation.ThreediSimulation(example_settings)
-    # The example settings of course give an authentication error.
-    with pytest.raises(simulation.AuthenticationError):
+    with pytest.deprecated_call():
+        # .deprecated_call() fails if there isn't a DeprecationWarning.
         threedi_simulation.login()
 
 
