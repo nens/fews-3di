@@ -265,7 +265,12 @@ class ThreediSimulation:
         states_result = self.api.threedimodels_saved_states_list(model_id)
         results = states_result.results
         if not results:
-            raise NotFoundError(f"State for model id:{model_id} not found")
+            msg = f"No saved states for model id:{model_id} found"
+            if self.allow_missing_saved_state:
+                logger.warn(msg + ", continuing")
+                return
+            else:
+                raise NotFoundError(msg)
         saved_state_id = results[0].id
         logger.info("last available state is: %s", saved_state_id)
         try:
