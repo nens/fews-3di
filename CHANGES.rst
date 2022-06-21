@@ -2,7 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-2.0 (unreleased)
+2.0 (2022-06-21)
 ----------------
 
 - Requiring threedi-api-client 4.0.1 or higher. This has several import and
