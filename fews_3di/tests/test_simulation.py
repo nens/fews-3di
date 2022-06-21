@@ -1,5 +1,4 @@
 from fews_3di import simulation
-from openapi_client.exceptions import ApiException
 
 import mock
 import pytest
@@ -10,29 +9,11 @@ def test_init(example_settings):
     simulation.ThreediSimulation(example_settings)
 
 
-def test_login_fails(example_settings):
+def test_login_deprecated(example_settings):
     threedi_simulation = simulation.ThreediSimulation(example_settings)
-    # The example settings of course give an authentication error.
-    with pytest.raises(simulation.AuthenticationError):
+    with pytest.deprecated_call():
+        # .deprecated_call() fails if there isn't a DeprecationWarning.
         threedi_simulation.login()
-
-
-def test_login_fails_unknown(example_settings):
-    threedi_simulation = simulation.ThreediSimulation(example_settings)
-    with mock.patch("openapi_client.AuthApi.auth_token_create") as mocked:
-        mocked.side_effect = ApiException(status=500)
-        with pytest.raises(ApiException):
-            threedi_simulation.login()
-
-
-def test_login_succeeds(example_settings):
-    threedi_simulation = simulation.ThreediSimulation(example_settings)
-    with mock.patch("openapi_client.AuthApi.auth_token_create") as mocked:
-        mock_response = mock.Mock()
-        mock_response.access = "my tokens"
-        mocked.side_effect = [mock_response]
-        threedi_simulation.login()
-        assert threedi_simulation.configuration.api_key["Authorization"] == "my tokens"
 
 
 def test_run_mock_mock_mock(example_settings):
@@ -60,46 +41,37 @@ def test_run_mock_mock_mock(example_settings):
     threedi_simulation.run()
 
 
-def test_find_model(example_settings):
+def test_what_we_call_actually_exists(example_settings):
+    # Generate the list of items with the following command:
+    #
+    # grep 'self\.api\.' fews_3di/simulation.py | \
+    # sed 's/^.*self\.api\.//g'|cut -d\( -f1
     threedi_simulation = simulation.ThreediSimulation(example_settings)
-    threedi_simulation.threedimodels_api = mock.Mock()
-    # Pfffff, it is a bit hard to mock all this stuff...
-    mock_result = mock.Mock()
-    mock_model = mock.Mock()
-    mock_model.id = 42
-    mock_result.results = [mock_model]
-    threedi_simulation.threedimodels_api.threedimodels_list = mock.MagicMock(
-        return_value=mock_result
-    )
-    assert threedi_simulation._find_model() == 42
-
-
-def test_find_model_not_found(example_settings):
-    threedi_simulation = simulation.ThreediSimulation(example_settings)
-    threedi_simulation.threedimodels_api = mock.Mock()
-    # Pfffff, it is a bit hard to mock all this stuff...
-    mock_result = mock.Mock()
-    mock_result.results = []
-    threedi_simulation.threedimodels_api.threedimodels_list = mock.MagicMock(
-        return_value=mock_result
-    )
-    with pytest.raises(simulation.NotFoundError):
-        threedi_simulation._find_model()
-
-
-def test_add_laterals(example_settings):
-    threedi_simulation = simulation.ThreediSimulation(example_settings)
-    threedi_simulation.simulations_api = mock.Mock()
-    threedi_simulation.simulation_id = 1
-    laterals = {"name 1": [mock.Mock()]}
-    mock_lateral = mock.Mock()
-    threedi_simulation.simulations_api.simulations_events_lateral_timeseries_create = (
-        mock.MagicMock(return_value=mock_lateral)
-    )
-    mock_lateral2 = mock.Mock()
-    mock_lateral2.state = "valid"
-    threedi_simulation.simulations_api.simulations_events_lateral_timeseries_read = (
-        mock.MagicMock(return_value=mock_lateral2)
-    )
-
-    threedi_simulation._add_laterals(laterals)  # Should just return None
+    missing = []
+    for we_use in [
+        "simulations_actions_create",
+        "simulations_create",
+        "simulations_create_saved_states_timed_create",
+        "simulations_events_lateral_timeseries_create",
+        "simulations_events_lateral_timeseries_read",
+        "simulations_events_rain_constant_create",
+        "simulations_events_rain_rasters_lizard_create",
+        "simulations_events_rain_rasters_netcdf_create",
+        "simulations_events_rain_rasters_netcdf_list",
+        "simulations_events_rain_timeseries_create",
+        "simulations_events_sources_sinks_rasters_netcdf_create",
+        "simulations_events_sources_sinks_rasters_netcdf_list",
+        "simulations_initial2d_water_level_raster_create",
+        "simulations_initial_saved_state_create",
+        "simulations_results_files_download",
+        "simulations_results_files_list",
+        "simulations_results_post_processing_lizard_basic_create",
+        "simulations_status_list",
+        "threedimodels_initial_waterlevels_list",
+        "threedimodels_list",
+        "threedimodels_saved_states_list",
+        "user_agent",
+    ]:
+        if not hasattr(threedi_simulation.api, we_use):
+            missing.append(we_use)
+    assert not missing

@@ -16,7 +16,7 @@ import xml.etree.ElementTree as ET
 
 NAMESPACES = {"pi": "http://www.wldelft.nl/fews/PI"}
 NULL_VALUE = -999
-DEFAULT_API_HOST = "https://api.3di.live/v3.0"
+DEFAULT_API_HOST = "https://api.3di.live"
 
 logger = logging.getLogger(__name__)
 
@@ -40,22 +40,22 @@ class Settings:
     # Instance variables with their types
     api_host: str
     end: datetime.datetime
+    fews_pre_processing: bool
+    initial_waterlevel: str
+    lizard_results_scenario_name: str
     modelrevision: str
     organisation: str
     password: str
+    rain_input: str
+    rain_type: str
     save_state: bool
     save_state_time: int
-    use_last_available_state: bool
     saved_state_expiry_days: int
     settings_file: Path
     simulationname: str
     start: datetime.datetime
+    use_last_available_state: bool
     username: str
-    lizard_results_scenario_name: str
-    rain_type: str
-    rain_input: str
-    fews_pre_processing: bool
-    initial_waterlevel: str
 
     def __init__(self, settings_file: Path):
         """Read settings from the xml settings file."""
@@ -159,6 +159,14 @@ class Settings:
     @property
     def base_dir(self) -> Path:
         return self.settings_file.parent
+
+    def as_api_config(self) -> dict:
+        """Return config dict as used by threedi_api_client's __init__()"""
+        return {
+            "THREEDI_API_HOST": self.api_host,
+            "THREEDI_API_USERNAME": self.username,
+            "THREEDI_API_PASSWORD": self.password,
+        }
 
 
 def lateral_timeseries(

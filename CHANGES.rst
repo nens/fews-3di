@@ -5,7 +5,18 @@ Changelog of fews-3di
 1.16 (unreleased)
 -----------------
 
-- Nothing changed yet.
+- Requiring threedi-api-client 4.0.1 or higher. This has several import and
+  functionality changes, which we'll have to use (and compensate for). Some
+  items to watch out for:
+
+  - The api host setting should not include the api version number.
+
+  - Preferrably, don't add a trailing slash to the api host url.
+
+- ``.login()`` no longer needs to be called. threedi-api-client handles it
+  automatically. If you call it, you get a deprecation warning.
+
+- ``--allow-missing-saved-state`` also works if there are no states found.
 
 
 1.15 (2022-06-10)
