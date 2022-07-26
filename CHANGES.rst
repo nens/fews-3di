@@ -5,7 +5,9 @@ Changelog of fews-3di
 2.1 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Simulation templates are used to create a simulation to adobt to new 3Di version.
+- Added a seperate folder for the states of the staging (states_staging)
+  
 
 
 2.0 (2022-06-21)
