@@ -24,7 +24,7 @@ SAVED_STATE_ID_FILENAME = "3di-saved-state-id.txt"
 COLD_STATE_ID_FILENAME = "3di-cold-state-id.txt"
 SIMULATION_STATUS_CHECK_INTERVAL = 30
 USER_AGENT = "fews-3di (https://github.com/nens/fews-3di/)"
-
+DEFAULT_API_HOST = "https://api.3di.live"
 logger = logging.getLogger(__name__)
 
 
@@ -107,21 +107,21 @@ class ThreediSimulation:
             self._add_laterals(laterals)
         else:
             logger.info("No lateral timeseries found at %s, skipping.", laterals_csv)
-        if self.settings.api_host == "https://api.staging.3di.live":
-            logger.info("Using the states files in the states_staging folder")
-            saved_state_id_file = (
-                self.settings.base_dir / "states_staging" / SAVED_STATE_ID_FILENAME
-            )
-            cold_state_id_file = (
-                self.settings.base_dir / "states_staging" / COLD_STATE_ID_FILENAME
-            )
-        else:
+        if self.settings.api_host == DEFAULT_API_HOST:
             logger.info("Using the states files in the states folder")
             saved_state_id_file = (
                 self.settings.base_dir / "states" / SAVED_STATE_ID_FILENAME
             )
             cold_state_id_file = (
                 self.settings.base_dir / "states" / COLD_STATE_ID_FILENAME
+            )
+        else:
+            logger.info("Using the states files in the states_staging folder")
+            saved_state_id_file = (
+                self.settings.base_dir / "states_staging" / SAVED_STATE_ID_FILENAME
+            )
+            cold_state_id_file = (
+                self.settings.base_dir / "states_staging" / COLD_STATE_ID_FILENAME
             )
 
         # self.add_initial_1d_waterlevels(model_id)
