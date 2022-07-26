@@ -364,27 +364,27 @@ class ThreediSimulation:
         return saved_state.id
 
     # def add_initial_1d_waterlevels(self, model_id):
-        # logger.info("Uploading initial 1d waterlevel")
-        # ini_wl_api_call = self.api.simulations_initial1d_water_level_predefined_create(
-            # simulation_pk=self.simulation_id, data={}
-        # )
-        # logger.info("Added initial 1D waterlevel %s", ini_wl_api_call.url)
+    # logger.info("Uploading initial 1d waterlevel")
+    # ini_wl_api_call = self.api.simulations_initial1d_water_level_predefined_create(
+    # simulation_pk=self.simulation_id, data={}
+    # )
+    # logger.info("Added initial 1D waterlevel %s", ini_wl_api_call.url)
 
     # def _add_initial_waterlevel_raster(self, model_id):
-        # """Upload initial waterlevel raster and wait for it to be processed."""
-        # logger.info("Uploading initial waterlevel raster...")
-        # self.waterlevel_raster_id = (
-            # self.api.threedimodels_initial_waterlevels_list(model_id).results[0].id
-        # )
+    # """Upload initial waterlevel raster and wait for it to be processed."""
+    # logger.info("Uploading initial waterlevel raster...")
+    # self.waterlevel_raster_id = (
+    # self.api.threedimodels_initial_waterlevels_list(model_id).results[0].id
+    # )
 
-        # ini_wl_api_call = self.api.simulations_initial2d_water_level_raster_create(
-            # simulation_pk=self.simulation_id,
-            # data={
-                # "aggregation_method": self.settings.initial_waterlevel,
-                # "initial_waterlevel": self.waterlevel_raster_id,
-            # },
-        # )
-        # logger.info("Added initial waterlevel raster to %s", ini_wl_api_call.url)
+    # ini_wl_api_call = self.api.simulations_initial2d_water_level_raster_create(
+    # simulation_pk=self.simulation_id,
+    # data={
+    # "aggregation_method": self.settings.initial_waterlevel,
+    # "initial_waterlevel": self.waterlevel_raster_id,
+    # },
+    # )
+    # logger.info("Added initial waterlevel raster to %s", ini_wl_api_call.url)
 
     def _add_netcdf_rain(self, rain_raster_netcdf: Path):
         """Upload rain raster netcdf file and wait for it to be processed."""
