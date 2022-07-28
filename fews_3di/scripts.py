@@ -15,6 +15,7 @@ OWN_EXCEPTIONS = (
     simulation.InvalidDataError,
     simulation.MissingSavedStateError,
     simulation.NotFoundError,
+    simulation.MissingSimulationTemplateError,
     utils.FileDownloadException,
     utils.MissingFileException,
     utils.MissingSettingException,

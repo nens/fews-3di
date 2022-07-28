@@ -35,7 +35,7 @@ class InvalidDataError(Exception):
     pass
 
 
-class MissingSimulationTemplate(Exception):
+class MissingSimulationTemplateError(Exception):
     pass
 
 
@@ -202,7 +202,7 @@ class ThreediSimulation:
             ).results[0]
         except IndexError:
             msg = f"No simulation template for model id with {model_id}"
-            raise MissingSimulationTemplate(msg)
+            raise MissingSimulationTemplateError(msg)
         data = {}
         data["name"] = self.settings.simulationname
         data["template"] = str(simulation_template.id)
