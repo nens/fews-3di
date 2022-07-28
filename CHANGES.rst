@@ -5,7 +5,7 @@ Changelog of fews-3di
 2.1 (unreleased)
 ----------------
 
-- Simulation templates are used to create a simulation to adobt to new 3Di version.
+- Simulation templates are used to create a simulation to adjust to the new 3Di version.
 - Added a seperate folder for the states of the staging (states_staging)
   
 
