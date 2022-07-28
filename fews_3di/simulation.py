@@ -35,6 +35,10 @@ class InvalidDataError(Exception):
     pass
 
 
+class MissingSimulationTemplate(Exception):
+    pass
+
+
 class MissingSavedStateError(Exception):
     pass
 
@@ -192,9 +196,13 @@ class ThreediSimulation:
 
     def _create_simulation(self, model_id: int) -> Tuple[int, str]:
         """Return id and url of created simulation."""
-        simulation_template = self.api.simulation_templates_list(
-            simulation__threedimodel__id=model_id
-        ).results[0]
+        try:
+            simulation_template = self.api.simulation_templates_list(
+                simulation__threedimodel__id=model_id
+            ).results[0]
+        except IndexError:
+            msg = f"No simulation template for model id with {model_id}"
+            raise MissingSimulationTemplate(msg)
         data = {}
         data["name"] = self.settings.simulationname
         data["template"] = str(simulation_template.id)
