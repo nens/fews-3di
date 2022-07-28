@@ -2,7 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-2.1 (unreleased)
+2.1 (2022-07-28)
 ----------------
 
 - Simulation templates are used to create a simulation to adjust to the new 3Di version.
