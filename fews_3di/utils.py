@@ -152,6 +152,12 @@ class Settings:
         setattr(self, datetime_variable, timestamp)
 
     @property
+    def states_dir(self) -> Path:
+        if "staging" in self.api_host:
+            return self.base_dir / "staging_states"
+        return self.base_dir / "states"
+
+    @property
     def duration(self) -> int:
         """Return duration in seconds."""
         return int((self.end - self.start).total_seconds())

@@ -24,7 +24,6 @@ SAVED_STATE_ID_FILENAME = "3di-saved-state-id.txt"
 COLD_STATE_ID_FILENAME = "3di-cold-state-id.txt"
 SIMULATION_STATUS_CHECK_INTERVAL = 30
 USER_AGENT = "fews-3di (https://github.com/nens/fews-3di/)"
-
 logger = logging.getLogger(__name__)
 
 
@@ -33,6 +32,10 @@ class NotFoundError(Exception):
 
 
 class InvalidDataError(Exception):
+    pass
+
+
+class MissingSimulationTemplateError(Exception):
     pass
 
 
@@ -107,16 +110,8 @@ class ThreediSimulation:
             self._add_laterals(laterals)
         else:
             logger.info("No lateral timeseries found at %s, skipping.", laterals_csv)
-
-        saved_state_id_file = (
-            self.settings.base_dir / "states" / SAVED_STATE_ID_FILENAME
-        )
-        cold_state_id_file = self.settings.base_dir / "states" / COLD_STATE_ID_FILENAME
-
-        if self.settings.initial_waterlevel:
-            self._add_initial_waterlevel_raster(model_id)
-        else:
-            logger.info("No initial waterlevel raster predefined")
+        saved_state_id_file = self.settings.states_dir / SAVED_STATE_ID_FILENAME
+        cold_state_id_file = self.settings.states_dir / COLD_STATE_ID_FILENAME
 
         if self.settings.save_state:
             if self.settings.use_last_available_state:
@@ -201,15 +196,22 @@ class ThreediSimulation:
 
     def _create_simulation(self, model_id: int) -> Tuple[int, str]:
         """Return id and url of created simulation."""
+        try:
+            simulation_template = self.api.simulation_templates_list(
+                simulation__threedimodel__id=model_id
+            ).results[0]
+        except IndexError:
+            msg = f"No simulation template for model id with {model_id}"
+            raise MissingSimulationTemplateError(msg)
         data = {}
         data["name"] = self.settings.simulationname
+        data["template"] = str(simulation_template.id)
         data["threedimodel"] = str(model_id)
         data["organisation"] = self.settings.organisation
         data["start_datetime"] = self.settings.start.isoformat()
         data["duration"] = str(self.settings.duration)
         logger.debug("Creating simulation with these settings: %s", data)
-
-        simulation = self.api.simulations_create(data)
+        simulation = self.api.simulations_from_template(data)
         logger.info("Simulation %s has been created", simulation.url)
         return simulation.id, simulation.url
 
@@ -346,22 +348,6 @@ class ThreediSimulation:
         )
         logger.info("Saved state will be stored: %s", saved_state.url)
         return saved_state.id
-
-    def _add_initial_waterlevel_raster(self, model_id):
-        """Upload initial waterlevel raster and wait for it to be processed."""
-        logger.info("Uploading initial waterlevel raster...")
-        self.waterlevel_raster_id = (
-            self.api.threedimodels_initial_waterlevels_list(model_id).results[0].id
-        )
-
-        ini_wl_api_call = self.api.simulations_initial2d_water_level_raster_create(
-            simulation_pk=self.simulation_id,
-            data={
-                "aggregation_method": self.settings.initial_waterlevel,
-                "initial_waterlevel": self.waterlevel_raster_id,
-            },
-        )
-        logger.info("Added initial waterlevel raster to %s", ini_wl_api_call.url)
 
     def _add_netcdf_rain(self, rain_raster_netcdf: Path):
         """Upload rain raster netcdf file and wait for it to be processed."""
