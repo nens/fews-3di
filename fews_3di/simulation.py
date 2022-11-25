@@ -12,6 +12,7 @@ import logging
 import netCDF4
 import pandas as pd
 import requests
+import shutil
 import socket
 import time
 import warnings
@@ -622,7 +623,7 @@ class ThreediSimulation:
             open_water_input_file, self.settings
         )
         # converted_netcdf is a temp file, so move it to the correct spot.
-        converted_netcdf.replace(open_water_output_file)
+        shutil.move(converted_netcdf, open_water_input_file)
         logger.debug("Started open water output file %s", open_water_output_file)
         dset = netCDF4.Dataset(open_water_output_file, "a")
         s1 = (
