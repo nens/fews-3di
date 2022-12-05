@@ -4,6 +4,7 @@ from pathlib import Path
 from threedi_api_client import openapi
 from threedi_api_client import ThreediApi
 from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
+from typing import Dict
 from typing import List
 from typing import Tuple
 
@@ -216,7 +217,7 @@ class ThreediSimulation:
         logger.info("Simulation %s has been created", simulation.url)
         return simulation.id, simulation.url
 
-    def _add_laterals(self, laterals):
+    def _add_laterals(self, laterals: Dict[str, List[OffsetAndValue]]):
         """Upload lateral timeseries and wait for them to be processed."""
         still_to_process: List[int] = []
         logger.info("Uploading %s lateral timeseries...", len(laterals))
