@@ -2,7 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-2.2 (unreleased)
+2.2 (2022-12-05)
 ----------------
 
 - Moving from temp to the actual file in a more windows-friendly way. (Moving
