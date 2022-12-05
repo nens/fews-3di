@@ -5,7 +5,8 @@ Changelog of fews-3di
 2.2 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Moving from temp to the actual file in a more windows-friendly way. (Moving
+  between a temp dir on ``c:`` and a target dir on ``d:`` isn't allowed).
 
 
 2.1 (2022-07-28)
@@ -13,7 +14,7 @@ Changelog of fews-3di
 
 - Simulation templates are used to create a simulation to adjust to the new 3Di version.
 - Added a seperate folder for the states of the staging (states_staging)
-  
+
 
 
 2.0 (2022-06-21)

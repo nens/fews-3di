@@ -4,6 +4,7 @@ from pathlib import Path
 from threedi_api_client import openapi
 from threedi_api_client import ThreediApi
 from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
+from typing import Dict
 from typing import List
 from typing import Tuple
 
@@ -12,6 +13,7 @@ import logging
 import netCDF4
 import pandas as pd
 import requests
+import shutil
 import socket
 import time
 import warnings
@@ -215,7 +217,7 @@ class ThreediSimulation:
         logger.info("Simulation %s has been created", simulation.url)
         return simulation.id, simulation.url
 
-    def _add_laterals(self, laterals):
+    def _add_laterals(self, laterals: Dict[str, List[OffsetAndValue]]):
         """Upload lateral timeseries and wait for them to be processed."""
         still_to_process: List[int] = []
         logger.info("Uploading %s lateral timeseries...", len(laterals))
@@ -622,7 +624,7 @@ class ThreediSimulation:
             open_water_input_file, self.settings
         )
         # converted_netcdf is a temp file, so move it to the correct spot.
-        converted_netcdf.replace(open_water_output_file)
+        shutil.move(converted_netcdf, open_water_input_file)
         logger.debug("Started open water output file %s", open_water_output_file)
         dset = netCDF4.Dataset(open_water_output_file, "a")
         s1 = (
