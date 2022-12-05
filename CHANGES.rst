@@ -5,9 +5,8 @@ Changelog of fews-3di
 2.2 (unreleased)
 ----------------
 
-- Moving from temp to the actual file in a more windows-friendly way. (The old
-  way of moving between a temp dir on ``c:`` and a target dir on ``d:`` wasn't
-  allowed).
+- Moving from temp to the actual file in a more windows-friendly way. (Moving
+  between a temp dir on ``c:`` and a target dir on ``d:`` isn't allowed).
 
 
 2.1 (2022-07-28)
