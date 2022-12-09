@@ -598,6 +598,7 @@ class ThreediSimulation:
         # to be expanded
         if results.has_pumpstations:
             pump_id = results.pumps.display_name.astype("U13")
+            pump_id[0] = 0
             discharges = results.pumps.timeseries(start_time=0, end_time=endtime).data[
                 "q_pump"
             ]
