@@ -39,13 +39,13 @@ class FileDownloadException(Exception):
 class Settings:
     # Instance variables with their types
     api_host: str
+    api_token: str
     end: datetime.datetime
     fews_pre_processing: bool
     initial_waterlevel: str
     lizard_results_scenario_name: str
     modelrevision: str
     organisation: str
-    password: str
     rain_input: str
     rain_type: str
     save_state: bool
@@ -55,7 +55,6 @@ class Settings:
     simulationname: str
     start: datetime.datetime
     use_last_available_state: bool
-    username: str
 
     def __init__(self, settings_file: Path):
         """Read settings from the xml settings file."""
@@ -72,11 +71,10 @@ class Settings:
         required_properties = [
             "modelrevision",
             "organisation",
-            "password",
+            "api_token",
             "save_state",
             "saved_state_expiry_days",
             "simulationname",
-            "username",
             "fews_pre_processing",
             "use_last_available_state",
         ]
@@ -129,7 +127,7 @@ class Settings:
             # Normal situation.
             value = string_value
         setattr(self, property_name, value)
-        if property_name == "password":
+        if property_name == "api_token":
             value = "*" * len(value)
         logger.debug("Found property %s=%s", property_name, value)
 
@@ -170,8 +168,7 @@ class Settings:
         """Return config dict as used by threedi_api_client's __init__()"""
         return {
             "THREEDI_API_HOST": self.api_host,
-            "THREEDI_API_USERNAME": self.username,
-            "THREEDI_API_PASSWORD": self.password,
+            "THREEDI_API_PERSONAL_API_TOKEN": self.api_token,
         }
 
 

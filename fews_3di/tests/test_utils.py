@@ -12,7 +12,7 @@ import pytest
 
 TEST_DIR = Path(__file__).parent
 EXAMPLE_SETTINGS_FILE = TEST_DIR / "example_settings.xml"
-WRONG_SETTINGS_FILE = TEST_DIR / "settings_without_username.xml"
+WRONG_SETTINGS_FILE = TEST_DIR / "settings_without_api_token.xml"
 EXAMPLE_LATERAL_CSV = TEST_DIR / "example_lateral.csv"
 EXAMPLE_PRECIPITATION_FILE = TEST_DIR / "precipitation.nc"
 EXAMPLE_EVAPORATION_FILE = TEST_DIR / "evaporation.nc"
