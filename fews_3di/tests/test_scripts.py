@@ -34,7 +34,7 @@ def test_main_error():
 # Note: example_settings is an automatic fixture, see conftest.py
 def test_main_login_error(example_settings):
     with mock.patch(
-        "sys.argv", ["program", "--settings", 
+        "sys.argv", ["program", "--settings",
                      str(example_settings.settings_file)]
     ):
 
@@ -53,7 +53,7 @@ def test_main_login_error_verbose(example_settings):
 
 def test_main_dummy_run(example_settings):
     with mock.patch(
-        "sys.argv", ["program", "--settings", 
+        "sys.argv", ["program", "--settings",
                      str(example_settings.settings_file)]
     ):
         with mock.patch("fews_3di.scripts.simulation.ThreediSimulation"):
