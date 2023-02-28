@@ -26,8 +26,7 @@ def test_main_verbose():
 
 
 def test_main_error():
-    with mock.patch("sys.argv", ["program", "--settings",
-                                  "missing.txt"]):
+    with mock.patch("sys.argv", ["program", "--settings", "missing.txt"]):
         assert scripts.main() == 1  # Exit error code.
 
 
@@ -44,8 +43,7 @@ def test_main_login_error(example_settings):
 def test_main_login_error_verbose(example_settings):
     with mock.patch(
         "sys.argv",
-        ["program", "--verbose", "--settings",
-         str(example_settings.settings_file)],
+        ["program", "--verbose", "--settings", str(example_settings.settings_file)],
     ):
 
         assert scripts.main() == 1  # exit code 1: expected login error.
