@@ -2,7 +2,6 @@
     <ns0:startDateTime date="2021-01-25" time="22:02:12" />
     <ns0:endDateTime date="2021-01-26" time="07:02:12" />
     <ns0:properties>
-        <ns0:string key="password" value="dummy" />
         <ns0:string key="organisation" value="61f5a464c35044c19bc7d4b42d7f58cb" />
         <ns0:string key="modelrevision" value="8578f8f0dc458719a0bb6aae9c908ca2cbe385da" />
         <ns0:string key="simulationname" value="LOGiC_Texel_historicalrun" />
@@ -10,7 +9,7 @@
         <ns0:string key="save_state_time" value="" />
         <ns0:string key="use_last_available_state" value="False" />
         <ns0:string key="saved_state_expiry_days" value="5" />
-        <ns0:string key="rain_type" value="constant" />   
+        <ns0:string key="rain_type" value="constant" />
         <ns0:string key="rain_input" value="0.00001" />
         <ns0:string key="fews_pre_processing" value="False" />
         <ns0:string key="lizard_results_scenario_name" value="Testsimulatie ivar"/>
