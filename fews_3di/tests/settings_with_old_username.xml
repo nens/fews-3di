@@ -1,0 +1,21 @@
+<ns0:Run xmlns:ns0="http://www.wldelft.nl/fews/PI" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" version="1.5" xsi:schemaLocation="http://www.wldelft.nl/fews/PI     http://fews.wldelft.nl/schemas/version1.0/pi-schemas/pi_run.xsd">
+    <ns0:startDateTime date="2020-01-26" time="10:00:00"/>
+    <ns0:endDateTime date="2020-01-30" time="12:00:00"/>
+    <ns0:properties>
+        <ns0:string key="username" value="Pietje" />
+        <ns0:string key="password" value="username is forbidden" />
+        <ns0:string key="organisation" value="12345678abcd" />
+        <ns0:string key="modelrevision" value="abcd123456787" />
+        <ns0:string key="simulationname" value="Simulation name" />
+        <ns0:string key="save_state" value="True" />
+        <ns0:string key="save_state_time" value="" />
+        <ns0:string key="use_last_available_state" value="False" />
+        <ns0:string key="saved_state_expiry_days" value="5" />
+        <ns0:string key="rain_type" value="constant" />
+        <ns0:string key="rain_input" value="0.00001" />
+        <ns0:string key="fews_pre_processing" value="False" />
+        <ns0:string key="lizard_results_scenario_name" value="Testsimulatie ivar"/>
+        <ns0:string key="lizard_results_scenario_uuid" value=""/>
+        <ns0:string key="initial_waterlevel" value="mean"/>
+    </ns0:properties>
+</ns0:Run>
