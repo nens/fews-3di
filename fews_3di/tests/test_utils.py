@@ -12,8 +12,7 @@ import pytest
 
 TEST_DIR = Path(__file__).parent
 EXAMPLE_SETTINGS_FILE = TEST_DIR / "example_settings.xml"
-WRONG_SETTINGS_FILE = TEST_DIR / "settings_without_api_token.xml"
-USERNAME_SETTINGS_FILE = TEST_DIR / "settings_with_username.xml"
+WRONG_SETTINGS_FILE = TEST_DIR / "settings_without_username.xml"
 EXAMPLE_LATERAL_CSV = TEST_DIR / "example_lateral.csv"
 EXAMPLE_PRECIPITATION_FILE = TEST_DIR / "precipitation.nc"
 EXAMPLE_EVAPORATION_FILE = TEST_DIR / "evaporation.nc"
@@ -23,12 +22,12 @@ def test_read_settings_smoke():
     utils.Settings(EXAMPLE_SETTINGS_FILE)
 
 
-def test_read_settings_username():
-    with pytest.raises(utils.DeprecatedSettingException):
-        utils.Settings(USERNAME_SETTINGS_FILE)
+# Note: example_settings is an automatic fixture, see conftest.py
+def test_read_settings_extracts_properties(example_settings):
+    assert example_settings.username == "pietje"
 
 
-def test_read_settings_missing_token():
+def test_read_settings_missing_username():
     with pytest.raises(utils.MissingSettingException):
         utils.Settings(WRONG_SETTINGS_FILE)
 
