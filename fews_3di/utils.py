@@ -130,7 +130,7 @@ class Settings:
         elif property_name == "username":
             raise DeprecatedSettingException(
                 f"Setting '{property_name}' is deprecated. Use API token instead."
-            )  
+            )
         else:
             # Normal situation.
             value = string_value
