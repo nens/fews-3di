@@ -1,4 +1,4 @@
-"""Tests for utils.py
+""" Tests for utils.py
 
 Note: the 'example_settings' pytest fixture is defined in conftest.py.
 

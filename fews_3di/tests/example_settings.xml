@@ -2,7 +2,7 @@
     <ns0:startDateTime date="2020-01-26" time="10:00:00"/>
     <ns0:endDateTime date="2020-01-30" time="12:00:00"/>
     <ns0:properties>
-        <ns0:string key="api_token" value="token" />
+        <ns0:string key="api_token" value="aBCd1234.5678tOkeNabcde" />
         <ns0:string key="organisation" value="12345678abcd" />
         <ns0:string key="modelrevision" value="abcd123456787" />
         <ns0:string key="simulationname" value="Simulation name" />

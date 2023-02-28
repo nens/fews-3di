@@ -38,7 +38,7 @@ The expected information in run_info.xml is::
       <startDateTime date="2020-01-26" time="10:00:00"/>
       <endDateTime date="2020-01-30" time="12:00:00"/>
       <properties>
-          <string key="api_token" value="token"/>
+          <string key="api_token" value="aBCd1234.5678tOkeNabcde"/>
           <string key="organisation" value="12345678abcd"/>
           <string key="modelrevision" value="abcd123456787"/>
           <string key="simulationname" value="Simulation name"/>
