@@ -72,6 +72,10 @@ class Settings:
         except FileNotFoundError as e:
             msg = f"Settings file '{settings_file}' not found"
             raise MissingFileException(msg) from e
+        deprecated_properties = [
+            "username",
+            "password",
+        ]
         required_properties = [
             "modelrevision",
             "organisation",
@@ -82,7 +86,6 @@ class Settings:
             "fews_pre_processing",
             "use_last_available_state",
         ]
-
         optional_properties = [
             "lizard_results_scenario_name",
             "lizard_results_scenario_uuid",
@@ -92,6 +95,10 @@ class Settings:
             "save_state_time",
             "api_host",
         ]
+
+        for property_name in deprecated_properties:
+            self._fail_on_deprecated_property(property_name)
+
         for property_name in required_properties:
             self._read_property(property_name)
 
@@ -101,6 +108,18 @@ class Settings:
         datetime_variables = ["start", "end"]
         for datetime_variable in datetime_variables:
             self._read_datetime(datetime_variable)
+
+    def _fail_on_deprecated_property(self, property_name):
+        """To make upgrades easier, fail immediately on deprecated properties."""
+        xpath = f"pi:properties/pi:string[@key='{property_name}']"
+        elements = self._root.findall(xpath, NAMESPACES)
+        if elements:
+            # The only deprecated properties at the moment are
+            # username/password, so we can warn specifically about the api
+            # token here.
+            raise DeprecatedSettingException(
+                f"Setting '{property_name}' is deprecated. Use API token instead."
+            )
 
     def _read_property(self, property_name, optional=False):
         """Extract <properties><string> element with the correct key attribute."""
@@ -127,11 +146,6 @@ class Settings:
 
         elif property_name == "saved_state_expiry_days":
             value = int(string_value)
-
-        elif property_name == "username":
-            raise DeprecatedSettingException(
-                f"Setting '{property_name}' is deprecated. Use API token instead."
-            )
 
         else:
             # Normal situation.
