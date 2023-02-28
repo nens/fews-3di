@@ -4,10 +4,10 @@ Changelog of fews-3di
 3.0 (unreleased)
 ----------------
 
-- Update usage of API token instead of a deprecated username/password
-  login when connecting to 3Di. You need to change your `settings.xml`:
-  remove `username` and `password` and add `api_token`, with an api key
-  you generated on the 3Di website.
+- Update usage of API token instead of a deprecated username/password login
+  when connecting to 3Di. You need to change your ``settings.xml``: remove
+  ``username`` and ``password`` and add ``api_token``, with an api key you
+  generated on the 3Di website.
 
 
 2.2 (2022-12-05)
