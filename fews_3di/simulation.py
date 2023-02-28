@@ -543,7 +543,6 @@ class ThreediSimulation:
                 raise utils.FileDownloadException(msg)
 
     def _process_basic_lizard_results(self):
-
         data = {
             "scenario_name": self.settings.lizard_results_scenario_name,
             "process_basic_results": True,
