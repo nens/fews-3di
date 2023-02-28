@@ -24,7 +24,7 @@ def test_read_settings_smoke():
 
 # Note: example_settings is an automatic fixture, see conftest.py
 def test_read_settings_extracts_properties(example_settings):
-    assert example_settings.username == "pietje"
+    assert example_settings.initial_waterlevel == "mean"
 
 
 def test_read_settings_missing_username():
