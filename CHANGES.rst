@@ -1,7 +1,7 @@
 Changelog of fews-3di
 ===================================================
 
-3.0 (unreleased)
+3.0 (2023-02-28)
 ----------------
 
 - Update usage of API token instead of a deprecated username/password login
