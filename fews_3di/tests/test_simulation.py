@@ -73,5 +73,5 @@ def test_what_we_call_actually_exists(example_settings):
         "user_agent",
     ]:
         if not hasattr(threedi_simulation.api, we_use):
-            missing.append(we_use)
+            missing.append(we_use)  # pragma: no cover
     assert not missing

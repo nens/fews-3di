@@ -2,7 +2,8 @@
     <ns0:startDateTime date="2020-01-26" time="10:00:00"/>
     <ns0:endDateTime date="2020-01-30" time="12:00:00"/>
     <ns0:properties>
-        <ns0:string key="api_token" value="aBCd1234.5678tOkeNabcde" />
+        <ns0:string key="username" value="Pietje" />
+        <ns0:string key="password" value="username is forbidden" />
         <ns0:string key="organisation" value="12345678abcd" />
         <ns0:string key="modelrevision" value="abcd123456787" />
         <ns0:string key="simulationname" value="Simulation name" />
@@ -10,11 +11,11 @@
         <ns0:string key="save_state_time" value="" />
         <ns0:string key="use_last_available_state" value="False" />
         <ns0:string key="saved_state_expiry_days" value="5" />
-        <ns0:string key="rain_type" value="constant" />   
+        <ns0:string key="rain_type" value="constant" />
         <ns0:string key="rain_input" value="0.00001" />
         <ns0:string key="fews_pre_processing" value="False" />
         <ns0:string key="lizard_results_scenario_name" value="Testsimulatie ivar"/>
         <ns0:string key="lizard_results_scenario_uuid" value=""/>
-        <ns0:string key="initial_waterlevel" value="mean"/>        
+        <ns0:string key="initial_waterlevel" value="mean"/>
     </ns0:properties>
 </ns0:Run>

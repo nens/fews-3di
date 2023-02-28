@@ -28,6 +28,10 @@ class MissingSettingException(Exception):
     pass
 
 
+class DeprecatedSettingException(Exception):
+    pass
+
+
 class MissingFileException(Exception):
     pass
 
@@ -39,13 +43,13 @@ class FileDownloadException(Exception):
 class Settings:
     # Instance variables with their types
     api_host: str
+    api_token: str
     end: datetime.datetime
     fews_pre_processing: bool
     initial_waterlevel: str
     lizard_results_scenario_name: str
     modelrevision: str
     organisation: str
-    password: str
     rain_input: str
     rain_type: str
     save_state: bool
@@ -55,7 +59,6 @@ class Settings:
     simulationname: str
     start: datetime.datetime
     use_last_available_state: bool
-    username: str
 
     def __init__(self, settings_file: Path):
         """Read settings from the xml settings file."""
@@ -69,18 +72,20 @@ class Settings:
         except FileNotFoundError as e:
             msg = f"Settings file '{settings_file}' not found"
             raise MissingFileException(msg) from e
+        deprecated_properties = [
+            "username",
+            "password",
+        ]
         required_properties = [
             "modelrevision",
             "organisation",
-            "password",
+            "api_token",
             "save_state",
             "saved_state_expiry_days",
             "simulationname",
-            "username",
             "fews_pre_processing",
             "use_last_available_state",
         ]
-
         optional_properties = [
             "lizard_results_scenario_name",
             "lizard_results_scenario_uuid",
@@ -90,6 +95,10 @@ class Settings:
             "save_state_time",
             "api_host",
         ]
+
+        for property_name in deprecated_properties:
+            self._fail_on_deprecated_property(property_name)
+
         for property_name in required_properties:
             self._read_property(property_name)
 
@@ -99,6 +108,18 @@ class Settings:
         datetime_variables = ["start", "end"]
         for datetime_variable in datetime_variables:
             self._read_datetime(datetime_variable)
+
+    def _fail_on_deprecated_property(self, property_name):
+        """To make upgrades easier, fail immediately on deprecated properties."""
+        xpath = f"pi:properties/pi:string[@key='{property_name}']"
+        elements = self._root.findall(xpath, NAMESPACES)
+        if elements:
+            # The only deprecated properties at the moment are
+            # username/password, so we can warn specifically about the api
+            # token here.
+            raise DeprecatedSettingException(
+                f"Setting '{property_name}' is deprecated. Use API token instead."
+            )
 
     def _read_property(self, property_name, optional=False):
         """Extract <properties><string> element with the correct key attribute."""
@@ -125,11 +146,12 @@ class Settings:
 
         elif property_name == "saved_state_expiry_days":
             value = int(string_value)
+
         else:
             # Normal situation.
             value = string_value
         setattr(self, property_name, value)
-        if property_name == "password":
+        if property_name == "api_token":
             value = "*" * len(value)
         logger.debug("Found property %s=%s", property_name, value)
 
@@ -170,8 +192,7 @@ class Settings:
         """Return config dict as used by threedi_api_client's __init__()"""
         return {
             "THREEDI_API_HOST": self.api_host,
-            "THREEDI_API_USERNAME": self.username,
-            "THREEDI_API_PASSWORD": self.password,
+            "THREEDI_API_PERSONAL_API_TOKEN": self.api_token,
         }
 
 

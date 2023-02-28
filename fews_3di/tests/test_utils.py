@@ -1,4 +1,4 @@
-"""Tests for utils.py
+""" Tests for utils.py
 
 Note: the 'example_settings' pytest fixture is defined in conftest.py.
 
@@ -12,7 +12,8 @@ import pytest
 
 TEST_DIR = Path(__file__).parent
 EXAMPLE_SETTINGS_FILE = TEST_DIR / "example_settings.xml"
-WRONG_SETTINGS_FILE = TEST_DIR / "settings_without_username.xml"
+WRONG_SETTINGS_FILE = TEST_DIR / "settings_without_api_token.xml"
+WRONG_SETTINGS_FILE2 = TEST_DIR / "settings_with_old_username.xml"
 EXAMPLE_LATERAL_CSV = TEST_DIR / "example_lateral.csv"
 EXAMPLE_PRECIPITATION_FILE = TEST_DIR / "precipitation.nc"
 EXAMPLE_EVAPORATION_FILE = TEST_DIR / "evaporation.nc"
@@ -24,12 +25,17 @@ def test_read_settings_smoke():
 
 # Note: example_settings is an automatic fixture, see conftest.py
 def test_read_settings_extracts_properties(example_settings):
-    assert example_settings.username == "pietje"
+    assert example_settings.initial_waterlevel == "mean"
 
 
-def test_read_settings_missing_username():
+def test_read_settings_missing_api_token():
     with pytest.raises(utils.MissingSettingException):
         utils.Settings(WRONG_SETTINGS_FILE)
+
+
+def test_read_settings_old_username():
+    with pytest.raises(utils.DeprecatedSettingException):
+        utils.Settings(WRONG_SETTINGS_FILE2)
 
 
 def test_read_settings_extracts_times(example_settings):

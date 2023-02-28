@@ -35,7 +35,6 @@ def test_main_login_error(example_settings):
     with mock.patch(
         "sys.argv", ["program", "--settings", str(example_settings.settings_file)]
     ):
-
         assert scripts.main() == 1  # exit code 1: expected login error.
 
 
@@ -44,7 +43,6 @@ def test_main_login_error_verbose(example_settings):
         "sys.argv",
         ["program", "--verbose", "--settings", str(example_settings.settings_file)],
     ):
-
         assert scripts.main() == 1  # exit code 1: expected login error.
 
 
