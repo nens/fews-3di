@@ -3,7 +3,8 @@ Changelog of fews-3di
 
 3.0 (unreleased)
 ----------------
-- Update usage of API token instead of a deprecated username/password 
+
+- Update usage of API token instead of a deprecated username/password
   login when connecting to 3Di. You need to change your `settings.xml`:
   remove `username` and `password` and add `api_key`, with an api key
   you generated on the 3Di website.
@@ -11,6 +12,7 @@ Changelog of fews-3di
 
 2.2 (2022-12-05)
 ----------------
+
 - Moving from temp to the actual file in a more windows-friendly way. (Moving
   between a temp dir on ``c:`` and a target dir on ``d:`` isn't allowed).
 
