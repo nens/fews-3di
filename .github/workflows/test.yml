@@ -19,7 +19,7 @@ jobs:
       # Activate python environment
       - uses: actions/setup-python@v4
         with:
-          python-version: '3.7'
+          python-version: '3.8'
       - name: build
         run: make install
       - name: test
