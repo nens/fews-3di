@@ -12,14 +12,14 @@ on:
 
 jobs:
   build_and_test:
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-22.04
     steps:
       # Checkout the code.
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
       # Activate python environment
-      - uses: actions/setup-python@v1
+      - uses: actions/setup-python@v4
         with:
-          python-version: '3.7'
+          python-version: '3.8'
       - name: build
         run: make install
       - name: test
