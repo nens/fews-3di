@@ -624,7 +624,7 @@ class ThreediSimulation:
             open_water_input_file, self.settings
         )
         # converted_netcdf is a temp file, so move it to the correct spot.
-        shutil.move(converted_netcdf, open_water_input_file)
+        shutil.move(converted_netcdf, open_water_output_file)
         logger.debug("Started open water output file %s", open_water_output_file)
         dset = netCDF4.Dataset(open_water_output_file, "a")
         s1 = (
