@@ -1,10 +1,11 @@
 Changelog of fews-3di
 ===================================================
 
-3.1 (unreleased)
+
+3.0.1 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Fix bug in moving ow.nc file to results folder
 
 
 3.0 (2023-02-28)
