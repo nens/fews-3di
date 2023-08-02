@@ -52,6 +52,7 @@ class Settings:
     organisation: str
     rain_input: str
     rain_type: str
+    rain_radar_multiplier: float
     save_state: bool
     save_state_time: int
     saved_state_expiry_days: int
@@ -91,6 +92,7 @@ class Settings:
             "lizard_results_scenario_uuid",
             "rain_type",
             "rain_input",
+            "rain_radar_multiplier",
             "initial_waterlevel",
             "save_state_time",
             "api_host",

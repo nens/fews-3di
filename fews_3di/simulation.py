@@ -407,6 +407,11 @@ class ThreediSimulation:
         """Upload radar rainfall from Lizard and wait for it to be processed."""
         logger.info("Uploading radar rainfall")
         duration = self.settings.end - self.settings.start
+        multiplier = (
+            self.settings.rain_radar_multiplier
+            if self.settings.rain_radar_multiplier
+            else 1
+        )
 
         self.api.simulations_events_rain_rasters_lizard_create(
             self.simulation_id,
@@ -415,6 +420,7 @@ class ThreediSimulation:
                 "duration": int(duration.total_seconds()),
                 "reference_uuid": self.settings.rain_input,
                 "start_datetime": self.settings.start,
+                "multiplier": multiplier,
                 "units": "m/s",
             },
         )
