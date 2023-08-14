@@ -2,7 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-3.1 (unreleased)
+3.1 (2023-08-14)
 ----------------
 
 - Option to set multiplier by using rain radar as forcing. The multiplier is 
