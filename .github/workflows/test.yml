@@ -15,7 +15,7 @@ jobs:
     runs-on: ubuntu-22.04
     steps:
       # Checkout the code.
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       # Activate python environment
       - uses: actions/setup-python@v5
         with:
