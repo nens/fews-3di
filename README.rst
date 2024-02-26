@@ -54,6 +54,8 @@ The expected information in run_info.xml is::
           <string key="lizard_results_scenario_uuid" value=""/>
           <string key="initial_waterlevel" value=""/>
           <string key="api_host" value=""/>
+          <string key="use_lizard_timeseries_as_boundary" value=""/>
+          <string key="boundary_file" value="boundary_file.json"/>
       </properties>
   </Run>
 
@@ -117,6 +119,15 @@ should be saved. If left empty the end of the simulation is used.
 
 **api_host:** (optional) api_host address can be added here. If not provided
  the default api_host address ("https://api.3di.live/v3.0") will be used.
+ 
+**use_lizard_timeseries_as_boundary:** (optional) can be ``True`` or ``False``.
+ Must be True if the boundary conditions of the simulation has to be updated by 
+ the boundary_file.json 
+
+**boundary_file:** (optional) the name of the boundary json file that will be 
+updated to the simulation if ``use_lizard_timeseries_as_boundary`` is ``True``.
+ No checks are done for the content of the file. 
+
 
 Several input files are needed, they should be in the ``input`` directory
 **relative** to the ``run_info.xml``:
@@ -128,6 +139,8 @@ Several input files are needed, they should be in the ``input`` directory
 - ``input/precipitation.nc``
 
 - ``input/evaporation.nc``
+
+- ``input/boundary_file.json``
 
 - ``input/ow.nc``
 

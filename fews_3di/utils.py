@@ -44,6 +44,7 @@ class Settings:
     # Instance variables with their types
     api_host: str
     api_token: str
+    boundary_file: str
     end: datetime.datetime
     fews_pre_processing: bool
     initial_waterlevel: str
@@ -60,6 +61,7 @@ class Settings:
     simulationname: str
     start: datetime.datetime
     use_last_available_state: bool
+    use_lizard_timeseries_as_boundary: bool
 
     def __init__(self, settings_file: Path):
         """Read settings from the xml settings file."""
@@ -96,6 +98,8 @@ class Settings:
             "initial_waterlevel",
             "save_state_time",
             "api_host",
+            "boundary_file",
+            "use_lizard_timeseries_as_boundary",
         ]
 
         for property_name in deprecated_properties:
@@ -144,6 +148,9 @@ class Settings:
             value = string_value.lower() == "true"
 
         elif property_name == "use_last_available_state":
+            value = string_value.lower() == "true"
+
+        elif property_name == "use_lizard_timeseries_as_boundary":
             value = string_value.lower() == "true"
 
         elif property_name == "saved_state_expiry_days":

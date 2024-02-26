@@ -106,6 +106,16 @@ class ThreediSimulation:
         model_id = self._find_model()
         self.simulation_id, self.simulation_url = self._create_simulation(model_id)
 
+        if self.settings.use_lizard_timeseries_as_boundary:
+            boundary_json = (
+                self.settings.base_dir / "input" / self.settings.boundary_file
+            )
+            if boundary_json.exists():
+                # rain = utils.rain_csv_timeseries(rain_csv, self.settings)
+                self._add_boundary(self.settings.boundary_file)
+            else:
+                logger.info("No json boundary file found, skipping.")
+
         laterals_csv = self.settings.base_dir / "input" / "lateral.csv"
         if laterals_csv.exists():
             laterals = utils.lateral_timeseries(laterals_csv, self.settings)
@@ -216,6 +226,36 @@ class ThreediSimulation:
         simulation = self.api.simulations_from_template(data)
         logger.info("Simulation %s has been created", simulation.url)
         return simulation.id, simulation.url
+
+    def _add_boundary(self, boundary_file):
+        """Upload boundary json file. No check for the content of the file"""
+        logger.info(
+            "replacing the current boundary of the simulation with %s", boundary_file
+        )
+        get_current_boundary_api_call = (
+            self.api.simulations_events_boundaryconditions_file_list(
+                simulation_pk=self.simulation_id,
+            )
+        )
+        current_boundary_id = get_current_boundary_api_call.results[0].id
+        self.api.simulations_events_boundaryconditions_file_delete(
+            id=current_boundary_id, simulation_pk=self.simulation_id
+        )
+        create_new_boundary_api_call = (
+            self.api.simulations_events_boundaryconditions_file_create(
+                simulation_pk=self.simulation_id, data={"filename": boundary_file}
+            )
+        )
+        log_url = create_new_boundary_api_call.put_url.split("?")[
+            0
+        ]  # Strip off aws credentials.
+        boundary_json_file = (
+            self.settings.base_dir / "input" / self.settings.boundary_file
+        )
+        with open(boundary_json_file, "rb") as f:
+            response = requests.put(create_new_boundary_api_call.put_url, data=f)
+            response.raise_for_status()
+        logger.debug("Added new boundary file to '%s'", log_url)
 
     def _add_laterals(self, laterals: Dict[str, List[OffsetAndValue]]):
         """Upload lateral timeseries and wait for them to be processed."""
