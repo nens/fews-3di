@@ -18,7 +18,7 @@ description = "FEWS-3Di coupling"
 authors = [
   {name = "Reinout van Rees", email = "reinout.vanrees@nelen-schuurmans.nl"},
 ]
-readme = "README.md"
+readme = "README.rst"
 license = {file = "LICENSE"}
 
 [project.scripts]
