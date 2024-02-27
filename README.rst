@@ -96,8 +96,8 @@ should be saved. If left empty the end of the simulation is used.
   must be stored in the input directory as ``input/rain.csv`` and
   ``input/precipitation.nc``
 
-**rain_radar_multiplier:** can be used to multiply the rain_input ``radar`` 
- with a constant value. This can be used to correct the radar input. The 
+**rain_radar_multiplier:** can be used to multiply the rain_input ``radar``
+ with a constant value. This can be used to correct the radar input. The
  default value is 1.0.
 
 **fews_pre_processing:** can be ``True`` or ``False``. Must be True if the
@@ -118,15 +118,15 @@ should be saved. If left empty the end of the simulation is used.
 - ``max``
 
 **api_host:** (optional) api_host address can be added here. If not provided
- the default api_host address ("https://api.3di.live/v3.0") will be used.
- 
-**use_lizard_timeseries_as_boundary:** (optional) can be ``True`` or ``False``.
- Must be True if the boundary conditions of the simulation has to be updated by 
- the boundary_file.json 
+the default api_host address ("https://api.3di.live/v3.0") will be used.
 
-**boundary_file:** (optional) the name of the boundary json file that will be 
+**use_lizard_timeseries_as_boundary:** (optional) can be ``True`` or ``False``.
+Must be True if the boundary conditions of the simulation has to be updated by
+the boundary_file.json
+
+**boundary_file:** (optional) the name of the boundary json file that will be
 updated to the simulation if ``use_lizard_timeseries_as_boundary`` is ``True``.
- No checks are done for the content of the file. 
+No checks are done for the content of the file.
 
 
 Several input files are needed, they should be in the ``input`` directory

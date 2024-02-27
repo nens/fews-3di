@@ -5,7 +5,7 @@ Changelog of fews-3di
 3.3 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Fixed readme syntax (which prevented a release).
 
 
 3.2 (2024-02-27)
