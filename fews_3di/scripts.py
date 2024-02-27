@@ -1,5 +1,6 @@
 """Script to start 3Di simulations from FEWS.
 """
+
 # ^^^ This docstring is automatically used in the command line help text.
 from fews_3di import simulation
 from fews_3di import utils

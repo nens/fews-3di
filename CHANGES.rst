@@ -2,17 +2,29 @@ Changelog of fews-3di
 ===================================================
 
 
-3.2 (unreleased)
+3.3 (unreleased)
 ----------------
 
 - Nothing changed yet.
 
 
+3.2.1 (2024-02-27)
+------------------
+
+- Fixed readme syntax (which prevented a release).
+
+
+3.2 (2024-02-27)
+----------------
+
+- Added option to add lizard timeseries as a boundary condition.
+
+
 3.1 (2023-08-14)
 ----------------
 
-- Option to set multiplier by using rain radar as forcing. The multiplier is 
-  set by the user in the settings file. 
+- Option to set multiplier by using rain radar as forcing. The multiplier is
+  set by the user in the settings file.
 
 
 3.0.1 (2023-03-10)
