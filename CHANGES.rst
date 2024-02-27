@@ -5,14 +5,14 @@ Changelog of fews-3di
 3.2 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Added option to add lizard timeseries as a boundary condition.
 
 
 3.1 (2023-08-14)
 ----------------
 
-- Option to set multiplier by using rain radar as forcing. The multiplier is 
-  set by the user in the settings file. 
+- Option to set multiplier by using rain radar as forcing. The multiplier is
+  set by the user in the settings file.
 
 
 3.0.1 (2023-03-10)

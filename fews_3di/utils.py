@@ -44,6 +44,7 @@ class Settings:
     # Instance variables with their types
     api_host: str
     api_token: str
+    boundary_file: str
     end: datetime.datetime
     fews_pre_processing: bool
     initial_waterlevel: str
@@ -60,13 +61,18 @@ class Settings:
     simulationname: str
     start: datetime.datetime
     use_last_available_state: bool
+    use_lizard_timeseries_as_boundary: bool
 
     def __init__(self, settings_file: Path):
         """Read settings from the xml settings file."""
         self.settings_file = settings_file
-        setattr(self, "lizard_results_scenario_name", "")
-        setattr(self, "lizard_results_scenario_uuid", "")
-        setattr(self, "api_host", DEFAULT_API_HOST)
+        # First some defaults for optional properties
+        self.lizard_results_scenario_name = ""
+        self.lizard_results_scenario_uuid = ""
+        self.api_host = DEFAULT_API_HOST
+        self.use_lizard_timeseries_as_boundary = False
+        self.boundary_file = ""
+
         logger.info("Reading settings from %s...", self.settings_file)
         try:
             self._root = ET.fromstring(self.settings_file.read_text())
@@ -96,6 +102,8 @@ class Settings:
             "initial_waterlevel",
             "save_state_time",
             "api_host",
+            "boundary_file",
+            "use_lizard_timeseries_as_boundary",
         ]
 
         for property_name in deprecated_properties:
@@ -105,7 +113,7 @@ class Settings:
             self._read_property(property_name)
 
         for property_name in optional_properties:
-            self._read_property(property_name, True)
+            self._read_property(property_name, optional=True)
 
         datetime_variables = ["start", "end"]
         for datetime_variable in datetime_variables:
@@ -144,6 +152,9 @@ class Settings:
             value = string_value.lower() == "true"
 
         elif property_name == "use_last_available_state":
+            value = string_value.lower() == "true"
+
+        elif property_name == "use_lizard_timeseries_as_boundary":
             value = string_value.lower() == "true"
 
         elif property_name == "saved_state_expiry_days":
@@ -214,9 +225,9 @@ def lateral_timeseries(
     rows = rows[2:]
 
     timeseries: Dict[str, List[OffsetAndValue]] = {}
-    previous_values: Dict[
-        str, float
-    ] = {}  # Values can be omitted if they stay the same.
+    previous_values: Dict[str, float] = (
+        {}
+    )  # Values can be omitted if they stay the same.
     for header in headers:
         timeseries[header] = []
 
