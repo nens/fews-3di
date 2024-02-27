@@ -10,8 +10,6 @@ on:
     branches:
       - master
       - main
-    tags:
-      - "*"
   pull_request:
     branches:
       - master
@@ -36,6 +34,8 @@ jobs:
             tox-env: "py311"
           - python-version: "3.12"
             tox-env: "py312"
+          - python-version: "3.11"
+            tox-env: "build_package"
     steps:
 
       - uses: actions/checkout@v4

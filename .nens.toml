@@ -4,3 +4,9 @@ uses_ansible = false
 meta_version = "0.5.dev0"
 project_name = "fews-3di"
 package_name = "fews_3di"
+
+[tox]
+minimum_coverage = "50"
+
+[meta_workflow]
+environments = ["lint", "coverage", "TEST", "build_package"]
