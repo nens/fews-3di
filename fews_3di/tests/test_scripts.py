@@ -1,9 +1,10 @@
 """Tests for script.py"""
 
-from fews_3di import scripts
+from unittest import mock
 
-import mock
 import pytest
+
+from fews_3di import scripts
 
 
 def test_get_parser():

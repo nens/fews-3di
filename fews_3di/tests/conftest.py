@@ -7,12 +7,12 @@ necessary sample data.
 
 """
 
-from fews_3di import utils
+import shutil
 from pathlib import Path
 
 import pytest
-import shutil
 
+from fews_3di import utils
 
 TEST_DIR = Path(__file__).parent
 EXAMPLE_SETTINGS_FILENAME = "example_settings.xml"

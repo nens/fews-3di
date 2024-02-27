@@ -10,11 +10,11 @@
         <ns0:string key="save_state_time" value="" />
         <ns0:string key="use_last_available_state" value="False" />
         <ns0:string key="saved_state_expiry_days" value="5" />
-        <ns0:string key="rain_type" value="constant" />   
+        <ns0:string key="rain_type" value="constant" />
         <ns0:string key="rain_input" value="0.00001" />
         <ns0:string key="fews_pre_processing" value="False" />
         <ns0:string key="lizard_results_scenario_name" value="Testsimulatie ivar"/>
         <ns0:string key="lizard_results_scenario_uuid" value=""/>
-        <ns0:string key="initial_waterlevel" value="mean"/>        
+        <ns0:string key="initial_waterlevel" value="mean"/>
     </ns0:properties>
 </ns0:Run>

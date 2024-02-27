@@ -4,12 +4,12 @@ Note: the 'example_settings' pytest fixture is defined in conftest.py.
 
 """
 
-from fews_3di import utils
+import datetime
 from pathlib import Path
 
-import datetime
 import pytest
 
+from fews_3di import utils
 
 TEST_DIR = Path(__file__).parent
 EXAMPLE_SETTINGS_FILE = TEST_DIR / "example_settings.xml"

@@ -1,7 +1,8 @@
-from fews_3di import simulation
+from unittest import mock
 
-import mock
 import pytest
+
+from fews_3di import simulation
 
 
 # Note: example_settings is an automatic fixture, see conftest.py
