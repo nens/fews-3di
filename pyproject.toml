@@ -5,7 +5,7 @@ requires = ["setuptools>=69"]
 
 [project]
 name = "fews-3di"
-requires-python = ">=3."
+requires-python = ">=3.8"
 version = "3.3.dev0"
 dependencies = [
   "netCDF4",
@@ -16,7 +16,7 @@ dependencies = [
 ]
 description = "FEWS-3Di coupling"
 authors = [
-  {"name": "Reinout van Rees", "email": "reinout.vanrees@nelen-schuurmans.nl"},
+  {name = "Reinout van Rees", email = "reinout.vanrees@nelen-schuurmans.nl"},
 ]
 readme = ["README.md", "CHANGES.rst", "DEVELOPMENT.rst"]
 license = "MIT"
@@ -35,7 +35,7 @@ packages = ["fews_3di"]
 zip-safe = false
 
 [tool.setuptools.dynamic]
-entry-points = {"console_scripts": ["run-fews-3di = fews_3di.scripts:main"]}
+entry-points = {console_scripts = ["run-fews-3di = fews_3di.scripts:main"]}
 
 [tool.pytest.ini_options]
 testpaths = ["fews_3di"]
