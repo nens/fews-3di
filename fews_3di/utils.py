@@ -109,7 +109,7 @@ class Settings:
             self._read_property(property_name)
 
         for property_name in optional_properties:
-            self._read_property(property_name, True)
+            self._read_property(property_name, optional=True)
 
         datetime_variables = ["start", "end"]
         for datetime_variable in datetime_variables:
