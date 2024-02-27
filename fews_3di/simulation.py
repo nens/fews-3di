@@ -106,16 +106,6 @@ class ThreediSimulation:
         model_id = self._find_model()
         self.simulation_id, self.simulation_url = self._create_simulation(model_id)
 
-        if self.settings.use_lizard_timeseries_as_boundary:
-            boundary_json = (
-                self.settings.base_dir / "input" / self.settings.boundary_file
-            )
-            if boundary_json.exists():
-                # rain = utils.rain_csv_timeseries(rain_csv, self.settings)
-                self._add_boundary(self.settings.boundary_file)
-            else:
-                logger.info("No json boundary file found, skipping.")
-
         laterals_csv = self.settings.base_dir / "input" / "lateral.csv"
         if laterals_csv.exists():
             laterals = utils.lateral_timeseries(laterals_csv, self.settings)
@@ -178,6 +168,16 @@ class ThreediSimulation:
             self._process_basic_lizard_results()
         else:
             logger.info("Not processing basic results in Lizard")
+
+        if self.settings.use_lizard_timeseries_as_boundary:
+            boundary_json = (
+                self.settings.base_dir / "input" / self.settings.boundary_file
+            )
+            if boundary_json.exists():
+                # rain = utils.rain_csv_timeseries(rain_csv, self.settings)
+                self._add_boundary(self.settings.boundary_file)
+            else:
+                logger.info("No json boundary file found, skipping.")
 
         self._run_simulation()
         self._download_results()
