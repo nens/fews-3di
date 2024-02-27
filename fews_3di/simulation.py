@@ -25,6 +25,7 @@ CHUNK_SIZE = 1024 * 1024  # 1MB
 SAVED_STATE_ID_FILENAME = "3di-saved-state-id.txt"
 COLD_STATE_ID_FILENAME = "3di-cold-state-id.txt"
 SIMULATION_STATUS_CHECK_INTERVAL = 30
+UPLOAD_STATUS_CHECK_INTERVAL = 2
 USER_AGENT = "fews-3di (https://github.com/nens/fews-3di/)"
 logger = logging.getLogger(__name__)
 
@@ -255,6 +256,9 @@ class ThreediSimulation:
         with open(boundary_json_file, "rb") as f:
             response = requests.put(create_new_boundary_api_call.put_url, data=f)
             response.raise_for_status()
+
+        time.sleep(UPLOAD_STATUS_CHECK_INTERVAL)
+
         logger.debug("Added new boundary file to '%s'", log_url)
 
     def _add_laterals(self, laterals: Dict[str, List[OffsetAndValue]]):
@@ -279,7 +283,7 @@ class ThreediSimulation:
 
         logger.debug("Waiting for laterals to be processed...")
         while True:
-            time.sleep(2)
+            time.sleep(UPLOAD_STATUS_CHECK_INTERVAL)
             for id in still_to_process:
                 lateral = self.api.simulations_events_lateral_timeseries_read(
                     simulation_pk=self.simulation_id, id=id
@@ -405,7 +409,7 @@ class ThreediSimulation:
 
         logger.debug("Waiting for rain raster to be processed...")
         while True:
-            time.sleep(2)
+            time.sleep(UPLOAD_STATUS_CHECK_INTERVAL)
             upload_status = self.api.simulations_events_rain_rasters_netcdf_list(
                 self.simulation_id
             )
@@ -498,7 +502,7 @@ class ThreediSimulation:
 
         logger.debug("Waiting for evaporation raster to be processed...")
         while True:
-            time.sleep(2)
+            time.sleep(UPLOAD_STATUS_CHECK_INTERVAL)
             upload_status = self.api.simulations_events_sources_sinks_rasters_netcdf_list(  # noqa: E501
                 self.simulation_id
             )
