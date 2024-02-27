@@ -66,9 +66,13 @@ class Settings:
     def __init__(self, settings_file: Path):
         """Read settings from the xml settings file."""
         self.settings_file = settings_file
-        setattr(self, "lizard_results_scenario_name", "")
-        setattr(self, "lizard_results_scenario_uuid", "")
-        setattr(self, "api_host", DEFAULT_API_HOST)
+        # First some defaults for optional properties
+        self.lizard_results_scenario_name = ""
+        self.lizard_results_scenario_uuid = ""
+        self.api_host = DEFAULT_API_HOST
+        self.use_lizard_timeseries_as_boundary = False
+        self.boundary_file = ""
+
         logger.info("Reading settings from %s...", self.settings_file)
         try:
             self._root = ET.fromstring(self.settings_file.read_text())
