@@ -5,25 +5,27 @@ Development instructions
 Development installation
 ------------------------
 
-To install::
+See https://nens-meta.readthedocs.io/en/latest/usage.html for nice instructions!
 
-  $ make install
+Basically::
 
-If you want to use a specific version of python, you can first run something
-like this::
+  $ python3 -m venv .venv
+  $ .venv/bin/activate  # Linux: source .venv/bin/activate
+  $ pip install -r requirements.txt
 
-  $ python3.9 -m venv .
+Formatting, checks, tests::
+
+  $ tox
+  (.venv) $ pytest
 
 There will be a script you can run like this::
 
-  $ bin/run-fews-3di
+  $ .venv/bin/run-fews-3di
 
 It runs the ``main()`` function in ``fews-3di/scripts.py``, adjust that if
 necessary. The script is configured in ``setup.py`` (see ``entry_points``).
 
-If you need a new dependency (like ``requests``), add it in ``setup.py`` in
-``install_requires``. Local development tools, like "black", can be added to
-the ``requirements.txt`` file. In both cases, run ``make install`` again.
+If you need a new dependency (like ``requests``), add it in ``pyproject.toml``.
 
 
 Code structure
