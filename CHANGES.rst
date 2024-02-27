@@ -2,10 +2,16 @@ Changelog of fews-3di
 ===================================================
 
 
-3.3 (unreleased)
+3.4 (unreleased)
 ----------------
 
 - Nothing changed yet.
+
+
+3.3 (2024-02-27)
+----------------
+
+- Added extra 2 second delay.
 
 
 3.2.1 (2024-02-27)
