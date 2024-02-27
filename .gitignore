@@ -3,35 +3,36 @@
 *~
 *.swp
 *.pyc
+.DS_Store
 
 # Packages/buildout/pip/pipenv
 *.egg
 *.egg-info
 sdist
 pip-log.txt
-src
 bower_components/
 node_modules/
-.DS_Store
 doc/build/
 ansible/*.retry
 .venv
+venv
 bin/
 lib/
 pyvenv.cfg
+dist/
+var/
+*.suggestion
+
+# Our generated files
+for_step_summary.md
 
 # Unit test / coverage reports
 .coverage
 .tox
-nosetests.xml
 htmlcov
 .codeintel
-coverage.xml
+coverage.*
 .pytest_cache
-.mypy_cache
-
-original/
-dist/
 
 # Pycharm, visual studio
 .idea
@@ -39,3 +40,5 @@ dist/
 
 # Docker
 docker-compose.override.yml
+
+### Extra lines below are preserved ###
