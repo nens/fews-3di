@@ -5,8 +5,6 @@
 # Extra development dependencies
 black
 coveralls
-flake8
-isort >= 5
 mypy
 wheel
 zest.releaser
