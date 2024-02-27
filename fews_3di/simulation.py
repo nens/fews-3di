@@ -1,23 +1,20 @@
-from collections import namedtuple
-from fews_3di import utils
-from pathlib import Path
-from threedi_api_client import openapi
-from threedi_api_client import ThreediApi
-from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
-from typing import Dict
-from typing import List
-from typing import Tuple
-
 import datetime
 import logging
-import netCDF4
-import pandas as pd
-import requests
 import shutil
 import socket
 import time
 import warnings
+from collections import namedtuple
+from pathlib import Path
+from typing import Dict, List, Tuple
 
+import netCDF4
+import pandas as pd
+import requests
+from threedi_api_client import ThreediApi, openapi
+from threedigrid.admin.gridresultadmin import GridH5ResultAdmin
+
+from fews_3di import utils
 
 OffsetAndValue = namedtuple("OffsetAndValue", ["offset", "value"])
 NULL_VALUE = -999  # nodata value in FEWS
@@ -499,8 +496,10 @@ class ThreediSimulation:
         logger.debug("Waiting for evaporation raster to be processed...")
         while True:
             time.sleep(2)
-            upload_status = self.api.simulations_events_sources_sinks_rasters_netcdf_list(  # noqa: E501
-                self.simulation_id
+            upload_status = (
+                self.api.simulations_events_sources_sinks_rasters_netcdf_list(  # noqa: E501
+                    self.simulation_id
+                )
             )
             state = upload_status.results[0].file.state
             if state.lower() == "processing":

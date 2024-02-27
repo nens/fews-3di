@@ -2,14 +2,13 @@
 """
 
 # ^^^ This docstring is automatically used in the command line help text.
-from fews_3di import simulation
-from fews_3di import utils
-from pathlib import Path
-
 import argparse
 import logging
+from pathlib import Path
+
 import threedi_api_client
 
+from fews_3di import simulation, utils
 
 # Exceptions we raise ourselves that are suitable for printing as error messages.
 OWN_EXCEPTIONS = (

@@ -1,18 +1,15 @@
-from collections import namedtuple
-from pathlib import Path
-from typing import Dict
-from typing import List
-from typing import Tuple
-
-import cftime
 import csv
 import datetime
 import logging
-import netCDF4 as nc
-import numpy as np
 import tempfile
 import xml.etree.ElementTree as ET
+from collections import namedtuple
+from pathlib import Path
+from typing import Dict, List, Tuple
 
+import cftime
+import netCDF4 as nc
+import numpy as np
 
 NAMESPACES = {"pi": "http://www.wldelft.nl/fews/PI"}
 NULL_VALUE = -999
@@ -225,9 +222,9 @@ def lateral_timeseries(
     rows = rows[2:]
 
     timeseries: Dict[str, List[OffsetAndValue]] = {}
-    previous_values: Dict[str, float] = (
-        {}
-    )  # Values can be omitted if they stay the same.
+    previous_values: Dict[
+        str, float
+    ] = {}  # Values can be omitted if they stay the same.
     for header in headers:
         timeseries[header] = []
 
