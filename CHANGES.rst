@@ -5,12 +5,6 @@ Changelog of fews-3di
 3.5 (unreleased)
 ----------------
 
-- Nothing changed yet.
-
-
-3.4 (2024-02-27)
-----------------
-
 - Modernised the internal project setup (see ``DEVELOPMENT.rst``).
 
 
