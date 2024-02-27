@@ -1,0 +1,63 @@
+# See https://nens-meta.readthedocs.io/en/latest/config-files.html#pyproject-toml
+
+[build-system]
+requires = ["setuptools>=69"]
+
+[project]
+name = "fews-3di"
+requires-python = ">=3."
+version = "3.3.dev0"
+dependencies = [
+  "netCDF4",
+  "pandas",
+  "requests",
+  "threedi-api-client >= 4.0.1",
+  "threedigrid",
+]
+description = "FEWS-3Di coupling"
+authors = [
+  {"name": "Reinout van Rees", "email": "reinout.vanrees@nelen-schuurmans.nl"},
+]
+readme = ["README.md", "CHANGES.rst", "DEVELOPMENT.rst"]
+license = "MIT"
+dynamic = ["entry-points"]
+
+[project.optional-dependencies]
+test = [
+  "data-science-types",
+  "mock",
+  "pytest",
+  "pytest-mypy",
+]
+
+[tool.setuptools]
+packages = ["fews_3di"]
+zip-safe = false
+
+[tool.setuptools.dynamic]
+entry-points = {"console_scripts": ["run-fews-3di = fews_3di.scripts:main"]}
+
+[tool.pytest.ini_options]
+testpaths = ["fews_3di"]
+log_level = "DEBUG"
+
+[tool.coverage.run]
+source = ["fews_3di"]
+
+[tool.coverage.report]
+show_missing = true
+skip_empty = true
+
+[tool.ruff]
+target-version = "py38"
+
+[tool.ruff.lint]
+select = ["E4", "E7", "E9", "F", "I", "UP"]
+
+[tool.zest-releaser]
+release = false
+
+[tool.pyright]
+include = ["fews_3di"]
+venvPath = "."
+venv = ".venv"
