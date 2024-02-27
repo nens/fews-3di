@@ -18,9 +18,15 @@ description = "FEWS-3Di coupling"
 authors = [
   {name = "Reinout van Rees", email = "reinout.vanrees@nelen-schuurmans.nl"},
 ]
-readme = ["README.md", "CHANGES.rst", "DEVELOPMENT.rst"]
-license = "MIT"
-dynamic = ["entry-points"]
+readme = "README.md"
+license = {file = "LICENSE"}
+
+[project.scripts]
+run-fews-3di = "fews_3di.scripts:main"
+
+[project.urls]
+Homepage = "https://github.com/nens/fews-3di"
+Changelog = "https://github.com/nens/fews-3di/blob/master/CHANGES.rst"
 
 [project.optional-dependencies]
 test = [
@@ -33,9 +39,6 @@ test = [
 [tool.setuptools]
 packages = ["fews_3di"]
 zip-safe = false
-
-[tool.setuptools.dynamic]
-entry-points = {console_scripts = ["run-fews-3di = fews_3di.scripts:main"]}
 
 [tool.pytest.ini_options]
 testpaths = ["fews_3di"]
