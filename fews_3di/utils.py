@@ -221,9 +221,9 @@ def lateral_timeseries(
     rows = rows[2:]
 
     timeseries: Dict[str, List[OffsetAndValue]] = {}
-    previous_values: Dict[
-        str, float
-    ] = {}  # Values can be omitted if they stay the same.
+    previous_values: Dict[str, float] = (
+        {}
+    )  # Values can be omitted if they stay the same.
     for header in headers:
         timeseries[header] = []
 
