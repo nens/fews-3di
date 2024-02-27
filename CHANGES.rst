@@ -2,7 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-3.2 (unreleased)
+3.2 (2024-02-27)
 ----------------
 
 - Added option to add lizard timeseries as a boundary condition.
