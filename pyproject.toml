@@ -36,9 +36,8 @@ test = [
   "pytest-mypy",
 ]
 
-[tool.setuptools]
-packages = ["fews_3di"]
-zip-safe = false
+[tool.setuptools.packages.find]
+where = ["fews_3di"]
 
 [tool.pytest.ini_options]
 testpaths = ["fews_3di"]
