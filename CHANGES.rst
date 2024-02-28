@@ -5,7 +5,7 @@ Changelog of fews-3di
 3.5 (unreleased)
 ----------------
 
-- Nothing changed yet.
+- Fixed faulty packaging.
 
 
 3.4.2 (2024-02-27)
