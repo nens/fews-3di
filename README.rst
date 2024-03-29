@@ -43,8 +43,8 @@ The expected information in run_info.xml is::
           <string key="modelrevision" value="abcd123456787"/>
           <string key="simulationname" value="Simulation name"/>
           <string key="save_state" value="True"/>
-          <string key="save_state_time" value="1400" />
           <string key="use_last_available_state" value="False" />
+          <string key="save_state_time" value="1400"/>
           <string key="saved_state_expiry_days" value="5"/>
           <string key="rain_type" value="radar"/>
           <string key="rain_input" value="730d6675-35dd-4a35-aa9b-bfb8155f9ca7"/>
@@ -65,17 +65,25 @@ The expected information in run_info.xml is::
 ``save_state_expiry_days``, without a "d". The example radar uuid is the Dutch
 rainfall radar (NRR).
 
-**save_state:** To use a warm state provide a text file with id in the
-states folder using the name ``states/3di-saved-state-id.txt``.  A cold state
-is supplied in a similar way with the name: ``states/3di-cold-state-id.txt``.
+**save_state:** This option enables using and saving state files. To use a warm 
+state provide a text file with id in the states folder using the name 
+``states/3di-saved-state-id.txt``.  A cold state is supplied in a similar way 
+with the name: ``states/3di-cold-state-id.txt``. If this option is enabled, after
+the simulation the id of the saved state at is updated in same file 
+``states/3di-saved-state-id.txt``.
+
 
 **use_last_available_state:** To overpass the state management system and
 directly take the last available state in the 3Di database the option:
 ``use_last_available_state`` can be set to True.
 
-**save_state_time:** When saving a state a ``save_state_time`` can be specified.
-This parameter defines the time in the simulation (in seconds) when the state
-should be saved. If left empty the end of the simulation is used.
+**save_state_time:** This parameter defines the time in the simulation 
+(in seconds) when the state should be saved. If left empty the end of 
+the simulation is used.
+
+**saved_state_expiry_days:** The expiry time can be set to store states
+for a relevant period to enable hindcasting and at the same time prevent
+the usage of too much storage space.
 
 **rain_type:** multipe rain-types can be used in the configuration:
 
