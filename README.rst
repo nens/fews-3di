@@ -65,19 +65,19 @@ The expected information in run_info.xml is::
 ``save_state_expiry_days``, without a "d". The example radar uuid is the Dutch
 rainfall radar (NRR).
 
-**save_state:** This option enables using and saving state files. To use a warm 
-state provide a text file with id in the states folder using the name 
-``states/3di-saved-state-id.txt``.  A cold state is supplied in a similar way 
+**save_state:** This option enables using and saving state files. To use a warm
+state provide a text file with id in the states folder using the name
+``states/3di-saved-state-id.txt``.  A cold state is supplied in a similar way
 with the name: ``states/3di-cold-state-id.txt``. If this option is enabled, after
-the simulation the id of the saved state at is updated in same file 
+the simulation the id of the saved state at is updated in same file
 ``states/3di-saved-state-id.txt``.
 
 **use_last_available_state:** To overpass the state management system and
 directly take the last available state in the 3Di database the option:
 ``use_last_available_state`` can be set to True.
 
-**save_state_time:** This parameter defines the time in the simulation 
-(in seconds) when the state should be saved. If left empty the end of 
+**save_state_time:** This parameter defines the time in the simulation
+(in seconds) when the state should be saved. If left empty the end of
 the simulation is used.
 
 **saved_state_expiry_days:** The expiry time can be set to store states
