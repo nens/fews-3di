@@ -72,7 +72,6 @@ with the name: ``states/3di-cold-state-id.txt``. If this option is enabled, afte
 the simulation the id of the saved state at is updated in same file 
 ``states/3di-saved-state-id.txt``.
 
-
 **use_last_available_state:** To overpass the state management system and
 directly take the last available state in the 3Di database the option:
 ``use_last_available_state`` can be set to True.
