@@ -22,7 +22,7 @@ CHUNK_SIZE = 1024 * 1024  # 1MB
 SAVED_STATE_ID_FILENAME = "3di-saved-state-id.txt"
 COLD_STATE_ID_FILENAME = "3di-cold-state-id.txt"
 SIMULATION_STATUS_CHECK_INTERVAL = 30
-UPLOAD_STATUS_CHECK_INTERVAL = 2
+UPLOAD_STATUS_CHECK_INTERVAL = 5
 USER_AGENT = "fews-3di (https://github.com/nens/fews-3di/)"
 logger = logging.getLogger(__name__)
 
