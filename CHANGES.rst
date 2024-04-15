@@ -2,7 +2,7 @@ Changelog of fews-3di
 ===================================================
 
 
-3.5 (unreleased)
+3.5 (2024-04-15)
 ----------------
 
 - Increased the file processing time for boundary files.
