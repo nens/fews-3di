@@ -103,7 +103,7 @@ class Settings:
             "api_host",
             "boundary_file",
             "use_lizard_timeseries_as_boundary",
-            "simulation_template"
+            "simulation_template",
         ]
 
         for property_name in deprecated_properties:

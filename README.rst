@@ -137,8 +137,8 @@ updated to the simulation if ``use_lizard_timeseries_as_boundary`` is ``True``.
 No checks are done for the content of the file.
 
 **simulation_template:** (optional) the name of the simulation template to be
-used for the simulation. If not provided defaults to ``default``, the 
-simulation template generated at model creation. 
+used for the simulation. If not provided defaults to ``default``, the
+simulation template generated at model creation.
 
 Several input files are needed, they should be in the ``input`` directory
 **relative** to the ``run_info.xml``:
