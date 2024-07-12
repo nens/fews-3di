@@ -56,6 +56,7 @@ class Settings:
     saved_state_expiry_days: int
     settings_file: Path
     simulationname: str
+    simulation_template: str
     start: datetime.datetime
     use_last_available_state: bool
     use_lizard_timeseries_as_boundary: bool
@@ -69,6 +70,7 @@ class Settings:
         self.api_host = DEFAULT_API_HOST
         self.use_lizard_timeseries_as_boundary = False
         self.boundary_file = ""
+        self.simulation_template = "default"
 
         logger.info("Reading settings from %s...", self.settings_file)
         try:
@@ -101,6 +103,7 @@ class Settings:
             "api_host",
             "boundary_file",
             "use_lizard_timeseries_as_boundary",
+            "simulation_template"
         ]
 
         for property_name in deprecated_properties:
