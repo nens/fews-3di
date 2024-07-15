@@ -2,10 +2,10 @@ Changelog of fews-3di
 ===================================================
 
 
-3.6 (unreleased)
+3.6 (2024-07-15)
 ----------------
 
-- Nothing changed yet.
+- Added options to work with 3Di model templates.
 
 
 3.5 (2024-04-15)

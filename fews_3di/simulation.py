@@ -208,10 +208,11 @@ class ThreediSimulation:
         """Return id and url of created simulation."""
         try:
             simulation_template = self.api.simulation_templates_list(
-                simulation__threedimodel__id=model_id
+                name=self.settings.simulation_template,
+                simulation__threedimodel__id=model_id,
             ).results[0]
         except IndexError:
-            msg = f"No simulation template for model id with {model_id}"
+            msg = f"No simulation template named {self.settings.simulation_template} for model with id {model_id}"
             raise MissingSimulationTemplateError(msg)
         data = {}
         data["name"] = self.settings.simulationname
