@@ -44,6 +44,7 @@ class Settings:
     boundary_file: str
     end: datetime.datetime
     fews_pre_processing: bool
+    fews_state_management: bool
     initial_waterlevel: str
     lizard_results_scenario_name: str
     modelrevision: str
@@ -71,6 +72,7 @@ class Settings:
         self.use_lizard_timeseries_as_boundary = False
         self.boundary_file = ""
         self.simulation_template = "default"
+        self.fews_state_management = True
 
         logger.info("Reading settings from %s...", self.settings_file)
         try:
@@ -87,7 +89,6 @@ class Settings:
             "organisation",
             "api_token",
             "save_state",
-            "saved_state_expiry_days",
             "simulationname",
             "fews_pre_processing",
             "use_last_available_state",
@@ -104,7 +105,9 @@ class Settings:
             "boundary_file",
             "use_lizard_timeseries_as_boundary",
             "simulation_template",
+            "fews_state_management",
         ]
+
 
         for property_name in deprecated_properties:
             self._fail_on_deprecated_property(property_name)
@@ -149,6 +152,9 @@ class Settings:
             value = string_value.lower() == "true"
 
         elif property_name == "fews_pre_processing":
+            value = string_value.lower() == "true"
+
+        elif property_name == "fews_state_management":
             value = string_value.lower() == "true"
 
         elif property_name == "use_last_available_state":

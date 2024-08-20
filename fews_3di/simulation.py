@@ -114,12 +114,13 @@ class ThreediSimulation:
         cold_state_id_file = self.settings.states_dir / COLD_STATE_ID_FILENAME
 
         if self.settings.save_state:
+            self.saved_state_id = self._prepare_initial_state()
             if self.settings.use_last_available_state:
                 self._add_last_available_state(model_id)
-                self.saved_state_id = self._prepare_initial_state()
-            else:
+            elif self.settings.fews_state_management:
+                # Add file-based state management
                 self._add_initial_state(saved_state_id_file, cold_state_id_file)
-                self.saved_state_id = self._prepare_initial_state()
+                
         else:
             logger.info("Saved state not enabled in the configuration, skipping.")
 
