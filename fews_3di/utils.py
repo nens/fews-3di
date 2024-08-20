@@ -60,6 +60,7 @@ class Settings:
     start: datetime.datetime
     use_last_available_state: bool
     use_lizard_timeseries_as_boundary: bool
+    use_state_from_template: bool
 
     def __init__(self, settings_file: Path):
         """Read settings from the xml settings file."""
@@ -71,6 +72,7 @@ class Settings:
         self.use_lizard_timeseries_as_boundary = False
         self.boundary_file = ""
         self.simulation_template = "default"
+        self.use_state_from_template = False
 
         logger.info("Reading settings from %s...", self.settings_file)
         try:
@@ -104,6 +106,7 @@ class Settings:
             "boundary_file",
             "use_lizard_timeseries_as_boundary",
             "simulation_template",
+            "use_state_from_template",
         ]
 
         for property_name in deprecated_properties:
@@ -155,6 +158,9 @@ class Settings:
             value = string_value.lower() == "true"
 
         elif property_name == "use_lizard_timeseries_as_boundary":
+            value = string_value.lower() == "true"
+
+        elif property_name == "use_state_from_template":
             value = string_value.lower() == "true"
 
         elif property_name == "saved_state_expiry_days":
