@@ -109,7 +109,6 @@ class Settings:
             "fews_state_management",
         ]
 
-
         for property_name in deprecated_properties:
             self._fail_on_deprecated_property(property_name)
 

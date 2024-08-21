@@ -120,7 +120,7 @@ class ThreediSimulation:
             elif self.settings.fews_state_management:
                 # Add file-based state management
                 self._add_initial_state(saved_state_id_file, cold_state_id_file)
-                
+
         else:
             logger.info("Saved state not enabled in the configuration, skipping.")
 
