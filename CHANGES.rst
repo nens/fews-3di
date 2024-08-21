@@ -1,11 +1,10 @@
 Changelog of fews-3di
 ===================================================
 
-
-3.7 (unreleased)
+3.7 (2024-08-21)
 ----------------
 
-- Nothing changed yet.
+- Added option fews_state_management (default True) to overrule filebased state management.
 
 
 3.6 (2024-07-15)
