@@ -43,6 +43,7 @@ The expected information in run_info.xml is::
           <string key="modelrevision" value="abcd123456787"/>
           <string key="simulationname" value="Simulation name"/>
           <string key="save_state" value="True"/>
+          <string key="fews_state_management" value="True"/>
           <string key="use_last_available_state" value="False" />
           <string key="save_state_time" value="1400"/>
           <string key="saved_state_expiry_days" value="5"/>
@@ -73,9 +74,13 @@ with the name: ``states/3di-cold-state-id.txt``. If this option is enabled, afte
 the simulation the id of the saved state at is updated in same file
 ``states/3di-saved-state-id.txt``.
 
+**fews_state_management:** Can be set to `False` to overrule the filebased state
+management for FEWS. Instead only stores states in the 3Di database, which can be picked
+up with the option `use_last_available_state`. Default `True`.
+
 **use_last_available_state:** To overpass the state management system and
 directly take the last available state in the 3Di database the option:
-``use_last_available_state`` can be set to True.
+``use_last_available_state`` can be set to `True`.
 
 **save_state_time:** This parameter defines the time in the simulation
 (in seconds) when the state should be saved. If left empty the end of

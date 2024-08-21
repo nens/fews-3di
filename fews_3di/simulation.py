@@ -180,7 +180,7 @@ class ThreediSimulation:
 
         self._run_simulation()
         self._download_results()
-        if self.settings.save_state:
+        if self.settings.save_state and self.settings.fews_state_management:
             self._write_saved_state_id(saved_state_id_file)
         if self.settings.fews_pre_processing:
             logger.info("Pre-processing results for fews")

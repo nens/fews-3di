@@ -89,6 +89,7 @@ class Settings:
             "organisation",
             "api_token",
             "save_state",
+            "saved_state_expiry_days",
             "simulationname",
             "fews_pre_processing",
             "use_last_available_state",
