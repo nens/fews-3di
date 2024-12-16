@@ -1,7 +1,7 @@
 Changelog of fews-3di
 ===================================================
 
-3.8 (unreleased)
+3.8 (2024-12-16)
 ----------------
 
 - Set slug lookup to exact match
