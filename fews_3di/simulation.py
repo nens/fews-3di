@@ -193,7 +193,7 @@ class ThreediSimulation:
             "Searching model based on revision=%s...", self.settings.modelrevision
         )
         threedimodels_result = self.api.threedimodels_list(
-            slug__contains=self.settings.modelrevision
+            slug=self.settings.modelrevision
         )
         results = threedimodels_result.results
         if not results:
